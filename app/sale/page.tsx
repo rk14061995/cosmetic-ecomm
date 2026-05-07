@@ -74,7 +74,7 @@ function SaleCard({ product, endsAt }: { product: any; endsAt: number }) {
     }
     setAdding(true);
     const result = await dispatch(
-      addToCart({ itemId: product._id, itemType: 'product', quantity: 1 })
+      addToCart({ itemId: product._id, itemType: 'product', quantity: 1 } as any)
     );
     if (addToCart.fulfilled.match(result)) {
       toast.success('Added to cart!');

@@ -31,7 +31,7 @@ export default function MysteryBoxesPage() {
 
   const handleAddToCart = async (box: any) => {
     if (!user) { router.push('/auth/login'); return; }
-    const result = await dispatch(addToCart({ itemId: box._id, itemType: 'mysteryBox', quantity: 1 }));
+    const result = await dispatch(addToCart({ itemId: box._id, itemType: 'mysteryBox', quantity: 1 } as any));
     if (addToCart.fulfilled.match(result)) {
       toast.success(`${box.name} added to cart! 🎁`);
     } else {

@@ -17,7 +17,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await dispatch(loginUser(form));
+    const result = await dispatch(loginUser(form as any));
     if (loginUser.fulfilled.match(result)) {
       dispatch(fetchCart());
       toast.success(`Welcome back, ${result.payload.user.name}!`);

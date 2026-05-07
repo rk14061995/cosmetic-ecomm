@@ -22,12 +22,12 @@ export default function CartPage() {
   }, [user]);
 
   const handleQtyChange = (itemId: string, qty: number) => {
-    dispatch(updateCartItem({ itemId, quantity: qty }));
+    dispatch(updateCartItem({ itemId, quantity: qty } as any));
   };
 
   const handleRemove = async (itemId: string) => {
     setRemovingId(itemId);
-    await dispatch(removeFromCart(itemId));
+    await dispatch(removeFromCart(itemId as any));
     toast.success('Item removed from cart');
     setRemovingId(null);
   };
@@ -35,7 +35,7 @@ export default function CartPage() {
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
     setApplyingCoupon(true);
-    const result = await dispatch(applyCoupon(couponInput.trim()));
+    const result = await dispatch(applyCoupon(couponInput.trim() as any));
     if (applyCoupon.fulfilled.match(result)) {
       toast.success(`Coupon applied! You save ${formatPrice(result.payload.discount)}`);
     } else {

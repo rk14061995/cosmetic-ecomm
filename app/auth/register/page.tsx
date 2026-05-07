@@ -21,7 +21,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
-    const result = await dispatch(registerUser(form));
+    const result = await dispatch(registerUser(form as any));
     if (registerUser.fulfilled.match(result)) {
       dispatch(fetchCart());
       toast.success(`Welcome to GlowBox, ${result.payload.user.name}! 🎉`);

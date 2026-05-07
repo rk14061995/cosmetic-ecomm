@@ -21,7 +21,7 @@ export default function ProductCard({ product }: { product: any }) {
       router.push('/auth/login');
       return;
     }
-    const result = await dispatch(addToCart({ itemId: product._id, itemType: 'product', quantity: 1 }));
+    const result = await dispatch(addToCart({ itemId: product._id, itemType: 'product', quantity: 1 } as any));
     if (addToCart.fulfilled.match(result)) {
       toast.success('Added to cart!');
     } else {

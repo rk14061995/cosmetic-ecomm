@@ -223,7 +223,7 @@ export default function ProductDetailPage() {
 
   const handleAddRelatedToCart = async (p: any) => {
     if (!user) { router.push('/auth/login'); return; }
-    const result = await dispatch(addToCart({ itemId: p._id, itemType: 'product', quantity: 1 }));
+    const result = await dispatch(addToCart({ itemId: p._id, itemType: 'product', quantity: 1 } as any));
     if (addToCart.fulfilled.match(result)) toast.success(`${p.name} added to cart!`);
     else toast.error((result.payload as string) || 'Failed to add');
   };
