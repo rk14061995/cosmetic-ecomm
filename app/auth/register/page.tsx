@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,7 +7,7 @@ import { registerUser } from '@/store/slices/authSlice';
 import { fetchCart } from '@/store/slices/cartSlice';
 import toast from 'react-hot-toast';
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch<any>();
@@ -24,7 +24,7 @@ export default function RegisterPage() {
     const result = await dispatch(registerUser(form as any));
     if (registerUser.fulfilled.match(result)) {
       dispatch(fetchCart());
-      toast.success(`Welcome to GlowBox, ${result.payload.user.name}! 🎉`);
+      toast.success(`Welcome to GlowBox, ${result.payload.user.name}!`);
       router.push('/');
     } else {
       toast.error(result.payload as string || 'Registration failed');
@@ -80,7 +80,7 @@ export default function RegisterPage() {
               onChange={(e) => setForm((p) => ({ ...p, referralCode: e.target.value.toUpperCase() }))}
               placeholder="Enter referral code"
               className="w-full border rounded-xl px-4 py-3 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-pink-400" />
-            {form.referralCode && <p className="text-xs text-green-600 mt-1">✓ You'll get ₹50 off your first order!</p>}
+            {form.referralCode && <p className="text-xs text-green-600 mt-1">You&apos;ll get ₹50 off your first order!</p>}
           </div>
 
           <button type="submit" disabled={loading}
@@ -95,5 +95,13 @@ export default function RegisterPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
   );
 }
