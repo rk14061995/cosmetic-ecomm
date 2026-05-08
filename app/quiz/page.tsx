@@ -150,15 +150,15 @@ export default function QuizPage() {
   // ── Loading spinner ─────────────────────────────────────────────────────────
   if (step === 5) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-rose-50 to-fuchsia-100 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-cyan-100 flex items-center justify-center px-4">
         <div className="text-center">
           <div className="relative w-24 h-24 mx-auto mb-6">
-            <div className="absolute inset-0 rounded-full border-4 border-pink-200" />
-            <div className="absolute inset-0 rounded-full border-4 border-t-pink-500 border-r-transparent border-b-transparent border-l-transparent animate-spin" />
+            <div className="absolute inset-0 rounded-full border-4 border-indigo-200" />
+            <div className="absolute inset-0 rounded-full border-4 border-t-indigo-500 border-r-transparent border-b-transparent border-l-transparent animate-spin" />
             <div className="absolute inset-0 flex items-center justify-center text-3xl">✨</div>
           </div>
-          <p className="text-xl font-bold text-pink-700">Finding your perfect matches…</p>
-          <p className="text-sm text-pink-400 mt-2">Curating picks just for you</p>
+          <p className="text-xl font-black text-indigo-700">Building your glow profile…</p>
+          <p className="text-sm text-indigo-400 mt-2">AI-curated picks loading now</p>
         </div>
       </div>
     );
@@ -167,9 +167,9 @@ export default function QuizPage() {
   // ── Results ─────────────────────────────────────────────────────────────────
   if (step === 6) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-fuchsia-50">
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
         {/* Results header */}
-        <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-fuchsia-500 py-14 px-4 text-center">
+        <div className="bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-500 py-14 px-4 text-center">
           <div className="max-w-2xl mx-auto">
             <div className="text-5xl mb-4">🌟</div>
             <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-3">
@@ -212,7 +212,7 @@ export default function QuizPage() {
           <div className="text-center mt-12">
             <button
               onClick={handleRetake}
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold px-8 py-4 rounded-full hover:shadow-xl hover:scale-105 transition-all duration-300 text-base"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-bold px-8 py-4 rounded-full hover:shadow-xl hover:scale-105 transition-all duration-300 text-base"
             >
               🔄 Retake Quiz
             </button>
@@ -226,12 +226,12 @@ export default function QuizPage() {
   const current = QUESTIONS[step];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-rose-50 to-fuchsia-100 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-cyan-100 flex flex-col">
       {/* Top progress section */}
-      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-pink-100 shadow-sm">
+      <div className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-indigo-100 shadow-sm">
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-pink-500 uppercase tracking-widest">
+            <span className="text-xs font-semibold text-indigo-500 uppercase tracking-widest">
               Skin &amp; Beauty Quiz
             </span>
             <span className="text-xs font-bold text-gray-500">
@@ -239,9 +239,9 @@ export default function QuizPage() {
             </span>
           </div>
           {/* Progress bar */}
-          <div className="h-2.5 bg-pink-100 rounded-full overflow-hidden">
+          <div className="h-2.5 bg-indigo-100 rounded-full overflow-hidden">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-pink-400 via-rose-400 to-fuchsia-400 transition-all duration-700 ease-out"
+              className="h-full rounded-full bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 transition-all duration-700 ease-out"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -252,10 +252,10 @@ export default function QuizPage() {
                 key={i}
                 className={`w-2 h-2 rounded-full transition-all duration-300 ${
                   i < step
-                    ? 'bg-pink-500'
+                    ? 'bg-indigo-500'
                     : i === step
-                    ? 'bg-rose-400 scale-125'
-                    : 'bg-pink-100'
+                    ? 'bg-cyan-400 scale-125'
+                    : 'bg-indigo-100'
                 }`}
               />
             ))}
@@ -268,10 +268,10 @@ export default function QuizPage() {
         <div className="w-full max-w-2xl">
           <StepCard stepKey={step}>
             {/* Question card */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-pink-100 p-8 md:p-10">
+            <div className="bg-white/85 backdrop-blur-sm rounded-3xl shadow-xl border border-indigo-100 p-8 md:p-10">
               {/* Question heading */}
               <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-500 text-white font-extrabold text-lg mb-4 shadow-md">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-extrabold text-lg mb-4 shadow-md">
                   {step + 1}
                 </div>
                 <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">
@@ -289,20 +289,20 @@ export default function QuizPage() {
                       onClick={() => handleSelect(opt.label)}
                       className={`group relative flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all duration-200 focus:outline-none ${
                         isActive
-                          ? 'border-pink-500 bg-gradient-to-r from-pink-50 to-rose-50 shadow-md scale-[1.02]'
-                          : 'border-gray-200 bg-white hover:border-pink-300 hover:bg-pink-50 hover:scale-[1.01]'
+                          ? 'border-indigo-500 bg-gradient-to-r from-indigo-50 to-cyan-50 shadow-md scale-[1.02]'
+                          : 'border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50 hover:scale-[1.01]'
                       }`}
                     >
                       {/* Checkmark indicator */}
                       {isActive && (
-                        <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-pink-500 text-white text-xs flex items-center justify-center font-bold">
+                        <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-indigo-500 text-white text-xs flex items-center justify-center font-bold">
                           ✓
                         </span>
                       )}
                       <span className="text-3xl leading-none">{opt.emoji}</span>
                       <span
                         className={`text-sm font-semibold leading-tight ${
-                          isActive ? 'text-pink-700' : 'text-gray-700'
+                          isActive ? 'text-indigo-700' : 'text-gray-700'
                         }`}
                       >
                         {opt.label}
@@ -317,7 +317,7 @@ export default function QuizPage() {
                 {step > 0 && (
                   <button
                     onClick={handleBack}
-                    className="flex-1 py-3.5 rounded-2xl border-2 border-gray-200 text-gray-600 font-semibold text-sm hover:border-pink-300 hover:text-pink-600 transition-all"
+                    className="flex-1 py-3.5 rounded-2xl border-2 border-gray-200 text-gray-600 font-semibold text-sm hover:border-indigo-300 hover:text-indigo-600 transition-all"
                   >
                     ← Back
                   </button>
@@ -327,7 +327,7 @@ export default function QuizPage() {
                   disabled={!selected}
                   className={`flex-1 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 ${
                     selected
-                      ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]'
+                      ? 'bg-gradient-to-r from-indigo-500 to-cyan-500 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]'
                       : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   }`}
                 >
@@ -340,17 +340,17 @@ export default function QuizPage() {
           {/* Decorative blobs */}
           <div
             aria-hidden
-            className="pointer-events-none absolute top-40 -left-20 w-72 h-72 rounded-full bg-pink-300/20 blur-3xl -z-10"
+            className="pointer-events-none absolute top-40 -left-20 w-72 h-72 rounded-full bg-indigo-300/20 blur-3xl -z-10"
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute bottom-20 -right-20 w-96 h-96 rounded-full bg-fuchsia-300/20 blur-3xl -z-10"
+            className="pointer-events-none absolute bottom-20 -right-20 w-96 h-96 rounded-full bg-cyan-300/20 blur-3xl -z-10"
           />
         </div>
       </div>
 
       {/* Footer note */}
-      <div className="text-center pb-8 text-xs text-pink-400 font-medium">
+      <div className="text-center pb-8 text-xs text-indigo-400 font-medium">
         Your answers help us personalise your Glowzy experience 🌸
       </div>
     </div>
