@@ -144,27 +144,31 @@ export default function HomePage() {
       <ShopByBrand />
 
       {/* ── FEATURE STRIP ────────────────────────────────────────────── */}
-      <section className="py-16 bg-[#fdfbf9]">
+      <section className="py-20 bg-gradient-to-b from-[#fdfbf9] to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-10">
             <div>
-              <p className="text-xs font-bold tracking-[0.2em] text-rose-400 uppercase mb-2">Discover More</p>
-              <h2 className="text-3xl font-black text-neutral-900">Everything Glowzy</h2>
+              <p className="text-xs font-bold tracking-[0.2em] text-indigo-400 uppercase mb-2">Discover More</p>
+              <h2 className="text-3xl md:text-4xl font-black text-neutral-900">Everything Glowzy</h2>
+              <p className="text-sm text-neutral-500 mt-2 max-w-xl">
+                Elevated experiences beyond shopping - personalized routines, curated bundles, gifting, and more.
+              </p>
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 sm:mx-0 sm:px-0 sm:overflow-visible sm:pb-0 lg:grid-cols-5">
             {featureCards.map((f) => (
               <Link
                 key={f.title}
                 href={f.href}
-                className={`group bg-gradient-to-br ${f.card} border ${f.border} rounded-2xl p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200`}
+                className={`group relative min-w-[78%] sm:min-w-0 snap-start bg-gradient-to-br ${f.card} border ${f.border} rounded-3xl p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden`}
               >
-                <div className={`w-10 h-10 ${f.accent} rounded-xl flex items-center justify-center text-white text-lg mb-4 group-hover:scale-110 transition-transform shadow-sm`}>
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-white/40 via-transparent to-indigo-100/20 pointer-events-none" />
+                <div className={`relative w-11 h-11 ${f.accent} rounded-2xl flex items-center justify-center text-white text-lg mb-5 group-hover:scale-110 transition-transform shadow-md`}>
                   {f.icon}
                 </div>
-                <p className="font-bold text-neutral-900 text-sm mb-1">{f.title}</p>
-                <p className="text-xs text-neutral-400 leading-snug">{f.subtitle}</p>
-                <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-neutral-500 group-hover:text-neutral-900 transition-colors">
+                <p className="relative font-bold text-neutral-900 text-base mb-1.5">{f.title}</p>
+                <p className="relative text-sm text-neutral-500 leading-snug min-h-[2.5rem]">{f.subtitle}</p>
+                <div className="relative mt-5 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:text-indigo-700 transition-colors">
                   Explore <span className="group-hover:translate-x-0.5 transition-transform inline-block">→</span>
                 </div>
               </Link>

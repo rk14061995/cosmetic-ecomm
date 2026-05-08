@@ -12,6 +12,7 @@ const navItems = [
   { href: '/admin/users', label: 'Users', icon: '👥' },
   { href: '/admin/coupons', label: 'Coupons', icon: '🎟️' },
   { href: '/admin/mystery-boxes', label: 'Mystery Boxes', icon: '🎁' },
+  { href: '/admin/reels', label: 'Reels', icon: '🎬' },
   { href: '/admin/payments', label: 'Payments', icon: '💳' },
 ];
 const normalizeEmail = (email?: string) => (email || '').trim().toLowerCase();

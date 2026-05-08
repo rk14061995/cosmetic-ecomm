@@ -15,31 +15,9 @@ const TIER_STYLE: Record<string, { bar: string; badge: string; label: string; po
   premium:  { bar: 'bg-amber-400',   badge: 'bg-amber-50 text-amber-700 border-amber-100', label: 'Luxe'    },
 };
 
-const UNBOXING_REELS = [
-  {
-    title: 'K-Glow Reveal',
-    creator: '@riya.beauty',
-    image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1200&auto=format&fit=crop',
-  },
-  {
-    title: 'Premium Box Night',
-    creator: '@makeupwithaisha',
-    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1200&auto=format&fit=crop',
-  },
-  {
-    title: 'Best of Seoul Haul',
-    creator: '@kbeauty.diaries',
-    image: 'https://images.unsplash.com/photo-1526045478516-99145907023c?w=1200&auto=format&fit=crop',
-  },
-  {
-    title: 'Skincare Surprise',
-    creator: '@glowbymegha',
-    image: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=1200&auto=format&fit=crop',
-  },
-];
-
 export default function MysteryBoxPreview() {
   const [boxes, setBoxes] = useState<any[]>([]);
+  const [reels, setReels] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch<any>();
   const router = useRouter();
@@ -50,6 +28,10 @@ export default function MysteryBoxPreview() {
       .then(({ data }) => setBoxes((data.mysteryBoxes || []).slice(0, 3)))
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    api.get('/reels?section=mystery-boxes')
+      .then(({ data }) => setReels((data.reels || []).slice(0, 4)))
+      .catch(() => setReels([]));
   }, []);
 
   const handleAddToCart = async (box: any) => {
@@ -63,22 +45,22 @@ export default function MysteryBoxPreview() {
   };
 
   return (
-    <section className="py-24 bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#0b1120] relative overflow-hidden">
+    <section className="py-24 bg-gradient-to-br from-indigo-50 via-white to-cyan-50 relative overflow-hidden border-y border-indigo-100">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-24 -left-16 w-72 h-72 bg-fuchsia-500/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 right-0 w-80 h-80 bg-cyan-400/20 rounded-full blur-3xl" />
+        <div className="absolute -top-24 -left-16 w-72 h-72 bg-fuchsia-200/40 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 right-0 w-80 h-80 bg-cyan-200/40 rounded-full blur-3xl" />
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
           <div>
-            <p className="text-xs font-bold tracking-[0.2em] text-cyan-300 uppercase mb-3">Signature Experience</p>
-            <h2 className="text-4xl md:text-5xl font-black text-white leading-tight">
+            <p className="text-xs font-bold tracking-[0.2em] text-indigo-500 uppercase mb-3">Signature Experience</p>
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 leading-tight">
               Mystery Beauty<br />
-              <span className="font-thin italic text-fuchsia-300">Boxes</span>
+              <span className="font-thin italic text-indigo-500">Boxes</span>
             </h2>
-            <p className="text-indigo-100/85 mt-4 font-light text-sm md:text-base max-w-xl">
+            <p className="text-slate-600 mt-4 font-light text-sm md:text-base max-w-xl">
               The most-loved Glowzy feature: each Mystery Box is hand-curated by our team with premium K-beauty + global icons.
               Unbox discovery, value, and delight in every order.
             </p>
@@ -90,7 +72,7 @@ export default function MysteryBoxPreview() {
               ].map((point) => (
                 <span
                   key={point}
-                  className="text-xs md:text-sm px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-indigo-100"
+                  className="text-xs md:text-sm px-3 py-1.5 rounded-full bg-white border border-indigo-100 text-indigo-700"
                 >
                   {point}
                 </span>
@@ -99,7 +81,7 @@ export default function MysteryBoxPreview() {
           </div>
           <Link
             href="/mystery-boxes"
-            className="flex-shrink-0 inline-flex items-center gap-2 bg-white text-indigo-900 hover:bg-indigo-50 text-sm font-bold px-7 py-3 rounded-full transition-all shadow-lg"
+            className="flex-shrink-0 inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-cyan-500 text-white hover:shadow-lg text-sm font-bold px-7 py-3 rounded-full transition-all"
           >
             Explore Mystery Boxes →
           </Link>
@@ -111,9 +93,9 @@ export default function MysteryBoxPreview() {
             { k: '4.8/5', v: 'Average rating' },
             { k: '7-Day', v: 'Easy return (unopened)' },
           ].map((s) => (
-            <div key={s.v} className="rounded-2xl bg-white/10 border border-white/20 p-4 text-center">
-              <p className="text-white font-black text-xl">{s.k}</p>
-              <p className="text-indigo-100 text-xs md:text-sm mt-1">{s.v}</p>
+            <div key={s.v} className="rounded-2xl bg-white border border-indigo-100 p-4 text-center shadow-sm">
+              <p className="text-slate-900 font-black text-xl">{s.k}</p>
+              <p className="text-slate-500 text-xs md:text-sm mt-1">{s.v}</p>
             </div>
           ))}
         </div>
@@ -134,7 +116,7 @@ export default function MysteryBoxPreview() {
               return (
                 <div
                   key={box._id}
-                  className="relative bg-white/10 border border-white/20 rounded-3xl overflow-hidden hover:border-cyan-300/60 hover:bg-white/15 transition-all group backdrop-blur"
+                  className="relative bg-white border border-indigo-100 rounded-3xl overflow-hidden hover:border-indigo-300 hover:shadow-lg transition-all group"
                 >
                   {/* Top accent bar */}
                   <div className={`h-1 w-full ${style.bar}`} />
@@ -150,18 +132,18 @@ export default function MysteryBoxPreview() {
                       {style.label}
                     </span>
 
-                    <h3 className="text-lg font-bold text-white mb-1">{box.name}</h3>
-                    <p className="text-indigo-100/70 text-xs mb-4 font-light">{box.minProducts}–{box.maxProducts} premium products · worth {formatPrice(box.minValue)}+</p>
+                    <h3 className="text-lg font-bold text-slate-900 mb-1">{box.name}</h3>
+                    <p className="text-slate-500 text-xs mb-4 font-light">{box.minProducts}–{box.maxProducts} premium products · worth {formatPrice(box.minValue)}+</p>
 
-                    <div className="text-3xl font-black text-white mb-6">
+                    <div className="text-3xl font-black text-slate-900 mb-6">
                       {formatPrice(box.price)}
-                      <span className="text-sm font-normal text-neutral-500 ml-2">/ box</span>
+                      <span className="text-sm font-normal text-slate-500 ml-2">/ box</span>
                     </div>
 
                     <button
                       onClick={() => handleAddToCart(box)}
                       disabled={box.stock === 0}
-                      className="w-full bg-gradient-to-r from-indigo-400 to-cyan-400 text-white font-bold text-sm py-3 rounded-2xl hover:from-indigo-300 hover:to-cyan-300 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="w-full bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-bold text-sm py-3 rounded-2xl hover:shadow-md transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       {box.stock === 0 ? 'Sold Out' : 'Add to Cart'}
                     </button>
@@ -176,47 +158,51 @@ export default function MysteryBoxPreview() {
         <div className="mt-14">
           <div className="flex items-end justify-between mb-4">
             <div>
-              <p className="text-xs font-bold tracking-[0.2em] text-fuchsia-300 uppercase mb-1">Social Proof</p>
-              <h3 className="text-2xl font-black text-white">Live Unboxing Reels</h3>
+              <p className="text-xs font-bold tracking-[0.2em] text-indigo-500 uppercase mb-1">Social Proof</p>
+              <h3 className="text-2xl font-black text-slate-900">Live Unboxing Reels</h3>
             </div>
             <Link
               href="/mystery-boxes"
-              className="text-sm font-semibold text-cyan-200 hover:text-white transition-colors"
+              className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
             >
               Watch more →
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {UNBOXING_REELS.map((reel) => (
-              <Link
-                href="/mystery-boxes"
-                key={reel.title}
-                className="group relative rounded-2xl overflow-hidden border border-white/20 hover:border-cyan-300/70 transition-all"
-              >
-                <div className="relative aspect-[3/4]">
-                  <Image src={reel.image} alt={reel.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute top-2 left-2 inline-flex items-center gap-1 text-[10px] font-bold text-white bg-black/40 border border-white/20 rounded-full px-2 py-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                    LIVE
-                  </div>
-                  <div className="absolute bottom-3 left-3 right-3">
-                    <p className="text-white font-semibold text-sm">{reel.title}</p>
+          {reels.length === 0 ? (
+            <p className="text-sm text-slate-500">Reels will appear here once added from admin.</p>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {reels.map((reel) => (
+                <Link
+                  href={reel.ctaLink || '/mystery-boxes'}
+                  key={reel._id || reel.title}
+                className="group relative rounded-2xl overflow-hidden border border-indigo-100 hover:border-indigo-300 transition-all shadow-sm"
+                >
+                  <div className="relative aspect-[3/4]">
+                    <Image src={reel.image} alt={reel.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute top-2 left-2 inline-flex items-center gap-1 text-[10px] font-bold text-white bg-black/40 border border-white/20 rounded-full px-2 py-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                      LIVE
+                    </div>
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <p className="text-white font-semibold text-sm">{reel.title}</p>
                     <p className="text-indigo-100 text-xs">{reel.creator}</p>
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="w-10 h-10 rounded-full bg-white/85 text-indigo-900 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                        ▶
+                      </span>
+                    </div>
                   </div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="w-10 h-10 rounded-full bg-white/85 text-indigo-900 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                      ▶
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Bottom note */}
-        <p className="text-center text-indigo-100/70 text-xs mt-10 font-light">
+        <p className="text-center text-slate-500 text-xs mt-10 font-light">
           Free shipping on all mystery boxes · Tamper-safe packing · 7-day return policy if unopened
         </p>
       </div>

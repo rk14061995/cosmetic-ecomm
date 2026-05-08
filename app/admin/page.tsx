@@ -113,6 +113,7 @@ export default function AdminDashboard() {
           { href: '/admin/products', icon: '➕', label: 'Add Product' },
           { href: '/admin/coupons', icon: '🎟️', label: 'Create Coupon' },
           { href: '/admin/mystery-boxes', icon: '🎁', label: 'Manage Boxes' },
+          { href: '/admin/reels', icon: '🎬', label: 'Manage Reels' },
           { href: '/admin/users', icon: '👥', label: 'Manage Users' },
         ].map((action) => (
           <Link key={action.href} href={action.href}
