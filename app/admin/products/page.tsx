@@ -5,8 +5,25 @@ import api from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
-const CATEGORIES = ['Skincare', 'Makeup', 'Haircare', 'Fragrance', 'Body Care', 'Tools & Accessories'];
-const EMPTY_FORM = { name: '', description: '', shortDescription: '', price: '', discountPrice: '', category: 'Skincare', brand: '', stock: '', tags: '', ingredients: '', howToUse: '', weight: '', isFeatured: false, isActive: true, eligibleForMysteryBox: false };
+const EMPTY_FORM = {
+  name: '',
+  description: '',
+  shortDescription: '',
+  price: '',
+  discountPrice: '',
+  category: '',
+  brand: '',
+  stock: '',
+  tags: '',
+  ingredients: '',
+  howToUse: '',
+  weight: '',
+  isFeatured: false,
+  isNewArrival: false,
+  isBestSeller: false,
+  isActive: true,
+  eligibleForMysteryBox: false,
+};
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -17,6 +34,9 @@ export default function AdminProductsPage() {
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
+  const [categories, setCategories] = useState<any[]>([]);
+  const [newCategory, setNewCategory] = useState('');
+  const [creatingCategory, setCreatingCategory] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const fetchProducts = () => {
@@ -28,8 +48,24 @@ export default function AdminProductsPage() {
   };
 
   useEffect(() => { fetchProducts(); }, [search]);
+  useEffect(() => {
+    api.get('/categories?includeInactive=true')
+      .then(({ data }) => {
+        const list = data.categories || [];
+        setCategories(list);
+        if (!form.category && list.length > 0) {
+          setForm((p: any) => ({ ...p, category: list[0].name }));
+        }
+      })
+      .catch(() => setCategories([]));
+  }, []);
 
-  const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setImageFiles([]); setShowForm(true); };
+  const openCreate = () => {
+    setEditing(null);
+    setForm({ ...EMPTY_FORM, category: categories[0]?.name || '' });
+    setImageFiles([]);
+    setShowForm(true);
+  };
   const openEdit = (p: any) => {
     setEditing(p);
     setForm({ ...p, price: p.price, discountPrice: p.discountPrice || '', stock: p.stock, tags: p.tags?.join(', ') || '' });
@@ -77,6 +113,37 @@ export default function AdminProductsPage() {
     } catch { toast.error('Failed to update'); }
   };
 
+  const handleCreateCategory = async () => {
+    if (!newCategory.trim()) return;
+    setCreatingCategory(true);
+    try {
+      const { data } = await api.post('/categories', { name: newCategory.trim() });
+      const created = data.category;
+      setCategories((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
+      setForm((p: any) => ({ ...p, category: created.name }));
+      setNewCategory('');
+      toast.success('Category created');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to create category');
+    } finally {
+      setCreatingCategory(false);
+    }
+  };
+
+  const handleDeleteCategory = async (category: any) => {
+    if (!confirm(`Delete category "${category.name}"?`)) return;
+    try {
+      await api.delete(`/categories/${category._id}`);
+      setCategories((prev) => prev.filter((c) => c._id !== category._id));
+      if (form.category === category.name) {
+        setForm((p: any) => ({ ...p, category: '' }));
+      }
+      toast.success('Category deleted');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to delete category');
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -89,6 +156,39 @@ export default function AdminProductsPage() {
       <div className="mb-4">
         <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products..."
           className="w-full max-w-md border rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400" />
+      </div>
+
+      <div className="bg-white rounded-2xl border p-4 mb-6">
+        <div className="flex flex-col md:flex-row md:items-center gap-3">
+          <div className="flex-1 flex items-center gap-2">
+            <input
+              type="text"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              placeholder="Add new category"
+              className="w-full md:max-w-xs border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+            />
+            <button
+              type="button"
+              onClick={handleCreateCategory}
+              disabled={creatingCategory}
+              className="bg-pink-500 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-pink-600 disabled:opacity-50"
+            >
+              {creatingCategory ? 'Adding...' : 'Add'}
+            </button>
+          </div>
+          <p className="text-xs text-gray-400">Categories are now managed from admin and used across shop/product forms.</p>
+        </div>
+        {categories.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {categories.map((c) => (
+              <span key={c._id} className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs border ${c.isActive ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                {c.name}
+                <button type="button" onClick={() => handleDeleteCategory(c)} className="text-red-500 hover:text-red-700">×</button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-2xl border overflow-hidden">
@@ -127,6 +227,11 @@ export default function AdminProductsPage() {
                         <div>
                           <p className="font-medium line-clamp-1">{p.name}</p>
                           <p className="text-xs text-gray-400">{p.brand}</p>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {p.isFeatured && <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">Featured</span>}
+                            {p.isNewArrival && <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-700">New</span>}
+                            {p.isBestSeller && <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Best Seller</span>}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -187,7 +292,8 @@ export default function AdminProductsPage() {
                 <label className="block text-xs font-medium text-gray-600 mb-1">Category *</label>
                 <select value={form.category} onChange={(e) => setForm((p: any) => ({ ...p, category: e.target.value }))}
                   className="w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400">
-                  {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+                  <option value="">Select category</option>
+                  {categories.filter((c) => c.isActive).map((c) => <option key={c._id}>{c.name}</option>)}
                 </select>
               </div>
               <div>
@@ -223,6 +329,8 @@ export default function AdminProductsPage() {
               <div className="col-span-2 flex gap-6">
                 {[
                   { key: 'isFeatured', label: 'Featured Product' },
+                  { key: 'isNewArrival', label: 'New Arrival' },
+                  { key: 'isBestSeller', label: 'Best Seller' },
                   { key: 'isActive', label: 'Active' },
                   { key: 'eligibleForMysteryBox', label: 'Mystery Box Eligible' },
                 ].map(({ key, label }) => (

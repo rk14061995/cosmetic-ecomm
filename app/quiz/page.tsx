@@ -91,7 +91,7 @@ export default function QuizPage() {
 
   // Set page title
   useEffect(() => {
-    document.title = 'Skin & Beauty Quiz | GlowBox Cosmetics';
+    document.title = 'Skin & Beauty Quiz | Glowzy';
   }, []);
 
   const totalSteps = QUESTIONS.length;
@@ -339,7 +339,7 @@ export default function QuizPage() {
 
       {/* Footer note */}
       <div className="text-center pb-8 text-xs text-pink-400 font-medium">
-        Your answers help us personalise your GlowBox experience 🌸
+        Your answers help us personalise your Glowzy experience 🌸
       </div>
     </div>
   );

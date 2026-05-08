@@ -14,8 +14,11 @@ const navItems = [
   { href: '/admin/mystery-boxes', label: 'Mystery Boxes', icon: '🎁' },
   { href: '/admin/payments', label: 'Payments', icon: '💳' },
 ];
-const STATIC_ADMIN_EMAIL = 'rahul.k@simplilearn.net';
 const normalizeEmail = (email?: string) => (email || '').trim().toLowerCase();
+const STATIC_ADMIN_EMAILS = (process.env.NEXT_PUBLIC_STATIC_ADMIN_EMAILS || '')
+  .split(',')
+  .map((email) => normalizeEmail(email))
+  .filter(Boolean);
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, initialized } = useSelector((state: any) => state.auth);
@@ -23,7 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const isAdmin = !!user && (
     user.role === 'admin' ||
-    normalizeEmail(user.email) === normalizeEmail(STATIC_ADMIN_EMAIL)
+    STATIC_ADMIN_EMAILS.includes(normalizeEmail(user.email))
   );
 
   useEffect(() => {
@@ -34,7 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!initialized || !isAdmin) return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-500" />
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500" />
     </div>
   );
 
@@ -43,8 +46,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar */}
       <aside className="w-64 bg-gray-900 text-white flex flex-col flex-shrink-0">
         <div className="p-6 border-b border-gray-800">
-          <Link href="/" className="text-xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
-            GlowBox
+          <Link href="/" className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+            Glowzy
           </Link>
           <p className="text-gray-400 text-xs mt-1">Admin Panel</p>
         </div>
@@ -52,7 +55,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {navItems.map((item) => (
             <Link key={item.href} href={item.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                pathname === item.href ? 'bg-pink-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                pathname === item.href ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`}>
               <span>{item.icon}</span>
               {item.label}

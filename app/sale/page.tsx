@@ -215,7 +215,7 @@ export default function SalePage() {
   const endTimesRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
-    document.title = 'Flash Sale | GlowBox Cosmetics';
+    document.title = 'Flash Sale | Glowzy';
   }, []);
 
   useEffect(() => {

@@ -30,8 +30,8 @@ export default function ProductCard({ product }: { product: any }) {
   };
 
   return (
-    <Link href={`/products/${product.slug || product._id}`} className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-gray-100">
-      <div className="relative aspect-square overflow-hidden bg-gray-50">
+    <Link href={`/products/${product.slug || product._id}`} className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all border border-slate-200">
+      <div className="relative aspect-square overflow-hidden bg-slate-50">
         {product.images?.[0]?.url ? (
           <Image
             src={product.images[0].url}
@@ -43,7 +43,7 @@ export default function ProductCard({ product }: { product: any }) {
           <div className="w-full h-full flex items-center justify-center text-6xl">💄</div>
         )}
         {discount > 0 && (
-          <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+          <span className="absolute top-2 left-2 bg-indigo-500 text-white text-xs font-bold px-2 py-1 rounded-full">
             -{discount}%
           </span>
         )}
@@ -54,7 +54,7 @@ export default function ProductCard({ product }: { product: any }) {
         )}
       </div>
       <div className="p-4">
-        <p className="text-xs text-pink-500 font-medium mb-1">{product.brand}</p>
+        <p className="text-xs text-indigo-500 font-semibold mb-1">{product.brand}</p>
         <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 mb-2">{product.name}</h3>
         <div className="flex items-center gap-1 mb-3">
           <div className="flex text-yellow-400 text-xs">
@@ -73,7 +73,7 @@ export default function ProductCard({ product }: { product: any }) {
           {product.stock > 0 && (
             <button
               onClick={handleAddToCart}
-              className="bg-pink-500 hover:bg-pink-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full transition-colors"
+              className="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full transition-colors"
             >
               Add
             </button>

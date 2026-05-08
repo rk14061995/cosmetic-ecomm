@@ -87,7 +87,7 @@ function PostCard({ post, index }: { post: any; index: number }) {
                 {post.author?.name?.charAt(0)?.toUpperCase() ?? 'G'}
               </div>
               <span className="font-medium text-gray-600 truncate max-w-[90px]">
-                {post.author?.name ?? 'GlowBox Team'}
+                {post.author?.name ?? 'Glowzy Team'}
               </span>
               <span className="text-gray-300">·</span>
               <span>{formatDate(post.createdAt)}</span>
@@ -164,7 +164,7 @@ export default function BlogPage() {
       {/* Page header */}
       <section className="bg-gradient-to-br from-pink-50 to-rose-50 py-16 px-4 text-center">
         <div className="max-w-2xl mx-auto">
-          <p className="text-pink-400 font-semibold text-sm tracking-widest uppercase mb-3">GlowBox Blog</p>
+          <p className="text-pink-400 font-semibold text-sm tracking-widest uppercase mb-3">Glowzy Blog</p>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
             Beauty Journal
           </h1>

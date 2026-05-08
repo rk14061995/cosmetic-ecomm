@@ -136,7 +136,7 @@ export default function CheckoutPage() {
         currency:    rpData.currency || 'INR',
 
         // Brand identity shown in the Razorpay modal
-        name:        'GlowBox Cosmetics',
+        name:        'Glowzy',
         image:       `${process.env.NEXT_PUBLIC_SITE_URL || ''}/logo.png`,
         description: `Order #${order._id.slice(-8).toUpperCase()} · ${items.length} item${items.length > 1 ? 's' : ''}`,
 
@@ -180,7 +180,7 @@ export default function CheckoutPage() {
         },
 
         // Payment config
-        theme:   { color: '#e11d48', hide_topbar: false },
+        theme:   { color: '#4f46e5', hide_topbar: false },
         retry:   { enabled: true, max_count: 3 },
         timeout: 900, // 15 min before the modal auto-closes
 
@@ -216,12 +216,12 @@ export default function CheckoutPage() {
   };
 
   if (!user || items.length === 0) return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex items-center justify-center px-4">
       <div className="text-center">
-        <div className="w-24 h-24 bg-gradient-to-br from-pink-100 to-rose-100 rounded-full flex items-center justify-center text-5xl mx-auto mb-6 shadow-inner">🛒</div>
+        <div className="w-24 h-24 bg-gradient-to-br from-indigo-100 to-cyan-100 rounded-full flex items-center justify-center text-5xl mx-auto mb-6 shadow-inner">🛒</div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
         <p className="text-gray-500 mb-6">Add items to your cart before checking out</p>
-        <Link href="/products" className="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold px-8 py-3.5 rounded-full hover:shadow-lg hover:scale-105 transition-all">
+        <Link href="/products" className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-semibold px-8 py-3.5 rounded-full hover:shadow-lg hover:scale-105 transition-all">
           Shop Products →
         </Link>
       </div>
@@ -229,13 +229,13 @@ export default function CheckoutPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
 
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-pink-100">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-indigo-100">
         <div className="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/cart" className="w-9 h-9 rounded-full bg-pink-50 border border-pink-100 flex items-center justify-center text-pink-600 hover:bg-pink-100 transition-colors text-sm">←</Link>
+            <Link href="/cart" className="w-9 h-9 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 hover:bg-indigo-100 transition-colors text-sm">←</Link>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Checkout</h1>
               <p className="text-gray-400 text-sm">{items.length} item{items.length !== 1 ? 's' : ''} · {formatPrice(summary.subtotal)}</p>
@@ -246,8 +246,8 @@ export default function CheckoutPage() {
           <div className="hidden sm:flex items-center gap-2 text-sm">
             {['Cart', 'Checkout', 'Confirmed'].map((s, i) => (
               <div key={s} className="flex items-center gap-2">
-                <div className={`flex items-center gap-1.5 font-semibold ${i === 1 ? 'text-pink-600' : i < 1 ? 'text-gray-400' : 'text-gray-300'}`}>
-                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${i === 1 ? 'bg-gradient-to-br from-pink-500 to-rose-500 text-white' : i < 1 ? 'bg-gray-200 text-gray-500' : 'bg-gray-100 text-gray-300'}`}>{i + 1}</span>
+                <div className={`flex items-center gap-1.5 font-semibold ${i === 1 ? 'text-indigo-600' : i < 1 ? 'text-gray-400' : 'text-gray-300'}`}>
+                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${i === 1 ? 'bg-gradient-to-br from-indigo-500 to-cyan-500 text-white' : i < 1 ? 'bg-gray-200 text-gray-500' : 'bg-gray-100 text-gray-300'}`}>{i + 1}</span>
                   {s}
                 </div>
                 {i < 2 && <span className="text-gray-200">›</span>}
@@ -266,7 +266,7 @@ export default function CheckoutPage() {
             {/* ① Delivery Address */}
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="px-6 py-5 flex items-center gap-3 border-b border-gray-100">
-                <span className="w-8 h-8 bg-gradient-to-br from-pink-500 to-rose-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-sm">1</span>
+                <span className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-cyan-500 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-sm">1</span>
                 <h2 className="font-bold text-gray-900 text-lg">Delivery Address</h2>
               </div>
 
@@ -563,7 +563,7 @@ export default function CheckoutPage() {
                 <button
                   onClick={placeOrder}
                   disabled={placing || !selectedAddress}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold py-4 rounded-2xl hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-base"
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-bold py-4 rounded-2xl hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 text-base"
                 >
                   {placing ? (
                     <>

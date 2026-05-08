@@ -51,7 +51,7 @@ const TIERS: {
     inclusions: [
       '4–5 full-size beauty products',
       'Premium skincare + makeup',
-      'Exclusive GlowBox samples',
+      'Exclusive Glowzy samples',
       'Beauty tips booklet',
       'Free express shipping',
       'Members-only discounts',

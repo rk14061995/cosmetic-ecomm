@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-white text-xl font-bold mb-4 bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
-              GlowBox
+              Glowzy
             </h3>
             <p className="text-sm text-gray-400 leading-relaxed">
               Your one-stop destination for premium cosmetics, skincare, and mystery beauty boxes.
@@ -52,7 +52,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-800 mt-10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-500">© {new Date().getFullYear()} GlowBox Cosmetics. All rights reserved.</p>
+          <p className="text-sm text-gray-500">© {new Date().getFullYear()} Glowzy. All rights reserved.</p>
           <div className="flex items-center gap-3 text-sm text-gray-500">
             <span>Secure payments by</span>
             <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-xs font-bold">Razorpay</span>

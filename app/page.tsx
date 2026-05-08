@@ -3,19 +3,14 @@ import type { Metadata } from 'next';
 import FeaturedProducts from '@/components/products/FeaturedProducts';
 import MysteryBoxPreview from '@/components/products/MysteryBoxPreview';
 import BlogTeaser from '@/components/home/BlogTeaser';
+import ProductSplit from '@/components/home/ProductSplit';
+import TestimonialsCarousel from '@/components/home/TestimonialsCarousel';
+import MobileStickyCta from '@/components/home/MobileStickyCta';
+import DynamicCategories from '@/components/home/DynamicCategories';
 
 export const metadata: Metadata = {
-  title: 'GlowBox — K-Beauty & Premium Skincare',
+  title: 'Glowzy — K-Beauty & Premium Skincare',
 };
-
-const categories = [
-  { name: 'Skincare',           icon: '◇', color: 'from-rose-50   to-pink-50',   border: 'border-rose-100'  },
-  { name: 'Makeup',             icon: '◈', color: 'from-red-50    to-rose-50',   border: 'border-red-100'   },
-  { name: 'Haircare',           icon: '◉', color: 'from-amber-50  to-yellow-50', border: 'border-amber-100' },
-  { name: 'Fragrance',          icon: '◌', color: 'from-purple-50 to-pink-50',   border: 'border-purple-100'},
-  { name: 'Body Care',          icon: '◎', color: 'from-sky-50    to-cyan-50',   border: 'border-sky-100'   },
-  { name: 'Tools & Accessories',icon: '◆', color: 'from-emerald-50 to-teal-50',  border: 'border-emerald-100'},
-];
 
 const featureCards = [
   { icon: '⚡', title: 'Flash Sale',       subtitle: 'Up to 50% off',         href: '/sale',        accent: 'bg-rose-600',   card: 'from-rose-50 to-red-50',      border: 'border-rose-100'   },
@@ -141,18 +136,7 @@ export default function HomePage() {
               View all →
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {categories.map((cat) => (
-              <Link
-                key={cat.name}
-                href={`/products?category=${encodeURIComponent(cat.name)}`}
-                className={`group bg-gradient-to-br ${cat.color} border ${cat.border} rounded-2xl p-5 flex flex-col items-center gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200`}
-              >
-                <span className="text-2xl text-neutral-400 group-hover:text-rose-400 transition-colors font-thin">{cat.icon}</span>
-                <span className="text-xs font-semibold text-neutral-600 text-center leading-tight">{cat.name}</span>
-              </Link>
-            ))}
-          </div>
+          <DynamicCategories />
         </div>
       </section>
 
@@ -162,7 +146,7 @@ export default function HomePage() {
           <div className="flex items-end justify-between mb-10">
             <div>
               <p className="text-xs font-bold tracking-[0.2em] text-rose-400 uppercase mb-2">Discover More</p>
-              <h2 className="text-3xl font-black text-neutral-900">Everything GlowBox</h2>
+              <h2 className="text-3xl font-black text-neutral-900">Everything Glowzy</h2>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -206,6 +190,12 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── BESTSELLERS + NEW ARRIVALS ──────────────────────────────── */}
+      <ProductSplit />
+
+      {/* ── TESTIMONIALS ─────────────────────────────────────────────── */}
+      <TestimonialsCarousel />
+
       {/* ── REFERRAL BANNER ──────────────────────────────────────────── */}
       <section className="py-16 bg-neutral-900">
         <div className="max-w-4xl mx-auto px-4 text-center">
@@ -247,6 +237,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <MobileStickyCta />
 
     </div>
   );

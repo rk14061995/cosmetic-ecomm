@@ -31,11 +31,11 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-rose-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-sm p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-3xl shadow-sm border border-slate-200 p-8">
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
-            GlowBox
+          <Link href="/" className="text-3xl font-bold bg-gradient-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent">
+            Glowzy
           </Link>
           <h1 className="text-xl font-bold text-gray-900 mt-3">Welcome back</h1>
           <p className="text-gray-500 text-sm mt-1">Sign in to your account</p>
@@ -50,7 +50,7 @@ function LoginForm() {
               onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
               required
               placeholder="you@example.com"
-              className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
             />
           </div>
           <div>
@@ -62,7 +62,7 @@ function LoginForm() {
                 onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                 required
                 placeholder="••••••••"
-                className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 pr-12"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 pr-12"
               />
               <button type="button" onClick={() => setShowPwd(!showPwd)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">
@@ -70,14 +70,14 @@ function LoginForm() {
               </button>
             </div>
             <div className="text-right mt-1.5">
-              <Link href="/auth/forgot-password" className="text-xs text-pink-600 hover:text-pink-700">Forgot password?</Link>
+              <Link href="/auth/forgot-password" className="text-xs text-indigo-600 hover:text-indigo-700">Forgot password?</Link>
             </div>
           </div>
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold py-3 rounded-full hover:shadow-lg transition-all disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-semibold py-3 rounded-full hover:shadow-lg transition-all disabled:opacity-50"
           >
             {submitting ? 'Signing in...' : 'Sign In'}
           </button>
@@ -85,7 +85,7 @@ function LoginForm() {
 
         <p className="text-center text-sm text-gray-500 mt-6">
           Don&apos;t have an account?{' '}
-          <Link href="/auth/register" className="text-pink-600 font-semibold hover:text-pink-700">Create one</Link>
+          <Link href="/auth/register" className="text-indigo-600 font-semibold hover:text-indigo-700">Create one</Link>
         </p>
       </div>
     </div>

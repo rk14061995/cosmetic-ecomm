@@ -10,15 +10,15 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
-    default: 'GlowBox Cosmetics — Premium Beauty & Skincare',
-    template: '%s | GlowBox Cosmetics',
+    default: 'Glowzy — Premium Beauty & Skincare',
+    template: '%s | Glowzy',
   },
   description: 'Discover premium cosmetics, skincare, and mystery beauty boxes. Shop the best brands at unbeatable prices.',
   keywords: ['cosmetics', 'skincare', 'makeup', 'haircare', 'beauty', 'mystery box'],
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    siteName: 'GlowBox Cosmetics',
+    siteName: 'Glowzy',
   },
 };
 

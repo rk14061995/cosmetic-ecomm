@@ -24,7 +24,7 @@ function RegisterForm() {
     const result = await dispatch(registerUser(form as any));
     if (registerUser.fulfilled.match(result)) {
       dispatch(fetchCart());
-      toast.success(`Welcome to GlowBox, ${result.payload.user.name}!`);
+      toast.success(`Welcome to Glowzy, ${result.payload.user.name}!`);
       router.push('/');
     } else {
       toast.error(result.payload as string || 'Registration failed');
@@ -32,11 +32,11 @@ function RegisterForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-rose-50 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-sm p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-3xl shadow-sm border border-slate-200 p-8">
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
-            GlowBox
+          <Link href="/" className="text-3xl font-bold bg-gradient-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent">
+            Glowzy
           </Link>
           <h1 className="text-xl font-bold text-gray-900 mt-3">Create your account</h1>
           <p className="text-gray-500 text-sm mt-1">Join thousands of beauty lovers</p>
@@ -47,19 +47,19 @@ function RegisterForm() {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
             <input type="text" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
               required placeholder="Jane Doe"
-              className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400" />
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
             <input type="email" value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
               required placeholder="you@example.com"
-              className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400" />
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone (optional)</label>
             <input type="tel" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
               placeholder="9876543210"
-              className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400" />
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
@@ -67,7 +67,7 @@ function RegisterForm() {
               <input type={showPwd ? 'text' : 'password'} value={form.password}
                 onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
                 required minLength={6} placeholder="Minimum 6 characters"
-                className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 pr-12" />
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 pr-12" />
               <button type="button" onClick={() => setShowPwd(!showPwd)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">
                 {showPwd ? 'Hide' : 'Show'}
@@ -79,19 +79,19 @@ function RegisterForm() {
             <input type="text" value={form.referralCode}
               onChange={(e) => setForm((p) => ({ ...p, referralCode: e.target.value.toUpperCase() }))}
               placeholder="Enter referral code"
-              className="w-full border rounded-xl px-4 py-3 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-pink-400" />
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-indigo-300" />
             {form.referralCode && <p className="text-xs text-green-600 mt-1">You&apos;ll get ₹50 off your first order!</p>}
           </div>
 
           <button type="submit" disabled={loading}
-            className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold py-3 rounded-full hover:shadow-lg transition-all disabled:opacity-50 mt-2">
+            className="w-full bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-semibold py-3 rounded-full hover:shadow-lg transition-all disabled:opacity-50 mt-2">
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-pink-600 font-semibold hover:text-pink-700">Sign in</Link>
+          <Link href="/auth/login" className="text-indigo-600 font-semibold hover:text-indigo-700">Sign in</Link>
         </p>
       </div>
     </div>

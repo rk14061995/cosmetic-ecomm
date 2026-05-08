@@ -6,8 +6,11 @@ import { useRouter } from 'next/navigation';
 import { logoutUser } from '@/store/slices/authSlice';
 import toast from 'react-hot-toast';
 
-const STATIC_ADMIN_EMAIL = 'rahul.k@simplilearn.net';
 const normalizeEmail = (email?: string) => (email || '').trim().toLowerCase();
+const STATIC_ADMIN_EMAILS = (process.env.NEXT_PUBLIC_STATIC_ADMIN_EMAILS || '')
+  .split(',')
+  .map((email) => normalizeEmail(email))
+  .filter(Boolean);
 
 export default function Navbar() {
   const dispatch = useDispatch<any>();
@@ -18,7 +21,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const hasAdminAccess = !!user && (
     user.role === 'admin' ||
-    normalizeEmail(user.email) === normalizeEmail(STATIC_ADMIN_EMAIL)
+    STATIC_ADMIN_EMAILS.includes(normalizeEmail(user.email))
   );
 
   const handleSearch = (e: React.FormEvent) => {
@@ -41,8 +44,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
-              GlowBox
+            <span className="text-2xl font-black text-indigo-700 tracking-tight">
+              Glowzy
             </span>
           </Link>
 
