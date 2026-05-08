@@ -8,11 +8,7 @@ function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState<any>(null);
-  const [filters, setFilters] = useState({
+  const getFiltersFromParams = () => ({
     category: searchParams.get('category') || '',
     brand: searchParams.get('brand') || '',
     minPrice: searchParams.get('minPrice') || '',
@@ -23,8 +19,18 @@ function ProductsContent() {
     newArrival: searchParams.get('newArrival') || '',
     bestSeller: searchParams.get('bestSeller') || '',
     featured: searchParams.get('featured') || '',
-    page: 1,
+    page: Number(searchParams.get('page') || 1) || 1,
   });
+
+  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState<any>(null);
+  const [filters, setFilters] = useState(getFiltersFromParams);
+
+  useEffect(() => {
+    setFilters(getFiltersFromParams());
+  }, [searchParams]);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);

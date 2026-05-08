@@ -7,6 +7,7 @@ import ProductSplit from '@/components/home/ProductSplit';
 import TestimonialsCarousel from '@/components/home/TestimonialsCarousel';
 import MobileStickyCta from '@/components/home/MobileStickyCta';
 import DynamicCategories from '@/components/home/DynamicCategories';
+import ShopByBrand from '@/components/home/ShopByBrand';
 
 export const metadata: Metadata = {
   title: 'Glowzy — K-Beauty & Premium Skincare',
@@ -25,15 +26,6 @@ const trustItems = [
   { stat: '50K+',  label: 'Happy Customers'  },
   { stat: '4.8',   label: 'Average Rating'   },
   { stat: '100%',  label: 'Authentic'        },
-];
-
-const shopByBrands = [
-  { name: 'SeoulSkin', tone: 'from-indigo-50 to-cyan-50 border-indigo-100' },
-  { name: 'DermaPure', tone: 'from-violet-50 to-indigo-50 border-violet-100' },
-  { name: 'K-Glow', tone: 'from-cyan-50 to-sky-50 border-cyan-100' },
-  { name: 'AromaLux', tone: 'from-slate-50 to-zinc-50 border-slate-200' },
-  { name: 'BodyBliss', tone: 'from-emerald-50 to-teal-50 border-emerald-100' },
-  { name: 'BrushCraft', tone: 'from-amber-50 to-yellow-50 border-amber-100' },
 ];
 
 export default function HomePage() {
@@ -149,34 +141,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── SHOP BY BRAND ─────────────────────────────────────────────── */}
-      <section className="py-16 bg-[#f8faff] border-b border-neutral-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <p className="text-xs font-bold tracking-[0.2em] text-indigo-400 uppercase mb-2">Brand Edit</p>
-              <h2 className="text-3xl font-black text-neutral-900">Shop by Brand</h2>
-            </div>
-            <Link href="/products" className="text-sm text-neutral-400 hover:text-neutral-700 transition-colors font-medium">
-              View all →
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {shopByBrands.map((brand) => (
-              <Link
-                key={brand.name}
-                href={`/products?brand=${encodeURIComponent(brand.name)}`}
-                className={`group bg-gradient-to-br ${brand.tone} border rounded-2xl p-5 text-center hover:shadow-md hover:-translate-y-0.5 transition-all duration-200`}
-              >
-                <div className="w-10 h-10 mx-auto mb-3 rounded-xl bg-white/80 border border-white flex items-center justify-center text-indigo-500 font-bold text-sm">
-                  {brand.name.slice(0, 2).toUpperCase()}
-                </div>
-                <p className="text-sm font-semibold text-neutral-700 group-hover:text-indigo-700 transition-colors">{brand.name}</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ShopByBrand />
 
       {/* ── FEATURE STRIP ────────────────────────────────────────────── */}
       <section className="py-16 bg-[#fdfbf9]">

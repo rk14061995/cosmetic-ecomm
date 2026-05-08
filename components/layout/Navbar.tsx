@@ -96,7 +96,7 @@ export default function Navbar() {
             {/* Quiz pill */}
             <Link
               href="/quiz"
-              className="text-sm font-semibold bg-gradient-to-r from-pink-500 to-rose-500 text-white px-3 py-1.5 rounded-full hover:shadow-md hover:scale-105 transition-all"
+              className="text-sm font-semibold bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-1.5 rounded-full hover:bg-indigo-200 hover:text-indigo-800 transition-all"
             >
               ✨ Take Quiz
             </Link>
@@ -189,7 +189,7 @@ export default function Navbar() {
             <Link
               href="/quiz"
               onClick={() => setMenuOpen(false)}
-              className="inline-block text-sm font-semibold bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-1.5 rounded-full"
+              className="inline-block text-sm font-semibold bg-indigo-100 text-indigo-700 border border-indigo-200 px-4 py-1.5 rounded-full"
             >
               ✨ Take Quiz
             </Link>
