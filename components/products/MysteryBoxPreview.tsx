@@ -7,12 +7,36 @@ import { addToCart } from '@/store/slices/cartSlice';
 import api from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import Image from 'next/image';
 
 const TIER_STYLE: Record<string, { bar: string; badge: string; label: string; popular?: boolean }> = {
   basic:    { bar: 'bg-rose-300',    badge: 'bg-rose-50 text-rose-600 border-rose-100',   label: 'Starter'  },
   standard: { bar: 'bg-violet-400',  badge: 'bg-violet-50 text-violet-600 border-violet-100', label: 'Popular', popular: true },
   premium:  { bar: 'bg-amber-400',   badge: 'bg-amber-50 text-amber-700 border-amber-100', label: 'Luxe'    },
 };
+
+const UNBOXING_REELS = [
+  {
+    title: 'K-Glow Reveal',
+    creator: '@riya.beauty',
+    image: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1200&auto=format&fit=crop',
+  },
+  {
+    title: 'Premium Box Night',
+    creator: '@makeupwithaisha',
+    image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1200&auto=format&fit=crop',
+  },
+  {
+    title: 'Best of Seoul Haul',
+    creator: '@kbeauty.diaries',
+    image: 'https://images.unsplash.com/photo-1526045478516-99145907023c?w=1200&auto=format&fit=crop',
+  },
+  {
+    title: 'Skincare Surprise',
+    creator: '@glowbymegha',
+    image: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=1200&auto=format&fit=crop',
+  },
+];
 
 export default function MysteryBoxPreview() {
   const [boxes, setBoxes] = useState<any[]>([]);
@@ -147,6 +171,49 @@ export default function MysteryBoxPreview() {
             })}
           </div>
         )}
+
+        {/* Unboxing reels strip */}
+        <div className="mt-14">
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <p className="text-xs font-bold tracking-[0.2em] text-fuchsia-300 uppercase mb-1">Social Proof</p>
+              <h3 className="text-2xl font-black text-white">Live Unboxing Reels</h3>
+            </div>
+            <Link
+              href="/mystery-boxes"
+              className="text-sm font-semibold text-cyan-200 hover:text-white transition-colors"
+            >
+              Watch more →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {UNBOXING_REELS.map((reel) => (
+              <Link
+                href="/mystery-boxes"
+                key={reel.title}
+                className="group relative rounded-2xl overflow-hidden border border-white/20 hover:border-cyan-300/70 transition-all"
+              >
+                <div className="relative aspect-[3/4]">
+                  <Image src={reel.image} alt={reel.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute top-2 left-2 inline-flex items-center gap-1 text-[10px] font-bold text-white bg-black/40 border border-white/20 rounded-full px-2 py-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                    LIVE
+                  </div>
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <p className="text-white font-semibold text-sm">{reel.title}</p>
+                    <p className="text-indigo-100 text-xs">{reel.creator}</p>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="w-10 h-10 rounded-full bg-white/85 text-indigo-900 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      ▶
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
 
         {/* Bottom note */}
         <p className="text-center text-indigo-100/70 text-xs mt-10 font-light">
