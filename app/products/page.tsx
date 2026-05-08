@@ -14,6 +14,7 @@ function ProductsContent() {
   const [pagination, setPagination] = useState<any>(null);
   const [filters, setFilters] = useState({
     category: searchParams.get('category') || '',
+    brand: searchParams.get('brand') || '',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
     rating: searchParams.get('rating') || '',
@@ -54,6 +55,7 @@ function ProductsContent() {
 
   const hasActiveFilters = !!(
     filters.category ||
+    filters.brand ||
     filters.minPrice ||
     filters.maxPrice ||
     filters.rating ||
@@ -66,6 +68,7 @@ function ProductsContent() {
   const clearAll = () =>
     setFilters({
       category: '',
+      brand: '',
       minPrice: '',
       maxPrice: '',
       rating: '',
@@ -82,7 +85,7 @@ function ProductsContent() {
       <div className="rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-cyan-50 p-6 md:p-8 mb-8">
         <p className="text-xs uppercase tracking-[0.2em] font-semibold text-indigo-500 mb-2">Shop</p>
         <h1 className="text-3xl md:text-4xl font-black text-gray-900">
-          {filters.category || 'All Products'}
+          {filters.category || filters.brand || 'All Products'}
           {filters.search && <span className="font-bold text-indigo-600"> — "{filters.search}"</span>}
         </h1>
         <p className="text-sm text-gray-500 mt-2">
@@ -176,6 +179,7 @@ function ProductsContent() {
           {hasActiveFilters && (
             <div className="flex flex-wrap items-center gap-2 mb-5">
               {filters.category && <span className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1 rounded-full">{filters.category}</span>}
+              {filters.brand && <span className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1 rounded-full">Brand: {filters.brand}</span>}
               {filters.rating && <span className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1 rounded-full">{filters.rating}★ & up</span>}
               {(filters.minPrice || filters.maxPrice) && (
                 <span className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-100 px-3 py-1 rounded-full">

@@ -8,10 +8,26 @@ export default function FeaturedProducts() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/products/featured')
-      .then(({ data }) => setProducts(data.products || []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    const load = async () => {
+      try {
+        const { data } = await api.get('/products/featured');
+        const featured = data.products || [];
+        if (featured.length > 0) {
+          setProducts(featured);
+          return;
+        }
+
+        // Fallback if no products are manually flagged yet.
+        const { data: fallback } = await api.get('/products?sort=popular&limit=8');
+        setProducts(fallback.products || []);
+      } catch {
+        setProducts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
   }, []);
 
   if (loading) return (

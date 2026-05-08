@@ -35,7 +35,7 @@ function RegisterForm() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-3xl shadow-sm border border-slate-200 p-8">
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-bold bg-gradient-to-r from-indigo-500 to-cyan-500 bg-clip-text text-transparent">
+          <Link href="/" className="text-3xl font-black text-indigo-700 tracking-tight">
             Glowzy
           </Link>
           <h1 className="text-xl font-bold text-gray-900 mt-3">Create your account</h1>

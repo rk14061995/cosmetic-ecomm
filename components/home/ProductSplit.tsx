@@ -15,8 +15,22 @@ export default function ProductSplit() {
       api.get('/products?newArrival=true&limit=8'),
     ])
       .then(([popularRes, newestRes]) => {
-        setPopular(popularRes.data?.products || []);
-        setNewArrivals(newestRes.data?.products || []);
+        const bestSeller = popularRes.data?.products || [];
+        const newArrival = newestRes.data?.products || [];
+
+        if (bestSeller.length > 0) setPopular(bestSeller);
+        else {
+          api.get('/products?sort=popular&limit=8')
+            .then(({ data }) => setPopular(data.products || []))
+            .catch(() => setPopular([]));
+        }
+
+        if (newArrival.length > 0) setNewArrivals(newArrival);
+        else {
+          api.get('/products?sort=newest&limit=8')
+            .then(({ data }) => setNewArrivals(data.products || []))
+            .catch(() => setNewArrivals([]));
+        }
       })
       .catch(() => {
         setPopular([]);

@@ -17,6 +17,7 @@ const PLACEHOLDER_GRADIENTS = [
 ];
 
 const COMING_SOON_PLACEHOLDERS = [
+  { name: 'Best of Seoul', gradient: 'from-indigo-500 to-cyan-500', save: '28%', price: 1499, original: 2082 },
   { name: 'Glow Starter Kit', gradient: 'from-pink-400 to-rose-400', save: '25%', price: 999, original: 1332 },
   { name: 'Night Repair Bundle', gradient: 'from-purple-400 to-pink-400', save: '20%', price: 1299, original: 1624 },
   { name: 'Sun Care Set', gradient: 'from-rose-400 to-orange-300', save: '30%', price: 799, original: 1142 },
@@ -60,13 +61,13 @@ export default function BundlesPage() {
     Math.round(((original - price) / original) * 100);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f7f9ff]">
       {/* Hero */}
-      <div className="bg-gradient-to-r from-pink-600 to-rose-600 text-white py-16 px-4 text-center">
+      <div className="bg-gradient-to-r from-indigo-700 via-indigo-600 to-cyan-600 text-white py-16 px-4 text-center">
         <div className="text-5xl mb-4">🛍️</div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-3">Beauty Bundles</h1>
-        <p className="text-pink-100 text-lg max-w-2xl mx-auto">
-          Save more when you bundle — curated sets for every routine
+        <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-3">Beauty Bundles</h1>
+        <p className="text-indigo-100 text-lg max-w-2xl mx-auto">
+          Premium routines in one box. Better value, cleaner picks, faster checkout.
         </p>
       </div>
 
@@ -100,19 +101,19 @@ export default function BundlesPage() {
           <div>
             <div className="text-center mb-10">
               <div className="text-5xl mb-4">✨</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Bundles Coming Soon!</h2>
+              <h2 className="text-2xl font-black text-gray-900 mb-2">Bundles Coming Soon</h2>
               <p className="text-gray-500">
-                We're curating the perfect beauty sets for you. Here's a sneak peek:
+                We are curating premium sets for you. Here is a live preview, including Best of Seoul:
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
               {COMING_SOON_PLACEHOLDERS.map((ph, i) => (
                 <div
                   key={i}
-                  className="relative bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 opacity-75"
+                  className="relative bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
                 >
                   {/* Save badge */}
-                  <div className="absolute top-4 right-4 z-10 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold text-sm px-3 py-1.5 rounded-full shadow-md">
+                    <div className="absolute top-4 right-4 z-10 bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-bold text-sm px-3 py-1.5 rounded-full shadow-md">
                     SAVE {ph.save}
                   </div>
 
@@ -126,7 +127,7 @@ export default function BundlesPage() {
                     <p className="text-sm text-gray-400 mb-4">Coming soon — be the first to know!</p>
 
                     <div className="flex items-baseline gap-3 mb-5">
-                      <span className="text-3xl font-bold text-pink-600">{formatPrice(ph.price)}</span>
+                      <span className="text-3xl font-bold text-indigo-600">{formatPrice(ph.price)}</span>
                       <span className="text-gray-400 line-through text-sm">{formatPrice(ph.original)}</span>
                     </div>
 
@@ -154,11 +155,11 @@ export default function BundlesPage() {
               return (
                 <div
                   key={bundle._id}
-                  className="relative bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 group flex flex-col"
+                  className="relative bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 group flex flex-col"
                 >
                   {/* Save badge */}
                   {saving !== null && saving > 0 && (
-                    <div className="absolute top-4 right-4 z-10 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold text-sm px-3 py-1.5 rounded-full shadow-md">
+                    <div className="absolute top-4 right-4 z-10 bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-bold text-sm px-3 py-1.5 rounded-full shadow-md">
                       SAVE {saving}%
                     </div>
                   )}
@@ -194,7 +195,7 @@ export default function BundlesPage() {
                         {bundle.products.map((product: any, i: number) => (
                           <span
                             key={product._id || i}
-                            className="text-xs bg-pink-50 text-pink-700 border border-pink-200 px-3 py-1 rounded-full font-medium"
+                            className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1 rounded-full font-medium"
                           >
                             {product.name || product}
                           </span>
@@ -205,7 +206,7 @@ export default function BundlesPage() {
                     {/* Pricing — pushed to bottom */}
                     <div className="mt-auto">
                       <div className="flex items-baseline gap-3 mb-4">
-                        <span className="text-3xl font-bold text-pink-600">{formatPrice(bundle.price)}</span>
+                        <span className="text-3xl font-bold text-indigo-600">{formatPrice(bundle.price)}</span>
                         {bundle.originalPrice && bundle.originalPrice > bundle.price && (
                           <span className="text-gray-400 line-through text-base">
                             {formatPrice(bundle.originalPrice)}
@@ -223,7 +224,7 @@ export default function BundlesPage() {
                       <button
                         onClick={() => handleAddToCart(bundle)}
                         disabled={isAdding}
-                        className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold py-3.5 rounded-full hover:shadow-lg hover:scale-105 transition-all disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 group-hover:shadow-pink-200"
+                        className="w-full bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-bold py-3.5 rounded-full hover:shadow-lg hover:scale-105 transition-all disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100 group-hover:shadow-indigo-200"
                       >
                         {isAdding ? (
                           <span className="flex items-center justify-center gap-2">

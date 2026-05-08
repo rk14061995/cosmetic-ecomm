@@ -113,9 +113,21 @@ export default function QuizPage() {
       setTimeout(async () => {
         try {
           const { data } = await api.get('/products?category=Skincare&limit=6');
-          setProducts(data.products || []);
+          const skincare = data.products || [];
+          if (skincare.length > 0) {
+            setProducts(skincare);
+          } else {
+            // Fallback so quiz never appears broken if category data changes.
+            const { data: fallback } = await api.get('/products?sort=popular&limit=6');
+            setProducts(fallback.products || []);
+          }
         } catch {
-          setProducts([]);
+          try {
+            const { data: fallback } = await api.get('/products?limit=6');
+            setProducts(fallback.products || []);
+          } catch {
+            setProducts([]);
+          }
         }
         setStep(6);
       }, 1500);

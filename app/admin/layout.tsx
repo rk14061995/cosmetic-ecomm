@@ -46,7 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar */}
       <aside className="w-64 bg-gray-900 text-white flex flex-col flex-shrink-0">
         <div className="p-6 border-b border-gray-800">
-          <Link href="/" className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+          <Link href="/" className="text-xl font-black text-indigo-300 tracking-tight">
             Glowzy
           </Link>
           <p className="text-gray-400 text-xs mt-1">Admin Panel</p>
