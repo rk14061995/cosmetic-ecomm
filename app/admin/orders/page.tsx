@@ -18,7 +18,10 @@ export default function AdminOrdersPage() {
     const params = filterStatus ? `?status=${filterStatus}` : '';
     api.get(`/orders${params}`)
       .then(({ data }) => setOrders(data.orders || []))
-      .catch(() => {})
+      .catch((err: any) => {
+        toast.error(err.response?.data?.message || 'Failed to load admin orders');
+        setOrders([]);
+      })
       .finally(() => setLoading(false));
   };
 

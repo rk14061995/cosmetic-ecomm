@@ -14,19 +14,25 @@ const navItems = [
   { href: '/admin/mystery-boxes', label: 'Mystery Boxes', icon: '🎁' },
   { href: '/admin/payments', label: 'Payments', icon: '💳' },
 ];
+const STATIC_ADMIN_EMAIL = 'rahul.k@simplilearn.net';
+const normalizeEmail = (email?: string) => (email || '').trim().toLowerCase();
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, initialized } = useSelector((state: any) => state.auth);
   const router = useRouter();
   const pathname = usePathname();
+  const isAdmin = !!user && (
+    user.role === 'admin' ||
+    normalizeEmail(user.email) === normalizeEmail(STATIC_ADMIN_EMAIL)
+  );
 
   useEffect(() => {
-    if (initialized && (!user || user.role !== 'admin')) {
+    if (initialized && !isAdmin) {
       router.push('/');
     }
-  }, [user, initialized]);
+  }, [initialized, isAdmin, router]);
 
-  if (!initialized || !user || user.role !== 'admin') return (
+  if (!initialized || !isAdmin) return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-500" />
     </div>

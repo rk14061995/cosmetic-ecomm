@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { logoutUser } from '@/store/slices/authSlice';
 import toast from 'react-hot-toast';
 
+const STATIC_ADMIN_EMAIL = 'rahul.k@simplilearn.net';
+const normalizeEmail = (email?: string) => (email || '').trim().toLowerCase();
+
 export default function Navbar() {
   const dispatch = useDispatch<any>();
   const router = useRouter();
@@ -13,6 +16,10 @@ export default function Navbar() {
   const { cartCount } = useSelector((state: any) => state.cart);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const hasAdminAccess = !!user && (
+    user.role === 'admin' ||
+    normalizeEmail(user.email) === normalizeEmail(STATIC_ADMIN_EMAIL)
+  );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,7 +126,7 @@ export default function Navbar() {
                   <Link href="/profile" className="block px-4 py-2 text-sm hover:bg-pink-50">My Profile</Link>
                   <Link href="/profile/orders" className="block px-4 py-2 text-sm hover:bg-pink-50">Orders</Link>
                   <Link href="/profile/wishlist" className="block px-4 py-2 text-sm hover:bg-pink-50">Wishlist</Link>
-                  {user.role === 'admin' && (
+                  {hasAdminAccess && (
                     <Link href="/admin" className="block px-4 py-2 text-sm text-purple-600 hover:bg-purple-50">Admin Panel</Link>
                   )}
                   <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 border-t">
@@ -191,7 +198,7 @@ export default function Navbar() {
             <>
               <Link href="/profile"        className="block text-sm font-medium py-2.5 border-b border-gray-50" onClick={() => setMenuOpen(false)}>Profile</Link>
               <Link href="/profile/orders" className="block text-sm font-medium py-2.5 border-b border-gray-50" onClick={() => setMenuOpen(false)}>Orders</Link>
-              {user.role === 'admin' && (
+              {hasAdminAccess && (
                 <Link href="/admin" className="block text-sm font-medium text-purple-600 py-2.5 border-b border-gray-50" onClick={() => setMenuOpen(false)}>Admin Panel</Link>
               )}
               <button onClick={handleLogout} className="block text-sm font-medium text-red-600 py-2.5 w-full text-left">Logout</button>

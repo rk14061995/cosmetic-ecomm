@@ -90,12 +90,10 @@ export default function CheckoutPage() {
     setPlacing(true);
     try {
       const orderItems = items.map((item: any) => ({
-        product: item.product?._id,
-        mysteryBox: item.mysteryBox?._id,
+        ...(item.product?._id ? { product: item.product._id } : {}),
+        ...(item.mysteryBox?._id ? { mysteryBox: item.mysteryBox._id } : {}),
         quantity: item.quantity,
-        price: item.price,
         itemType: item.itemType,
-        name: item.product?.name || item.mysteryBox?.name || item.name,
       }));
 
       const { data: orderRes } = await api.post('/orders', {
@@ -111,10 +109,6 @@ export default function CheckoutPage() {
         },
         paymentMethod,
         walletAmountUsed: walletDeduct,
-        itemsPrice: summary.subtotal,
-        shippingPrice: summary.shipping,
-        discountPrice: summary.discount + walletDeduct + giftCardDeduct,
-        totalPrice: effectiveTotal,
         ...(appliedGiftCard ? { giftCardCode: appliedGiftCard.code } : {}),
       });
 

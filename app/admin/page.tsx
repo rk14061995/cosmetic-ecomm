@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { formatPrice, formatDate, getOrderStatusColor } from '@/lib/utils';
+import toast from 'react-hot-toast';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
@@ -11,7 +12,9 @@ export default function AdminDashboard() {
   useEffect(() => {
     api.get('/orders/admin/stats')
       .then(({ data }) => setStats(data.stats))
-      .catch(() => {})
+      .catch((err: any) => {
+        toast.error(err.response?.data?.message || 'Failed to load dashboard stats');
+      })
       .finally(() => setLoading(false));
   }, []);
 
