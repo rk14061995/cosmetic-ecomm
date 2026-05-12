@@ -152,20 +152,15 @@ export default function CheckoutPage() {
         // Shipping address passed as notes — visible in Razorpay dashboard for every payment
         notes: {
           order_id:       order._id,
-          order_ref:      `#${order._id.slice(-8).toUpperCase()}`,
           customer_name:  user.name,
           customer_email: user.email,
           customer_phone: user.phone || selectedAddress?.phone || '',
           items:          itemsSummary,
-          item_count:     String(items.length),
           subtotal:       `₹${summary.subtotal}`,
           shipping:       summary.shipping === 0 ? 'Free' : `₹${summary.shipping}`,
           discount:       summary.discount > 0 ? `₹${summary.discount}` : 'None',
           wallet_used:    walletDeduct > 0 ? `₹${walletDeduct}` : 'None',
-          gift_card:      appliedGiftCard ? appliedGiftCard.code : 'None',
           total_paid:     `₹${effectiveTotal}`,
-          // Shipping address for delivery verification
-          ship_name:      selectedAddress?.fullName    || '',
           ship_address:   selectedAddress?.addressLine1 || '',
           ship_city:      selectedAddress?.city        || '',
           ship_state:     selectedAddress?.state       || '',

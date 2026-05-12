@@ -44,8 +44,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-2xl font-black text-indigo-700 tracking-tight">
-              Glowzy
+            <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-violet-600 to-pink-500 bg-clip-text text-transparent">
+              KosmeticX
             </span>
           </Link>
 

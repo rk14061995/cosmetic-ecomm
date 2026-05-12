@@ -10,15 +10,16 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
-    default: 'Glowzy — Premium Beauty & Skincare',
-    template: '%s | Glowzy',
+    default: 'KosmeticX — Premium Beauty & Skincare',
+    template: '%s | KosmeticX',
   },
-  description: 'Discover premium cosmetics, skincare, and mystery beauty boxes. Shop the best brands at unbeatable prices.',
-  keywords: ['cosmetics', 'skincare', 'makeup', 'haircare', 'beauty', 'mystery box'],
+  description: 'Discover premium cosmetics, skincare, and mystery beauty boxes at KosmeticX. Shop the best brands at unbeatable prices.',
+  keywords: ['cosmetics', 'skincare', 'makeup', 'haircare', 'beauty', 'mystery box', 'KosmeticX'],
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    siteName: 'Glowzy',
+    siteName: 'KosmeticX',
+    url: 'https://kosmeticx.com',
   },
 };
 
