@@ -1,6 +1,19 @@
 import type { NextConfig } from "next";
+import path from "path";
+import { fileURLToPath } from "url";
+
+/** Pin workspace root when multiple lockfiles exist (avoids Turbopack picking the wrong tree). */
+const turbopackRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: turbopackRoot,
+  },
+  async redirects() {
+    return [
+      { source: '/favicon.ico', destination: '/favicon.svg', permanent: false },
+    ];
+  },
   images: {
     loader: 'custom',
     loaderFile: './lib/cloudinaryLoader.ts',

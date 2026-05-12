@@ -91,7 +91,7 @@ export default function QuizPage() {
 
   // Set page title
   useEffect(() => {
-    document.title = 'Skin & Beauty Quiz | Glowzy';
+    document.title = `Skin & Beauty Quiz | ${process.env.NEXT_PUBLIC_SITE_NAME || 'KosmeticX'}`;
   }, []);
 
   const totalSteps = QUESTIONS.length;

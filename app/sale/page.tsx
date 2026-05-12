@@ -257,7 +257,7 @@ export default function SalePage() {
   const endTimesRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
-    document.title = 'Flash Sale | Glowzy';
+    document.title = `Flash Sale | ${process.env.NEXT_PUBLIC_SITE_NAME || 'KosmeticX'}`;
   }, []);
 
   useEffect(() => {

@@ -126,7 +126,7 @@ export default function CheckoutPage() {
         currency:    rpData.currency || 'INR',
 
         // Brand identity shown in the Razorpay modal
-        name:        'Glowzy',
+        name:        process.env.NEXT_PUBLIC_SITE_NAME || 'KosmeticX',
         image:       `${process.env.NEXT_PUBLIC_SITE_URL || ''}/logo.png`,
         description: `Order #${order._id.slice(-8).toUpperCase()} · ${items.length} item${items.length > 1 ? 's' : ''}`,
 

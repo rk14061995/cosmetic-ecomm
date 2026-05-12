@@ -8,9 +8,32 @@ import TestimonialsCarousel from '@/components/home/TestimonialsCarousel';
 import MobileStickyCta from '@/components/home/MobileStickyCta';
 import DynamicCategories from '@/components/home/DynamicCategories';
 import ShopByBrand from '@/components/home/ShopByBrand';
+import {
+  DEFAULT_DESCRIPTION,
+  KEYWORDS,
+  SITE_TAGLINE,
+  absoluteUrl,
+  defaultOpenGraph,
+  defaultTwitter,
+  getSiteName,
+} from '@/lib/seo';
+
+const homeTitle = `${getSiteName()} — ${SITE_TAGLINE} | Shop Online India`;
 
 export const metadata: Metadata = {
-  title: 'Glowzy — K-Beauty & Premium Skincare',
+  title: { absolute: homeTitle },
+  description: DEFAULT_DESCRIPTION,
+  keywords: KEYWORDS,
+  alternates: { canonical: '/' },
+  openGraph: defaultOpenGraph({
+    title: homeTitle,
+    description: DEFAULT_DESCRIPTION,
+    url: absoluteUrl('/'),
+  }),
+  twitter: defaultTwitter({
+    title: homeTitle,
+    description: DEFAULT_DESCRIPTION,
+  }),
 };
 
 const featureCards = [

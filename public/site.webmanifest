@@ -1,0 +1,17 @@
+{
+  "name": "KosmeticX — K-Beauty & Skincare",
+  "short_name": "KosmeticX",
+  "description": "Shop authentic K-beauty, skincare, makeup, and haircare online.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdfbf9",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
