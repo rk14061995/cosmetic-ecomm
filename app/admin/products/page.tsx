@@ -9,6 +9,8 @@ const EMPTY_FORM = {
   name: '', description: '', shortDescription: '', price: '', discountPrice: '', category: '',
   brand: '', stock: '', tags: '', ingredients: '', howToUse: '', weight: '',
   isFeatured: false, isNewArrival: false, isBestSeller: false, isActive: true, eligibleForMysteryBox: false,
+  virtualTryOn: false,
+  tryOnTintHex: '#db2777',
 };
 
 /** Only these keys are sent as multipart fields; excludes nested docs like images/reviews from spread form. */
@@ -16,6 +18,7 @@ const PRODUCT_FORM_KEYS = [
   'name', 'description', 'shortDescription', 'price', 'discountPrice', 'category', 'brand', 'stock',
   'tags', 'ingredients', 'howToUse', 'weight', 'slug',
   'isFeatured', 'isNewArrival', 'isBestSeller', 'isActive', 'eligibleForMysteryBox',
+  'virtualTryOn', 'tryOnTintHex',
 ] as const;
 
 function appendProductFields(fd: FormData, form: Record<string, unknown>) {
@@ -70,7 +73,18 @@ export default function AdminProductsPage() {
   };
   const openEdit = (p: any) => {
     setEditing(p);
-    setForm({ ...p, price: p.price, discountPrice: p.discountPrice || '', stock: p.stock, tags: p.tags?.join(', ') || '' });
+    const hex = typeof p.tryOnTintHex === 'string' && /^#[0-9A-Fa-f]{6}$/.test(p.tryOnTintHex.trim())
+      ? p.tryOnTintHex.trim()
+      : '#db2777';
+    setForm({
+      ...p,
+      price: p.price,
+      discountPrice: p.discountPrice || '',
+      stock: p.stock,
+      tags: p.tags?.join(', ') || '',
+      virtualTryOn: Boolean(p.virtualTryOn),
+      tryOnTintHex: hex,
+    });
     setImageFiles([]);
     setExistingImages(Array.isArray(p.images) ? p.images.map((img: any) => ({ url: img.url, publicId: img.publicId })) : []);
     setShowForm(true);
@@ -418,12 +432,38 @@ export default function AdminProductsPage() {
                     { key: 'isBestSeller', label: 'Best Seller' },
                     { key: 'isActive', label: 'Active' },
                     { key: 'eligibleForMysteryBox', label: 'Mystery Box Eligible' },
+                    { key: 'virtualTryOn', label: 'Virtual try-on (customer photo preview)' },
                   ].map(({ key, label }) => (
                     <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
                       <input type="checkbox" checked={form[key]} onChange={(e) => setForm((p: any) => ({ ...p, [key]: e.target.checked }))} className="accent-violet-600" />
                       {label}
                     </label>
                   ))}
+                  {form.virtualTryOn && (
+                    <div className="pt-2 border-t border-slate-100 mt-2">
+                      <label className={labelCls}>Try-on tint colour</label>
+                      <div className="flex flex-wrap items-center gap-3 mt-1">
+                        <input
+                          type="color"
+                          value={/^#[0-9A-Fa-f]{6}$/.test(String(form.tryOnTintHex || '').trim()) ? String(form.tryOnTintHex).trim() : '#db2777'}
+                          onChange={(e) => setForm((p: any) => ({ ...p, tryOnTintHex: e.target.value }))}
+                          className="h-10 w-14 cursor-pointer rounded-lg border border-slate-200 bg-white p-0.5"
+                          title="Shade used for the on-device tint overlay"
+                        />
+                        <input
+                          type="text"
+                          value={form.tryOnTintHex || ''}
+                          onChange={(e) => setForm((p: any) => ({ ...p, tryOnTintHex: e.target.value }))}
+                          placeholder="#db2777"
+                          pattern="^#[0-9A-Fa-f]{6}$"
+                          className={`${inputCls} flex-1 min-w-[7rem] font-mono text-xs`}
+                        />
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        Shoppers upload a photo in the browser only; this hex sets the default tint (lip / blush preview).
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
               </div>

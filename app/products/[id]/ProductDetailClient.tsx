@@ -7,6 +7,7 @@ import { addToCart } from '@/store/slices/cartSlice';
 import api from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import VirtualTryOnModal from '@/components/products/VirtualTryOnModal';
 
 // ---------------------------------------------------------------------------
 // Lightbox modal for review images
@@ -223,6 +224,8 @@ export default function ProductDetailClient({ id }: { id: string }) {
 
   // Recently viewed
   const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
+
+  const [tryOnOpen, setTryOnOpen] = useState(false);
 
   // -------------------------------------------------------------------------
   // Load product
@@ -454,6 +457,15 @@ export default function ProductDetailClient({ id }: { id: string }) {
         />
       )}
 
+      {product?.virtualTryOn && (
+        <VirtualTryOnModal
+          open={tryOnOpen}
+          onClose={() => setTryOnOpen(false)}
+          productName={product.name}
+          tintHex={product.tryOnTintHex || '#db2777'}
+        />
+      )}
+
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* ================================================================
             Top grid: image gallery + product info
@@ -594,38 +606,56 @@ export default function ProductDetailClient({ id }: { id: string }) {
 
             {/* ── Add to Cart / Back-in-Stock Alert ───────────────────────── */}
             {!isOutOfStock ? (
-              <div className="flex items-center gap-4 mb-6">
-                <div className="flex items-center border rounded-full overflow-hidden">
+              <div className="mb-6 space-y-3">
+                {product.virtualTryOn && (
                   <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-4 py-2 text-lg hover:bg-gray-100 transition-colors"
+                    type="button"
+                    onClick={() => setTryOnOpen(true)}
+                    className="w-full rounded-2xl border-2 border-pink-500 bg-pink-50/50 py-3 px-4 text-sm font-bold text-pink-700 shadow-sm transition-all hover:bg-pink-50 hover:shadow-md"
                   >
-                    -
+                    <span className="mr-2" aria-hidden>
+                      ✨
+                    </span>
+                    Try on yourself — upload your photo
                   </button>
-                  <span className="px-4 font-semibold">{quantity}</span>
+                )}
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+                  <div className="flex items-center border rounded-full overflow-hidden shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="px-4 py-2 text-lg hover:bg-gray-100 transition-colors"
+                    >
+                      -
+                    </button>
+                    <span className="px-4 font-semibold">{quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity(Math.min(effectiveStock, quantity + 1))}
+                      className="px-4 py-2 text-lg hover:bg-gray-100 transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
                   <button
-                    onClick={() => setQuantity(Math.min(effectiveStock, quantity + 1))}
-                    className="px-4 py-2 text-lg hover:bg-gray-100 transition-colors"
+                    type="button"
+                    onClick={handleAddToCart}
+                    className="min-w-0 flex-1 bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 rounded-full shadow-sm ring-1 ring-black/10 transition-colors"
                   >
-                    +
+                    Add to Cart
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleWishlist}
+                    className={`p-3 rounded-full border-2 transition-all shrink-0 ${
+                      wishlisted
+                        ? 'border-pink-500 bg-pink-50 text-pink-500'
+                        : 'border-gray-200 hover:border-pink-300'
+                    }`}
+                  >
+                    {wishlisted ? '❤️' : '🤍'}
                   </button>
                 </div>
-                <button
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold py-3 rounded-full hover:shadow-lg hover:scale-105 transition-all"
-                >
-                  Add to Cart
-                </button>
-                <button
-                  onClick={handleWishlist}
-                  className={`p-3 rounded-full border-2 transition-all ${
-                    wishlisted
-                      ? 'border-pink-500 bg-pink-50 text-pink-500'
-                      : 'border-gray-200 hover:border-pink-300'
-                  }`}
-                >
-                  {wishlisted ? '❤️' : '🤍'}
-                </button>
               </div>
             ) : (
               /* Back-in-Stock form */

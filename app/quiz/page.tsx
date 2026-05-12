@@ -264,87 +264,129 @@ export default function QuizPage() {
       </div>
 
       {/* Main question area */}
-      <div className="flex-1 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-2xl">
+      <div className="flex-1 flex items-center justify-center px-4 py-8 sm:py-10">
+        <div className="relative w-full max-w-2xl">
           <StepCard stepKey={step}>
-            {/* Question card */}
-            <div className="bg-white/85 backdrop-blur-sm rounded-3xl shadow-xl border border-indigo-100 p-8 md:p-10">
-              {/* Question heading */}
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-500 text-white font-extrabold text-lg mb-4 shadow-md">
-                  {step + 1}
-                </div>
-                <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">
-                  {current.q}
-                </h2>
-              </div>
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-indigo-200/50 bg-white/90 backdrop-blur-md shadow-[0_28px_64px_-28px_rgba(67,56,202,0.35)]">
+              <div
+                className="h-1 w-full"
+                style={{ background: 'linear-gradient(90deg, #6366f1 0%, #8b5cf6 45%, #22d3ee 100%)' }}
+                aria-hidden
+              />
 
-              {/* Option cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-                {current.options.map((opt) => {
-                  const isActive = selected === opt.label;
-                  return (
-                    <button
-                      key={opt.label}
-                      onClick={() => handleSelect(opt.label)}
-                      className={`group relative flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all duration-200 focus:outline-none ${
-                        isActive
-                          ? 'border-indigo-500 bg-gradient-to-r from-indigo-50 to-cyan-50 shadow-md scale-[1.02]'
-                          : 'border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50 hover:scale-[1.01]'
-                      }`}
-                    >
-                      {/* Checkmark indicator */}
-                      {isActive && (
-                        <span className="absolute top-3 right-3 w-5 h-5 rounded-full bg-indigo-500 text-white text-xs flex items-center justify-center font-bold">
-                          ✓
-                        </span>
-                      )}
-                      <span className="text-3xl leading-none">{opt.emoji}</span>
-                      <span
-                        className={`text-sm font-semibold leading-tight ${
-                          isActive ? 'text-indigo-700' : 'text-gray-700'
+              <div className="p-6 sm:p-8 md:p-10">
+                <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+                  <div className="min-w-0 flex-1 text-center sm:text-left">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-indigo-500 mb-2">
+                      Step {step + 1} of {totalSteps}
+                    </p>
+                    <h2 className="text-2xl font-black leading-tight tracking-tight text-gray-900 sm:text-3xl md:text-[2rem] md:leading-snug">
+                      {current.q}
+                    </h2>
+                    <p className="mt-2 text-sm text-gray-500 hidden sm:block">
+                      Tap one answer — you can go back and change it anytime.
+                    </p>
+                  </div>
+                  <div
+                    className="mx-auto flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-black text-white shadow-lg shadow-indigo-500/25 sm:mx-0 sm:h-16 sm:w-16 sm:text-xl"
+                    style={{ background: 'linear-gradient(135deg, #6366f1 0%, #22d3ee 100%)' }}
+                    aria-hidden
+                  >
+                    {step + 1}
+                  </div>
+                </div>
+
+                <div
+                  role="radiogroup"
+                  aria-label={current.q}
+                  className="mb-8 grid grid-cols-1 gap-2.5 md:grid-cols-2 md:gap-3"
+                >
+                  {current.options.map((opt) => {
+                    const isActive = selected === opt.label;
+                    return (
+                      <button
+                        key={opt.label}
+                        type="button"
+                        role="radio"
+                        aria-checked={isActive}
+                        onClick={() => handleSelect(opt.label)}
+                        className={`group relative flex min-h-[3.25rem] items-center gap-3 rounded-2xl border px-4 py-3.5 text-left transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 ${
+                          isActive
+                            ? 'border-indigo-500 bg-indigo-50/90 shadow-md ring-1 ring-indigo-200/60'
+                            : 'border-gray-200/90 bg-gray-50/40 hover:border-indigo-300 hover:bg-white hover:shadow-sm'
                         }`}
                       >
-                        {opt.label}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+                        <span
+                          className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl text-2xl leading-none transition-colors ${
+                            isActive ? 'bg-white shadow-sm' : 'bg-white/80 text-gray-900'
+                          }`}
+                          aria-hidden
+                        >
+                          {opt.emoji}
+                        </span>
+                        <span
+                          className={`min-w-0 flex-1 text-sm font-semibold leading-snug sm:text-base ${
+                            isActive ? 'text-indigo-900' : 'text-gray-800'
+                          }`}
+                        >
+                          {opt.label}
+                        </span>
+                        <span
+                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
+                            isActive
+                              ? 'border-indigo-600 bg-indigo-600 text-white'
+                              : 'border-gray-300 bg-white text-transparent group-hover:border-indigo-300'
+                          }`}
+                          aria-hidden
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-              {/* Navigation buttons */}
-              <div className="flex items-center gap-3">
-                {step > 0 && (
+                <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
+                  {step > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleBack}
+                      className="w-full sm:flex-1 rounded-2xl border-2 border-gray-200 bg-white py-3.5 text-sm font-semibold text-gray-700 transition-all hover:border-indigo-200 hover:bg-indigo-50/50 hover:text-indigo-700 sm:w-auto"
+                    >
+                      ← Back
+                    </button>
+                  )}
                   <button
-                    onClick={handleBack}
-                    className="flex-1 py-3.5 rounded-2xl border-2 border-gray-200 text-gray-600 font-semibold text-sm hover:border-indigo-300 hover:text-indigo-600 transition-all"
+                    type="button"
+                    onClick={handleNext}
+                    disabled={!selected}
+                    style={
+                      selected
+                        ? { background: 'linear-gradient(90deg, #6366f1 0%, #22d3ee 100%)' }
+                        : undefined
+                    }
+                    className={`w-full rounded-2xl py-3.5 text-sm font-bold shadow-sm transition-all sm:flex-1 ${
+                      selected
+                        ? 'text-white ring-1 ring-black/10 hover:shadow-lg hover:brightness-[1.05] active:scale-[0.99]'
+                        : 'cursor-not-allowed bg-gray-100 text-gray-400'
+                    }`}
                   >
-                    ← Back
+                    {step === totalSteps - 1 ? 'See my results ✨' : 'Next →'}
                   </button>
-                )}
-                <button
-                  onClick={handleNext}
-                  disabled={!selected}
-                  className={`flex-1 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 ${
-                    selected
-                      ? 'bg-gradient-to-r from-indigo-500 to-cyan-500 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]'
-                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  {step === totalSteps - 1 ? 'See My Results ✨' : 'Next →'}
-                </button>
+                </div>
               </div>
             </div>
           </StepCard>
 
-          {/* Decorative blobs */}
           <div
             aria-hidden
-            className="pointer-events-none absolute top-40 -left-20 w-72 h-72 rounded-full bg-indigo-300/20 blur-3xl -z-10"
+            className="pointer-events-none absolute -left-24 top-32 -z-10 h-72 w-72 rounded-full bg-indigo-300/25 blur-3xl sm:-left-32"
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute bottom-20 -right-20 w-96 h-96 rounded-full bg-cyan-300/20 blur-3xl -z-10"
+            className="pointer-events-none absolute -right-24 bottom-8 -z-10 h-80 w-80 rounded-full bg-cyan-300/25 blur-3xl sm:-right-28"
           />
         </div>
       </div>
