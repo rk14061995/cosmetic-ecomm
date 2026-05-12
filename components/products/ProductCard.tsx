@@ -30,7 +30,7 @@ export default function ProductCard({ product }: { product: any }) {
   };
 
   return (
-    <Link href={`/products/${product.slug || product._id}`} className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all border border-slate-200">
+    <Link href={`/products/${product._id || product.slug}`} className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all border border-slate-200">
       <div className="relative aspect-square overflow-hidden bg-slate-50">
         {product.images?.[0]?.url ? (
           <Image

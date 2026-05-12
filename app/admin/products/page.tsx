@@ -11,6 +11,21 @@ const EMPTY_FORM = {
   isFeatured: false, isNewArrival: false, isBestSeller: false, isActive: true, eligibleForMysteryBox: false,
 };
 
+/** Only these keys are sent as multipart fields; excludes nested docs like images/reviews from spread form. */
+const PRODUCT_FORM_KEYS = [
+  'name', 'description', 'shortDescription', 'price', 'discountPrice', 'category', 'brand', 'stock',
+  'tags', 'ingredients', 'howToUse', 'weight', 'slug',
+  'isFeatured', 'isNewArrival', 'isBestSeller', 'isActive', 'eligibleForMysteryBox',
+] as const;
+
+function appendProductFields(fd: FormData, form: Record<string, unknown>) {
+  for (const k of PRODUCT_FORM_KEYS) {
+    const v = form[k];
+    if (v === '' || v === null || v === undefined) continue;
+    fd.append(k, typeof v === 'boolean' ? String(v) : String(v));
+  }
+}
+
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,6 +38,8 @@ export default function AdminProductsPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [creatingCategory, setCreatingCategory] = useState(false);
+  const [existingImages, setExistingImages] = useState<{ url: string; publicId?: string }[]>([]);
+  const [removingPublicId, setRemovingPublicId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const fetchProducts = () => {
@@ -44,15 +61,61 @@ export default function AdminProductsPage() {
       .catch(() => setCategories([]));
   }, []);
 
-  const openCreate = () => { setEditing(null); setForm({ ...EMPTY_FORM, category: categories[0]?.name || '' }); setImageFiles([]); setShowForm(true); };
-  const openEdit = (p: any) => { setEditing(p); setForm({ ...p, price: p.price, discountPrice: p.discountPrice || '', stock: p.stock, tags: p.tags?.join(', ') || '' }); setImageFiles([]); setShowForm(true); };
+  const openCreate = () => {
+    setEditing(null);
+    setForm({ ...EMPTY_FORM, category: categories[0]?.name || '' });
+    setImageFiles([]);
+    setExistingImages([]);
+    setShowForm(true);
+  };
+  const openEdit = (p: any) => {
+    setEditing(p);
+    setForm({ ...p, price: p.price, discountPrice: p.discountPrice || '', stock: p.stock, tags: p.tags?.join(', ') || '' });
+    setImageFiles([]);
+    setExistingImages(Array.isArray(p.images) ? p.images.map((img: any) => ({ url: img.url, publicId: img.publicId })) : []);
+    setShowForm(true);
+  };
+
+  const moveExistingImage = (index: number, delta: number) => {
+    setExistingImages((prev) => {
+      const next = [...prev];
+      const j = index + delta;
+      if (j < 0 || j >= next.length) return prev;
+      [next[index], next[j]] = [next[j], next[index]];
+      return next;
+    });
+  };
+
+  const handleRemoveExistingImage = async (publicId: string) => {
+    if (!editing?._id) return;
+    if (!publicId) {
+      toast.error('This image has no Cloudinary id and cannot be removed from here.');
+      return;
+    }
+    if (!confirm('Remove this image from the product?')) return;
+    setRemovingPublicId(publicId);
+    try {
+      const { data } = await api.delete(`/products/${editing._id}/images/${encodeURIComponent(publicId)}`);
+      const next = data.images || [];
+      setExistingImages(next);
+      setEditing((prev: any) => (prev ? { ...prev, images: next } : null));
+      toast.success('Image removed');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to remove image');
+    } finally {
+      setRemovingPublicId(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
       const fd = new FormData();
-      Object.entries(form).forEach(([k, v]) => { if (v !== '' && v !== null && v !== undefined) fd.append(k, String(v)); });
+      appendProductFields(fd, form);
+      if (editing) {
+        fd.append('existingImagesJson', JSON.stringify(existingImages));
+      }
       imageFiles.forEach((f) => fd.append('images', f));
       if (editing) {
         await api.put(`/products/${editing._id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -238,12 +301,15 @@ export default function AdminProductsPage() {
       {/* Product Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-2xl my-8 shadow-2xl">
-            <h3 className="font-bold text-slate-900 text-lg mb-1">{editing ? 'Edit Product' : 'Add New Product'}</h3>
-            <p className="text-sm text-slate-500 mb-6">{editing ? `Editing: ${editing.name}` : 'Fill in product details below'}</p>
-            <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+          <div className="bg-white rounded-2xl w-full max-w-5xl my-6 shadow-2xl max-h-[calc(100vh-3rem)] overflow-hidden flex flex-col">
+            <div className="px-6 py-4 border-b border-slate-100">
+              <h3 className="font-bold text-slate-900 text-lg mb-1">{editing ? 'Edit Product' : 'Add New Product'}</h3>
+              <p className="text-sm text-slate-500">{editing ? `Editing: ${editing.name}` : 'Fill in product details below'}</p>
+            </div>
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+              <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { key: 'name', label: 'Product Name *', col: 'col-span-2', required: true },
+                { key: 'name', label: 'Product Name *', col: 'md:col-span-2', required: true },
                 { key: 'brand', label: 'Brand *', required: true },
                 { key: 'price', label: 'Price (₹) *', type: 'number', required: true },
                 { key: 'discountPrice', label: 'Discount Price (₹)', type: 'number' },
@@ -271,10 +337,10 @@ export default function AdminProductsPage() {
               </div>
 
               {[
-                { key: 'shortDescription', label: 'Short Description (max 300 chars)', col: 'col-span-2', rows: 2 },
-                { key: 'description', label: 'Full Description *', col: 'col-span-2', rows: 4, required: true },
-                { key: 'ingredients', label: 'Ingredients', col: 'col-span-2', rows: 3 },
-                { key: 'howToUse', label: 'How to Use', col: 'col-span-2', rows: 2 },
+                { key: 'shortDescription', label: 'Short Description', col: 'md:col-span-3', rows: 2 },
+                { key: 'description', label: 'Full Description *', col: 'md:col-span-3', rows: 3, required: true },
+                { key: 'ingredients', label: 'Ingredients', col: 'md:col-span-2', rows: 2 },
+                { key: 'howToUse', label: 'How to Use', col: 'md:col-span-1', rows: 2 },
               ].map(({ key, label, col, rows, required }) => (
                 <div key={key} className={col}>
                   <label className={labelCls}>{label}</label>
@@ -283,20 +349,69 @@ export default function AdminProductsPage() {
                 </div>
               ))}
 
-              <div className="col-span-2">
+              <div className="md:col-span-2 space-y-3">
                 <label className={labelCls}>Product Images</label>
+                {editing && existingImages.length > 0 && (
+                  <div>
+                    <p className="text-xs text-slate-500 mb-2">
+                      Current images — order is saved when you update the product. The first image is the main listing photo.
+                    </p>
+                    <div className="flex flex-wrap gap-4 items-end">
+                      {existingImages.map((img, idx) => {
+                        const canRemove = Boolean(img.publicId);
+                        return (
+                          <div key={`${idx}-${img.publicId || img.url}`} className="flex flex-col items-center gap-1.5">
+                            <span className="text-[10px] font-semibold text-slate-400 tabular-nums">{idx + 1}</span>
+                            <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-slate-200 bg-slate-50">
+                              <Image src={img.url} alt="" fill className="object-cover" sizes="80px" />
+                              <button
+                                type="button"
+                                disabled={!canRemove || removingPublicId === img.publicId}
+                                title={canRemove ? 'Remove image' : 'No Cloudinary id — cannot remove via API'}
+                                onClick={() => img.publicId && handleRemoveExistingImage(img.publicId)}
+                                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/65 text-white text-sm leading-none flex items-center justify-center hover:bg-black/80 disabled:opacity-40 disabled:cursor-not-allowed"
+                              >
+                                {removingPublicId === img.publicId ? '…' : '×'}
+                              </button>
+                            </div>
+                            <div className="flex gap-1">
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                onClick={() => moveExistingImage(idx, -1)}
+                                className="px-2 py-0.5 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                title="Move earlier"
+                              >
+                                ←
+                              </button>
+                              <button
+                                type="button"
+                                disabled={idx === existingImages.length - 1}
+                                onClick={() => moveExistingImage(idx, 1)}
+                                className="px-2 py-0.5 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                                title="Move later"
+                              >
+                                →
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 <input type="file" ref={fileRef} multiple accept="image/*" onChange={(e) => setImageFiles(Array.from(e.target.files || []))} className="hidden" />
                 <button type="button" onClick={() => fileRef.current?.click()}
-                  className="w-full border-2 border-dashed border-slate-200 hover:border-violet-400 rounded-xl py-8 text-sm text-slate-400 hover:text-violet-500 transition-colors text-center">
+                  className="w-full border-2 border-dashed border-slate-200 hover:border-violet-400 rounded-xl py-6 text-sm text-slate-400 hover:text-violet-500 transition-colors text-center">
                   {imageFiles.length > 0
-                    ? <span className="font-medium text-violet-600">{imageFiles.length} image(s) selected</span>
-                    : <span>Click to upload images</span>}
+                    ? <span className="font-medium text-violet-600">{imageFiles.length} new file(s) selected — appended on save</span>
+                    : <span>{editing ? 'Add more images' : 'Click to upload images'}</span>}
                 </button>
               </div>
 
-              <div className="col-span-2">
+              <div className="md:col-span-1">
                 <label className={labelCls}>Flags</label>
-                <div className="flex flex-wrap gap-4 mt-1">
+                <div className="grid grid-cols-1 gap-2 mt-1 border border-slate-200 rounded-xl p-3">
                   {[
                     { key: 'isFeatured', label: 'Featured' },
                     { key: 'isNewArrival', label: 'New Arrival' },
@@ -311,8 +426,8 @@ export default function AdminProductsPage() {
                   ))}
                 </div>
               </div>
-
-              <div className="col-span-2 flex gap-3 pt-2">
+              </div>
+              <div className="px-6 py-4 border-t border-slate-100 bg-white flex gap-3">
                 <button type="submit" disabled={saving} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-xl disabled:opacity-50 transition-colors">
                   {saving ? 'Saving…' : editing ? 'Update Product' : 'Create Product'}
                 </button>
