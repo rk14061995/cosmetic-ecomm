@@ -8,10 +8,26 @@ import api from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
-const TIER_CONFIG: Record<string, { color: string; gradient: string; badge: string }> = {
-  basic: { color: 'from-pink-400 to-rose-400', gradient: 'from-pink-50 to-rose-50', badge: 'bg-pink-100 text-pink-700' },
-  standard: { color: 'from-purple-500 to-pink-500', gradient: 'from-purple-50 to-pink-50', badge: 'bg-purple-100 text-purple-700' },
-  premium: { color: 'from-yellow-400 to-orange-400', gradient: 'from-yellow-50 to-orange-50', badge: 'bg-yellow-100 text-yellow-800' },
+/** Inline gradients: Tailwind `from-pink-*` + `bg-gradient-to-r` is broken by globals.css palette overrides. */
+const TIER_CONFIG: Record<
+  string,
+  { gradient: string; badge: string; ctaGradient: string }
+> = {
+  basic: {
+    gradient: 'from-pink-50 to-rose-50',
+    badge: 'bg-pink-100 text-pink-700',
+    ctaGradient: 'linear-gradient(90deg, #ec4899 0%, #fb7185 100%)',
+  },
+  standard: {
+    gradient: 'from-purple-50 to-pink-50',
+    badge: 'bg-purple-100 text-purple-700',
+    ctaGradient: 'linear-gradient(90deg, #a855f7 0%, #ec4899 100%)',
+  },
+  premium: {
+    gradient: 'from-yellow-50 to-orange-50',
+    badge: 'bg-yellow-100 text-yellow-800',
+    ctaGradient: 'linear-gradient(90deg, #eab308 0%, #f97316 100%)',
+  },
 };
 
 export default function MysteryBoxesPage() {
@@ -87,12 +103,17 @@ export default function MysteryBoxesPage() {
             return (
               <div key={box._id} className={`relative bg-gradient-to-br ${config.gradient} rounded-3xl overflow-hidden border border-white shadow-sm hover:shadow-xl transition-all group`}>
                 {isPopular && (
-                  <div className="absolute top-4 right-4 z-10 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  <div
+                    className="absolute top-4 right-4 z-10 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md"
+                    style={{
+                      background: 'linear-gradient(90deg, #a855f7 0%, #ec4899 100%)',
+                    }}
+                  >
                     MOST POPULAR
                   </div>
                 )}
 
-                <div className={`h-3 bg-gradient-to-r ${config.color}`} />
+                <div className="h-3 w-full" style={{ background: config.ctaGradient }} aria-hidden />
 
                 <div className="p-8">
                   <div className="relative w-full h-48 mb-6 rounded-2xl overflow-hidden bg-white/50">
@@ -148,9 +169,11 @@ export default function MysteryBoxesPage() {
 
                   <div className="flex gap-3">
                     <button
+                      type="button"
                       onClick={() => handleAddToCart(box)}
                       disabled={box.stock === 0}
-                      className={`flex-1 bg-gradient-to-r ${config.color} text-white font-semibold py-3 rounded-full hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100`}
+                      style={{ background: config.ctaGradient }}
+                      className="flex-1 text-white font-semibold py-3 rounded-full shadow-sm ring-1 ring-black/10 hover:shadow-lg hover:brightness-[1.05] hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:brightness-100"
                     >
                       {box.stock === 0 ? 'Sold Out' : 'Add to Cart 🎁'}
                     </button>

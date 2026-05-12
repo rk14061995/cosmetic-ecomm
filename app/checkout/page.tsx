@@ -26,20 +26,12 @@ export default function CheckoutPage() {
   const { items, summary } = useSelector((state: any) => state.cart);
 
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
-  const [paymentMethod,   setPaymentMethod]   = useState<'razorpay' | 'cod' | 'bnpl'>('razorpay');
-  const [useWallet,       setUseWallet]       = useState(false);
   const [placing,         setPlacing]         = useState(false);
   const [showForm,        setShowForm]        = useState(false);
   const [newAddress,      setNewAddress]      = useState({
     fullName: '', phone: '', addressLine1: '', addressLine2: '',
     city: '', state: '', pincode: '',
   });
-
-  // Gift Card state
-  const [showGiftCard,    setShowGiftCard]    = useState(false);
-  const [giftCardCode,    setGiftCardCode]    = useState('');
-  const [gcLoading,       setGcLoading]       = useState(false);
-  const [appliedGiftCard, setAppliedGiftCard] = useState<{ code: string; balance: number } | null>(null);
 
   useEffect(() => {
     if (!user) { router.push('/auth/login'); return; }
@@ -53,35 +45,41 @@ export default function CheckoutPage() {
 
   const handleAddAddress = async (e: React.FormEvent) => {
     e.preventDefault();
+    const payload = {
+      fullName: newAddress.fullName.trim(),
+      phone: newAddress.phone.trim(),
+      addressLine1: newAddress.addressLine1.trim(),
+      addressLine2: newAddress.addressLine2.trim(),
+      city: newAddress.city.trim(),
+      state: newAddress.state.trim(),
+      pincode: newAddress.pincode.trim(),
+    };
+
+    if (!payload.fullName || !payload.phone || !payload.addressLine1 || !payload.city || !payload.state || !payload.pincode) {
+      toast.error('Please fill all required address fields');
+      return;
+    }
+    if (!/^\d{10}$/.test(payload.phone)) {
+      toast.error('Phone number must be 10 digits');
+      return;
+    }
+    if (!/^\d{6}$/.test(payload.pincode)) {
+      toast.error('Pincode must be 6 digits');
+      return;
+    }
+
     try {
-      const { data } = await api.post('/auth/addresses', newAddress);
-      const saved = data.addresses[data.addresses.length - 1];
+      const { data } = await api.post('/auth/addresses', payload);
+      const saved = data?.addresses?.[data.addresses.length - 1];
       setSelectedAddress(saved);
       setShowForm(false);
       toast.success('Address saved');
-    } catch { toast.error('Failed to save address'); }
-  };
-
-  // Gift card apply handler
-  const handleApplyGiftCard = async () => {
-    if (!giftCardCode.trim()) { toast.error('Enter a gift card code'); return; }
-    setGcLoading(true);
-    try {
-      const { data } = await api.post('/gift-cards/validate', { code: giftCardCode.trim() });
-      setAppliedGiftCard({ code: giftCardCode.trim(), balance: data.balance });
-      toast.success('Gift card applied!');
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Invalid or expired gift card');
-    } finally {
-      setGcLoading(false);
+      toast.error(err?.response?.data?.message || 'Failed to save address');
     }
   };
 
-  const walletDeduct   = useWallet ? Math.min(user?.wallet || 0, summary.total) : 0;
-  const giftCardDeduct = appliedGiftCard
-    ? Math.min(appliedGiftCard.balance, Math.max(0, summary.total - walletDeduct))
-    : 0;
-  const effectiveTotal = Math.max(0, summary.total - walletDeduct - giftCardDeduct);
+  const effectiveTotal = summary.total;
 
   const placeOrder = async () => {
     if (!selectedAddress) { toast.error('Please select a delivery address'); return; }
@@ -107,19 +105,11 @@ export default function CheckoutPage() {
           state:        selectedAddress.state,
           pincode:      selectedAddress.pincode,
         },
-        paymentMethod,
-        walletAmountUsed: walletDeduct,
-        ...(appliedGiftCard ? { giftCardCode: appliedGiftCard.code } : {}),
+        paymentMethod: 'razorpay',
+        walletAmountUsed: 0,
       });
 
       const order = orderRes.order;
-
-      // COD and BNPL both complete without payment gateway
-      if (paymentMethod === 'cod' || paymentMethod === 'bnpl') {
-        toast.success(paymentMethod === 'bnpl' ? 'Order placed! BNPL payment pending. 🎉' : 'Order placed successfully! 🎉');
-        router.push('/profile/orders');
-        return;
-      }
 
       const loaded = await loadRazorpayScript();
       if (!loaded) { toast.error('Failed to load payment gateway'); setPlacing(false); return; }
@@ -152,20 +142,15 @@ export default function CheckoutPage() {
         // Shipping address passed as notes — visible in Razorpay dashboard for every payment
         notes: {
           order_id:       order._id,
-          order_ref:      `#${order._id.slice(-8).toUpperCase()}`,
           customer_name:  user.name,
           customer_email: user.email,
           customer_phone: user.phone || selectedAddress?.phone || '',
           items:          itemsSummary,
-          item_count:     String(items.length),
           subtotal:       `₹${summary.subtotal}`,
           shipping:       summary.shipping === 0 ? 'Free' : `₹${summary.shipping}`,
           discount:       summary.discount > 0 ? `₹${summary.discount}` : 'None',
-          wallet_used:    walletDeduct > 0 ? `₹${walletDeduct}` : 'None',
-          gift_card:      appliedGiftCard ? appliedGiftCard.code : 'None',
+          wallet_used:    'None',
           total_paid:     `₹${effectiveTotal}`,
-          // Shipping address for delivery verification
-          ship_name:      selectedAddress?.fullName    || '',
           ship_address:   selectedAddress?.addressLine1 || '',
           ship_city:      selectedAddress?.city        || '',
           ship_state:     selectedAddress?.state       || '',
@@ -317,29 +302,39 @@ export default function CheckoutPage() {
                   </button>
                 ) : (
                   <form onSubmit={handleAddAddress} className="border-t border-gray-100 pt-5">
-                    <p className="text-sm font-bold text-gray-700 mb-4">New Address</p>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="rounded-[1.6rem] p-[1px] bg-gradient-to-br from-white via-white to-indigo-100/60">
+                      <div className="rounded-[calc(1.6rem-1px)] border border-slate-100 bg-gradient-to-b from-white to-slate-50/60 p-5 sm:p-6">
+                        <div className="flex items-center justify-between gap-3 mb-5">
+                          <div>
+                            <p className="text-[11px] font-bold tracking-[0.16em] text-neutral-400 uppercase">Delivery Details</p>
+                            <p className="text-base font-bold text-neutral-900 mt-1">New Address</p>
+                          </div>
+                          <span className="text-[11px] text-neutral-400">All fields required except line 2</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {FIELDS.map(({ key, label, col, placeholder }) => (
-                        <div key={key} className={col}>
-                          <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">{label}</label>
+                        <div key={key} className={[col, col ? `sm:${col}` : ''].join(' ').trim()}>
+                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1.5 uppercase tracking-[0.12em]">{label}</label>
                           <input
                             type="text"
                             placeholder={placeholder}
                             value={(newAddress as any)[key]}
                             onChange={(e) => setNewAddress((p) => ({ ...p, [key]: e.target.value }))}
                             required={key !== 'addressLine2'}
-                            className="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-pink-300 focus:border-transparent transition-all placeholder:text-gray-300"
+                            className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-2.5 text-sm text-neutral-800 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-200 transition-all placeholder:text-neutral-300"
                           />
                         </div>
                       ))}
                     </div>
-                    <div className="flex items-center gap-3 mt-5">
-                      <button type="submit" className="bg-gradient-to-r from-pink-500 to-rose-500 text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:shadow-md hover:scale-105 transition-all">
-                        Save Address
-                      </button>
-                      <button type="button" onClick={() => setShowForm(false)} className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
-                        Cancel
-                      </button>
+                        <div className="flex items-center gap-3 mt-6">
+                          <button type="submit" className="bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:shadow-md hover:scale-[1.02] transition-all">
+                            Save Address
+                          </button>
+                          <button type="button" onClick={() => setShowForm(false)} className="text-sm text-neutral-500 hover:text-neutral-800 transition-colors font-medium">
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </form>
                 )}
@@ -353,140 +348,26 @@ export default function CheckoutPage() {
                 <h2 className="font-bold text-gray-900 text-lg">Payment Method</h2>
               </div>
 
-              <div className="p-6 space-y-3">
-                {/* Razorpay */}
-                <label className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${paymentMethod === 'razorpay' ? 'border-pink-400 bg-gradient-to-br from-pink-50 to-rose-50 shadow-sm' : 'border-gray-100 hover:border-pink-200 hover:bg-pink-50/30'}`}>
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${paymentMethod === 'razorpay' ? 'border-pink-500' : 'border-gray-300'}`}>
-                    {paymentMethod === 'razorpay' && <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-pink-500 to-rose-500" />}
+              <div className="p-6">
+                <div className="relative flex items-center gap-4 p-5 rounded-[1.4rem] border-2 border-indigo-300 bg-gradient-to-br from-indigo-50/90 via-white to-cyan-50/70 shadow-sm">
+                  <span className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-indigo-400 to-transparent" />
+                  <div className="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 border-indigo-500">
+                    <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-500" />
                   </div>
-                  <input type="radio" name="payment" className="sr-only" value="razorpay" checked={paymentMethod === 'razorpay'} onChange={() => setPaymentMethod('razorpay')} />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-bold text-gray-900 text-sm">Online Payment</span>
-                      <span className="text-xs bg-blue-600 text-white font-bold px-2 py-0.5 rounded-md">Razorpay</span>
+                      <span className="text-xs bg-indigo-600 text-white font-bold px-2 py-0.5 rounded-md">Razorpay</span>
                     </div>
-                    <p className="text-xs text-gray-400">Cards · UPI · Net Banking · Wallets · EMI</p>
+                    <p className="text-xs text-gray-500">Cards · UPI · Net Banking · Wallets · EMI</p>
                   </div>
-                  <div className="flex items-center gap-1.5 text-gray-300 text-xl">
-                    <span title="Card">💳</span>
-                    <span title="UPI">📱</span>
-                    <span title="Net Banking">🏦</span>
+                  <div className="flex items-center gap-1.5 text-indigo-300 text-xl">
+                    <span title="Card">◉</span>
+                    <span title="UPI">◎</span>
+                    <span title="Net Banking">◈</span>
                   </div>
-                </label>
-
-                {/* COD */}
-                <label className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${paymentMethod === 'cod' ? 'border-pink-400 bg-gradient-to-br from-pink-50 to-rose-50 shadow-sm' : 'border-gray-100 hover:border-pink-200 hover:bg-pink-50/30'}`}>
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${paymentMethod === 'cod' ? 'border-pink-500' : 'border-gray-300'}`}>
-                    {paymentMethod === 'cod' && <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-pink-500 to-rose-500" />}
-                  </div>
-                  <input type="radio" name="payment" className="sr-only" value="cod" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-gray-900 text-sm">Cash on Delivery</span>
-                      <span className="text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-md">COD</span>
-                    </div>
-                    <p className="text-xs text-gray-400">Pay in cash when your order arrives</p>
-                  </div>
-                  <span className="text-2xl text-gray-300">💵</span>
-                </label>
-
-                {/* ── BNPL ── */}
-                <label className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${paymentMethod === 'bnpl' ? 'border-indigo-400 bg-gradient-to-br from-indigo-50 to-violet-50 shadow-sm' : 'border-gray-100 hover:border-indigo-200 hover:bg-indigo-50/30'}`}>
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${paymentMethod === 'bnpl' ? 'border-indigo-500' : 'border-gray-300'}`}>
-                    {paymentMethod === 'bnpl' && <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500" />}
-                  </div>
-                  <input type="radio" name="payment" className="sr-only" value="bnpl" checked={paymentMethod === 'bnpl'} onChange={() => setPaymentMethod('bnpl')} />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-gray-900 text-sm">Buy Now Pay Later</span>
-                      <span className="text-xs bg-indigo-600 text-white font-bold px-2 py-0.5 rounded-md">BNPL</span>
-                    </div>
-                    <p className="text-xs text-gray-400">Pay in 3 easy instalments — powered by Simpl</p>
-                  </div>
-                  <span className="text-2xl text-gray-300">📅</span>
-                </label>
-
-                {/* Wallet */}
-                {user?.wallet > 0 && (
-                  <div
-                    onClick={() => setUseWallet((v) => !v)}
-                    className={`flex items-center gap-4 p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${useWallet ? 'border-amber-400 bg-gradient-to-br from-amber-50 to-yellow-50 shadow-sm' : 'border-gray-100 hover:border-amber-200'}`}
-                  >
-                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${useWallet ? 'border-amber-500 bg-amber-500' : 'border-gray-300'}`}>
-                      {useWallet && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-bold text-gray-900 text-sm">Use Wallet Balance</span>
-                        {useWallet && <span className="text-xs bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded-md">Applied</span>}
-                      </div>
-                      <p className="text-xs text-amber-600 font-semibold">Available: {formatPrice(user.wallet)}</p>
-                    </div>
-                    <span className="text-2xl">👜</span>
-                  </div>
-                )}
-
-                {/* ── Gift Card ── */}
-                <div
-                  onClick={() => !appliedGiftCard && setShowGiftCard((v) => !v)}
-                  className={`rounded-2xl border-2 transition-all duration-200 overflow-hidden ${
-                    appliedGiftCard
-                      ? 'border-teal-400 bg-gradient-to-br from-teal-50 to-cyan-50 shadow-sm cursor-default'
-                      : showGiftCard
-                      ? 'border-teal-400 bg-gradient-to-br from-teal-50 to-cyan-50 shadow-sm cursor-pointer'
-                      : 'border-gray-100 hover:border-teal-200 hover:bg-teal-50/30 cursor-pointer'
-                  }`}
-                >
-                  {/* Toggle row */}
-                  <div className="flex items-center gap-4 p-5">
-                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${(showGiftCard || appliedGiftCard) ? 'border-teal-500 bg-teal-500' : 'border-gray-300'}`}>
-                      {(showGiftCard || appliedGiftCard) && (
-                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-bold text-gray-900 text-sm">🎁 Use Gift Card</span>
-                        {appliedGiftCard && <span className="text-xs bg-teal-100 text-teal-700 font-semibold px-2 py-0.5 rounded-md">Applied</span>}
-                      </div>
-                      {appliedGiftCard ? (
-                        <p className="text-xs text-teal-600 font-semibold">
-                          Gift Card Applied — {formatPrice(appliedGiftCard.balance)} available
-                        </p>
-                      ) : (
-                        <p className="text-xs text-gray-400">Redeem a gift card at checkout</p>
-                      )}
-                    </div>
-                    <span className="text-2xl">🎁</span>
-                  </div>
-
-                  {/* Input row — shown when toggled and no card applied yet */}
-                  {showGiftCard && !appliedGiftCard && (
-                    <div
-                      className="px-5 pb-5 pt-0"
-                      onClick={(e) => e.stopPropagation()} // prevent collapse when clicking inside
-                    >
-                      <div className="flex gap-3">
-                        <input
-                          type="text"
-                          value={giftCardCode}
-                          onChange={(e) => setGiftCardCode(e.target.value.toUpperCase())}
-                          placeholder="GIFT-XXXX-XXXX"
-                          className="flex-1 bg-white border border-teal-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-transparent placeholder:text-gray-300 uppercase"
-                        />
-                        <button
-                          onClick={handleApplyGiftCard}
-                          disabled={gcLoading}
-                          className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:shadow-md hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                        >
-                          {gcLoading ? '…' : 'Apply'}
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
-                {/* ── /Gift Card ── */}
-
+                <p className="text-xs text-neutral-400 mt-4 text-center">All orders are paid securely through Razorpay.</p>
               </div>
             </div>
           </div>
@@ -539,18 +420,6 @@ export default function CheckoutPage() {
                     <span>− {formatPrice(summary.discount)}</span>
                   </div>
                 )}
-                {useWallet && walletDeduct > 0 && (
-                  <div className="flex justify-between text-sm text-amber-600 font-medium">
-                    <span>Wallet Credit</span>
-                    <span>− {formatPrice(walletDeduct)}</span>
-                  </div>
-                )}
-                {appliedGiftCard && giftCardDeduct > 0 && (
-                  <div className="flex justify-between text-sm text-teal-600 font-medium">
-                    <span>Gift Card</span>
-                    <span>− {formatPrice(giftCardDeduct)}</span>
-                  </div>
-                )}
                 <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
                 <div className="flex justify-between font-bold text-gray-900 text-lg">
                   <span>Total</span>
@@ -573,10 +442,6 @@ export default function CheckoutPage() {
                       </svg>
                       Processing…
                     </>
-                  ) : paymentMethod === 'cod' ? (
-                    <>Place Order (COD) →</>
-                  ) : paymentMethod === 'bnpl' ? (
-                    <>Place Order (BNPL) →</>
                   ) : (
                     <>
                       <span>🔒</span>

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart } from '@/store/slices/cartSlice';
 import { formatPrice } from '@/lib/utils';
@@ -34,21 +34,42 @@ function CountdownTimer({ endsAt }: { endsAt: number }) {
 
   const pad = (n: number) => String(n).padStart(2, '0');
 
+  const segments = [
+    { val: pad(h), unit: 'h' },
+    { val: pad(m), unit: 'm' },
+    { val: pad(s), unit: 's' },
+  ];
+
   return (
-    <div className="flex items-center gap-1" aria-label={`Ends in ${h} hours ${m} minutes ${s} seconds`}>
-      {[
-        { val: pad(h), unit: 'h' },
-        { val: pad(m), unit: 'm' },
-        { val: pad(s), unit: 's' },
-      ].map(({ val, unit }, idx) => (
-        <span key={unit} className="flex items-center gap-0.5">
-          <span className="bg-gray-900 text-white text-xs font-mono font-bold px-1.5 py-0.5 rounded-md min-w-[26px] text-center tabular-nums">
-            {val}
-          </span>
-          <span className="text-gray-400 text-[10px] font-semibold">{unit}</span>
-          {idx < 2 && <span className="text-gray-400 font-bold ml-0.5">:</span>}
-        </span>
-      ))}
+    <div className="w-full sm:w-auto" aria-label={`Ends in ${h} hours ${m} minutes ${s} seconds`}>
+      {/* Mobile: 3-up timer, no squeezed “h : m : s” row */}
+      <div className="grid grid-cols-3 gap-1 sm:hidden">
+        {segments.map(({ val, unit }) => (
+          <div
+            key={unit}
+            className="flex flex-col items-center gap-0.5 rounded-lg bg-white border border-gray-200/80 px-1 py-1.5"
+          >
+            <span className="bg-gray-900 text-white text-[11px] font-mono font-bold px-1.5 py-0.5 rounded-md min-w-[1.75rem] text-center tabular-nums leading-none">
+              {val}
+            </span>
+            <span className="text-gray-500 text-[9px] font-bold uppercase">{unit}</span>
+          </div>
+        ))}
+      </div>
+      {/* sm+: single row with colons */}
+      <div className="hidden sm:flex sm:items-center sm:gap-0.5">
+        {segments.map(({ val, unit }, idx) => (
+          <Fragment key={unit}>
+            {idx > 0 && <span className="text-gray-400 font-bold text-xs px-0.5">:</span>}
+            <span className="flex items-center gap-0.5">
+              <span className="bg-gray-900 text-white text-xs font-mono font-bold px-1.5 py-0.5 rounded-md min-w-[26px] text-center tabular-nums">
+                {val}
+              </span>
+              <span className="text-gray-400 text-[10px] font-semibold">{unit}</span>
+            </span>
+          </Fragment>
+        ))}
+      </div>
     </div>
   );
 }
@@ -84,8 +105,11 @@ function SaleCard({ product, endsAt }: { product: any; endsAt: number }) {
     setAdding(false);
   };
 
+  const ctaGradient = 'linear-gradient(90deg, #ec4899 0%, #fb7185 100%)';
+  const badgeGradient = 'linear-gradient(90deg, #ec4899 0%, #fb7185 100%)';
+
   return (
-    <div className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 hover:border-pink-200 transition-all duration-300 flex flex-col">
+    <div className="group bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 hover:border-pink-200 transition-all duration-300 flex flex-col h-full">
       {/* Image area */}
       <div className="relative aspect-square bg-gradient-to-br from-pink-50 to-rose-50 overflow-hidden">
         {product.images?.[0]?.url ? (
@@ -102,16 +126,19 @@ function SaleCard({ product, endsAt }: { product: any; endsAt: number }) {
 
         {/* Discount badge */}
         {discount > 0 && (
-          <div className="absolute top-3 left-3">
-            <span className="inline-flex items-center bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-md">
-              -{discount}%
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+            <span
+              className="inline-flex items-center text-white text-[10px] sm:text-xs font-extrabold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-md"
+              style={{ background: badgeGradient }}
+            >
+              −{discount}%
             </span>
           </div>
         )}
 
         {/* Flash badge */}
-        <div className="absolute top-3 right-3">
-          <span className="inline-flex items-center bg-yellow-400 text-yellow-900 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm uppercase tracking-wide">
+        <div className="absolute top-2 right-2 sm:top-3 sm:right-3">
+          <span className="inline-flex items-center bg-yellow-400 text-yellow-900 text-[9px] sm:text-[10px] font-extrabold px-1.5 py-0.5 sm:px-2 rounded-full shadow-sm uppercase tracking-wide">
             ⚡ Flash
           </span>
         </div>
@@ -126,51 +153,66 @@ function SaleCard({ product, endsAt }: { product: any; endsAt: number }) {
         )}
       </div>
 
-      {/* Card body */}
-      <div className="p-4 flex flex-col flex-1 gap-2">
+      {/* Card body — roomier on xs 2-col; single-col grid on narrow screens helps too */}
+      <div className="p-3 sm:p-4 flex flex-col flex-1 gap-1.5 sm:gap-2 min-h-0">
         {/* Brand */}
         {product.brand && (
-          <p className="text-[11px] text-pink-500 font-semibold uppercase tracking-wider truncate">
+          <p className="text-[10px] sm:text-[11px] text-pink-500 font-semibold uppercase tracking-wider truncate">
             {product.brand}
           </p>
         )}
 
         {/* Name */}
-        <h3 className="text-sm font-bold text-gray-900 leading-snug line-clamp-2 flex-1">
+        <h3 className="text-xs sm:text-sm font-bold text-gray-900 leading-snug line-clamp-2 min-h-[2.5rem] sm:min-h-0">
           {product.name}
         </h3>
 
         {/* Pricing */}
-        <div className="flex items-baseline gap-2">
-          <span className="text-base font-extrabold text-pink-600">
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0">
+          <span className="text-sm sm:text-base font-extrabold text-pink-600 tabular-nums">
             {formatPrice(salePrice)}
           </span>
           {product.discountPrice && (
-            <span className="text-xs text-gray-400 line-through">
+            <span className="text-[11px] sm:text-xs text-gray-400 line-through tabular-nums">
               {formatPrice(originalPrice)}
             </span>
           )}
         </div>
 
-        {/* Countdown */}
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-gray-500 font-medium shrink-0">Ends in:</span>
-          <CountdownTimer endsAt={endsAt} />
+        {/* Countdown — stacked label on very narrow widths */}
+        <div className="mt-0.5 rounded-xl bg-gray-50 border border-gray-100 px-2 py-2 sm:px-0 sm:py-0 sm:border-0 sm:bg-transparent">
+          <p className="text-[10px] font-semibold text-gray-500 mb-1.5 sm:hidden">Ends in</p>
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
+            <span className="hidden sm:inline text-[10px] text-gray-500 font-medium shrink-0">Ends in:</span>
+            <CountdownTimer endsAt={endsAt} />
+          </div>
         </div>
 
-        {/* Add to cart */}
+        {/* Add to cart — solid / inline gradient; Tailwind pink gradients break via globals.css */}
         <button
+          type="button"
           onClick={handleAddToCart}
           disabled={adding || product.stock === 0}
-          className={`mt-1 w-full py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 ${
+          style={product.stock !== 0 && !adding ? { background: ctaGradient } : undefined}
+          className={`mt-auto w-full min-h-10 sm:min-h-11 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold transition-all duration-200 ring-1 ring-black/5 ${
             product.stock === 0
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
               : adding
-              ? 'bg-pink-300 text-white cursor-wait'
-              : 'bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:shadow-lg hover:scale-[1.02] active:scale-95'
+                ? 'bg-pink-300 text-white cursor-wait'
+                : 'text-white hover:shadow-md hover:brightness-[1.05] active:scale-[0.98]'
           }`}
         >
-          {adding ? 'Adding…' : product.stock === 0 ? 'Out of Stock' : '🛒 Add to Cart'}
+          {adding ? (
+            'Adding…'
+          ) : product.stock === 0 ? (
+            'Out of stock'
+          ) : (
+            <span className="inline-flex items-center justify-center gap-1.5">
+              <span aria-hidden>🛒</span>
+              <span className="sm:hidden">Add</span>
+              <span className="hidden sm:inline">Add to cart</span>
+            </span>
+          )}
         </button>
       </div>
     </div>
@@ -181,7 +223,7 @@ function SaleCard({ product, endsAt }: { product: any; endsAt: number }) {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-gray-100 animate-pulse">
+    <div className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-gray-100 animate-pulse">
       <div className="aspect-square bg-gray-200" />
       <div className="p-4 space-y-3">
         <div className="h-3 bg-gray-200 rounded w-1/3" />
@@ -315,21 +357,26 @@ export default function SalePage() {
       <div className="max-w-7xl mx-auto px-4 py-8 pb-16">
 
         {/* Toolbar */}
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🔥</span>
-            <h2 className="text-lg font-extrabold text-gray-900">
-              {loading ? 'Loading deals…' : `${products.length} Hot Deals`}
-            </h2>
+        <div className="mb-6 space-y-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🔥</span>
+              <h2 className="text-lg font-extrabold text-gray-900">
+                {loading ? 'Loading deals…' : `${products.length} Hot Deals`}
+              </h2>
+            </div>
+            <p className="hidden sm:block max-w-md text-right text-xs font-semibold text-yellow-800 bg-yellow-50 border border-yellow-200 px-3 py-1.5 rounded-full">
+              ⚡ Timers are live — grab deals before they end.
+            </p>
           </div>
-          <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 text-yellow-700 text-xs font-semibold px-3 py-1.5 rounded-full">
-            ⚡ Prices drop as timers run out — grab yours now!
-          </div>
+          <p className="sm:hidden text-xs font-semibold text-yellow-800 bg-yellow-50 border border-yellow-200 px-3 py-2 rounded-xl">
+            ⚡ Each card has its own countdown — check the timer before checkout.
+          </p>
         </div>
 
         {/* Grid */}
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
             {[...Array(12)].map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : products.length === 0 ? (
@@ -339,7 +386,7 @@ export default function SalePage() {
             <p className="text-gray-400 text-sm mt-1">Check back soon — new deals drop daily!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
             {products.map((p: any) => (
               <SaleCard
                 key={p._id}

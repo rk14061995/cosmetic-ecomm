@@ -155,21 +155,30 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-          <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 sm:mx-0 sm:px-0 sm:overflow-visible sm:pb-0 lg:grid-cols-5">
+          <div className="flex gap-5 overflow-x-auto pb-3 -mx-4 px-4 snap-x snap-mandatory sm:grid sm:grid-cols-2 sm:mx-0 sm:px-0 sm:overflow-visible sm:pb-0 lg:grid-cols-5">
             {featureCards.map((f) => (
               <Link
                 key={f.title}
                 href={f.href}
-                className={`group relative min-w-[78%] sm:min-w-0 snap-start bg-gradient-to-br ${f.card} border ${f.border} rounded-3xl p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden`}
+                className={`group relative min-w-[82%] sm:min-w-0 snap-start rounded-[2rem] p-[1px] bg-gradient-to-br from-white via-white to-indigo-100/70 hover:-translate-y-1.5 transition-all duration-300`}
               >
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-white/40 via-transparent to-indigo-100/20 pointer-events-none" />
-                <div className={`relative w-11 h-11 ${f.accent} rounded-2xl flex items-center justify-center text-white text-lg mb-5 group-hover:scale-110 transition-transform shadow-md`}>
-                  {f.icon}
-                </div>
-                <p className="relative font-bold text-neutral-900 text-base mb-1.5">{f.title}</p>
-                <p className="relative text-sm text-neutral-500 leading-snug min-h-[2.5rem]">{f.subtitle}</p>
-                <div className="relative mt-5 inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 group-hover:text-indigo-700 transition-colors">
-                  Explore <span className="group-hover:translate-x-0.5 transition-transform inline-block">→</span>
+                <div className={`relative rounded-[calc(2rem-1px)] bg-gradient-to-br ${f.card} border ${f.border} px-5 py-6 min-h-[215px] overflow-hidden`}>
+                  <div className="absolute -top-16 -right-10 w-36 h-36 rounded-full bg-white/60 blur-2xl pointer-events-none" />
+                  <div className="absolute -bottom-20 -left-14 w-40 h-40 rounded-full bg-indigo-100/40 blur-3xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="relative flex items-start justify-between gap-4 mb-5">
+                    <div className={`w-12 h-12 ${f.accent} rounded-full flex items-center justify-center text-white text-lg shadow-lg ring-4 ring-white/70 group-hover:scale-110 transition-transform`}>
+                      {f.icon}
+                    </div>
+                    <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-neutral-400">
+                      Glowzy Pick
+                    </span>
+                  </div>
+                  <p className="relative font-black text-neutral-900 text-lg mb-1.5 tracking-tight">{f.title}</p>
+                  <p className="relative text-sm text-neutral-600 leading-snug max-w-[16rem]">{f.subtitle}</p>
+                  <div className="relative mt-6 inline-flex items-center gap-2 text-sm font-semibold text-indigo-700">
+                    <span>Explore</span>
+                    <span className="w-6 h-6 rounded-full bg-white/95 border border-indigo-200 flex items-center justify-center text-[11px] shadow-sm group-hover:translate-x-0.5 transition-transform">→</span>
+                  </div>
                 </div>
               </Link>
             ))}

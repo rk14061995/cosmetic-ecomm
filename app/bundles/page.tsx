@@ -146,8 +146,9 @@ export default function BundlesPage() {
           /* Bundle grid */
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {bundles.map((bundle: any, idx: number) => {
-              const saving = bundle.originalPrice && bundle.price
-                ? savePct(bundle.originalPrice, bundle.price)
+              const price = bundle.bundlePrice ?? bundle.price;
+              const saving = bundle.originalPrice && price
+                ? savePct(bundle.originalPrice, price)
                 : null;
               const gradientClass = PLACEHOLDER_GRADIENTS[idx % PLACEHOLDER_GRADIENTS.length];
               const isAdding = addingId === bundle._id;
@@ -192,12 +193,12 @@ export default function BundlesPage() {
                     {/* Product chips */}
                     {bundle.products?.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-5">
-                        {bundle.products.map((product: any, i: number) => (
+                        {bundle.products.map((item: any, i: number) => (
                           <span
-                            key={product._id || i}
+                            key={item._id || i}
                             className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1 rounded-full font-medium"
                           >
-                            {product.name || product}
+                            {item.product?.name ?? item.name ?? 'Product'}
                           </span>
                         ))}
                       </div>
@@ -206,8 +207,8 @@ export default function BundlesPage() {
                     {/* Pricing — pushed to bottom */}
                     <div className="mt-auto">
                       <div className="flex items-baseline gap-3 mb-4">
-                        <span className="text-3xl font-bold text-indigo-600">{formatPrice(bundle.price)}</span>
-                        {bundle.originalPrice && bundle.originalPrice > bundle.price && (
+                        <span className="text-3xl font-bold text-indigo-600">{formatPrice(price)}</span>
+                        {bundle.originalPrice && bundle.originalPrice > price && (
                           <span className="text-gray-400 line-through text-base">
                             {formatPrice(bundle.originalPrice)}
                           </span>

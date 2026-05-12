@@ -1,12 +1,12 @@
 'use client';
 import { Suspense, useState, useEffect, useCallback } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import api from '@/lib/api';
 import ProductCard from '@/components/products/ProductCard';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
 
   const getFiltersFromParams = () => ({
     category: searchParams.get('category') || '',
@@ -86,17 +86,90 @@ function ProductsContent() {
       page: 1,
     });
 
+  const heading =
+    filters.category || filters.brand || (filters.search ? 'Search results' : 'All products');
+
+  const subtitle = filters.search
+    ? `Matches for “${filters.search}”. Use the sidebar to narrow by category, price, or rating.`
+    : filters.category
+      ? `You’re browsing ${filters.category}. Combine filters to find exactly what your routine needs.`
+      : filters.brand
+        ? `Products from ${filters.brand}.`
+        : 'Curated beauty picks, trending formulas, and everyday essentials — all in one place.';
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 md:py-10">
-      <div className="rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-cyan-50 p-6 md:p-8 mb-8">
-        <p className="text-xs uppercase tracking-[0.2em] font-semibold text-indigo-500 mb-2">Shop</p>
-        <h1 className="text-3xl md:text-4xl font-black text-gray-900">
-          {filters.category || filters.brand || 'All Products'}
-          {filters.search && <span className="font-bold text-indigo-600"> — "{filters.search}"</span>}
-        </h1>
-        <p className="text-sm text-gray-500 mt-2">
-          Curated beauty picks, trending formulas, and everyday essentials.
-        </p>
+      <div className="relative overflow-hidden rounded-[1.75rem] border border-indigo-200/50 bg-white mb-8 shadow-[0_24px_64px_-28px_rgba(67,56,202,0.35)]">
+        <div
+          className="pointer-events-none absolute -right-20 -top-28 h-72 w-72 rounded-full bg-cyan-300/45 blur-3xl"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-indigo-300/40 blur-3xl"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-br from-indigo-50/95 via-white to-cyan-50/90"
+          aria-hidden
+        />
+        <div className="relative z-10 px-6 py-8 md:px-10 md:py-10">
+          <nav className="mb-5 text-xs text-gray-500" aria-label="Breadcrumb">
+            <ol className="flex flex-wrap items-center gap-2">
+              <li>
+                <Link href="/" className="font-medium text-gray-500 transition-colors hover:text-indigo-600">
+                  Home
+                </Link>
+              </li>
+              <li aria-hidden className="text-gray-300">
+                /
+              </li>
+              <li className="font-semibold text-gray-800">Products</li>
+            </ol>
+          </nav>
+
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-indigo-600 shadow-sm">
+                Shop
+              </span>
+              <h1 className="text-3xl font-black tracking-tight text-gray-900 sm:text-4xl lg:text-5xl lg:leading-[1.08] capitalize">
+                {heading}
+              </h1>
+              {filters.search && (
+                <p className="mt-3 inline-flex flex-wrap items-center gap-2 text-sm">
+                  <span className="text-gray-500">Query</span>
+                  <span className="rounded-lg bg-indigo-600 px-2.5 py-1 font-semibold text-white shadow-sm">
+                    &ldquo;{filters.search}&rdquo;
+                  </span>
+                </p>
+              )}
+              <p className="mt-4 text-base leading-relaxed text-gray-600">{subtitle}</p>
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  className="mt-5 text-sm font-semibold text-indigo-600 underline-offset-4 transition-colors hover:text-indigo-800 hover:underline"
+                >
+                  Clear all filters
+                </button>
+              )}
+            </div>
+
+            <div className="flex shrink-0 flex-wrap gap-3 sm:flex-nowrap lg:flex-col lg:items-stretch">
+              <div className="min-w-[11rem] rounded-2xl border border-indigo-100/90 bg-white/95 px-5 py-4 shadow-sm backdrop-blur-sm">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500">In this view</p>
+                <p className="mt-1 text-3xl font-black tabular-nums text-gray-900">
+                  {loading ? <span className="text-gray-300">…</span> : pagination?.totalItems ?? 0}
+                </p>
+                <p className="mt-0.5 text-xs text-gray-500">products match your filters</p>
+              </div>
+              <div className="flex min-w-[11rem] flex-col justify-center rounded-2xl border border-cyan-100/90 bg-gradient-to-br from-cyan-50/80 to-white px-5 py-4 shadow-sm">
+                <p className="text-xs font-semibold text-gray-700">Free delivery</p>
+                <p className="text-[11px] text-gray-500">On orders above ₹500</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
