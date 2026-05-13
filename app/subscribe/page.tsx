@@ -1,10 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { formatPrice, formatDate } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { useAuthStatus } from '@/hooks/useAuthStatus';
 
 type Tier = 'basic' | 'standard' | 'premium';
 
@@ -107,7 +107,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function SubscribePage() {
   const router = useRouter();
-  const { user } = useSelector((state: any) => state.auth);
+  const { user, authReady } = useAuthStatus();
 
   const [subscription, setSubscription] = useState<any>(null);
   const [subLoading, setSubLoading]     = useState(true);
@@ -119,6 +119,7 @@ export default function SubscribePage() {
   const [confirmCancel, setConfirmCancel] = useState(false);
 
   useEffect(() => {
+    if (!authReady) return;
     if (!user) { setSubLoading(false); return; }
     api.get('/subscriptions/my')
       .then(({ data }) => setSubscription(data.subscription || null))
@@ -126,9 +127,10 @@ export default function SubscribePage() {
         if (err?.response?.status !== 404) setSubError('Failed to load subscription info.');
       })
       .finally(() => setSubLoading(false));
-  }, [user]);
+  }, [user, authReady]);
 
   const handleSubscribe = async (tier: Tier) => {
+    if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
     setSubscribing(tier);
     try {

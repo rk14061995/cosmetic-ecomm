@@ -2,12 +2,13 @@
 import { useState, useEffect, useRef, useId } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { addToCart } from '@/store/slices/cartSlice';
 import api from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import VirtualTryOnModal from '@/components/products/VirtualTryOnModal';
+import { useAuthStatus } from '@/hooks/useAuthStatus';
 
 // ---------------------------------------------------------------------------
 // Lightbox modal for review images
@@ -189,7 +190,7 @@ function MiniProductCard({
 export default function ProductDetailClient({ id }: { id: string }) {
   const router = useRouter();
   const dispatch = useDispatch<any>();
-  const { user } = useSelector((state: any) => state.auth);
+  const { user, authReady } = useAuthStatus();
 
   // Core product state
   const [product, setProduct] = useState<any>(null);
@@ -332,6 +333,7 @@ export default function ProductDetailClient({ id }: { id: string }) {
   // Handlers
   // -------------------------------------------------------------------------
   const handleAddToCart = async () => {
+    if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
     const payload: any = { itemId: product._id, itemType: 'product', quantity };
     if (selectedVariant?._id) payload.variantId = selectedVariant._id;
@@ -341,6 +343,7 @@ export default function ProductDetailClient({ id }: { id: string }) {
   };
 
   const handleAddRelatedToCart = async (p: any) => {
+    if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
     const result = await dispatch(addToCart({ itemId: p._id, itemType: 'product', quantity: 1 } as any));
     if (addToCart.fulfilled.match(result)) toast.success(`${p.name} added to cart!`);
@@ -348,6 +351,7 @@ export default function ProductDetailClient({ id }: { id: string }) {
   };
 
   const handleWishlist = async () => {
+    if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
     try {
       const { data } = await api.put(`/products/${product._id}/wishlist`);
@@ -392,6 +396,7 @@ export default function ProductDetailClient({ id }: { id: string }) {
 
   const handleReview = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
     setSubmittingReview(true);
     try {

@@ -1,13 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { addToCart } from '@/store/slices/cartSlice';
 import api from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
+import { useAuthStatus } from '@/hooks/useAuthStatus';
 
 const TIER_STYLE: Record<string, { bar: string; badge: string; label: string; popular?: boolean }> = {
   basic:    { bar: 'bg-rose-300',    badge: 'bg-rose-50 text-rose-600 border-rose-100',   label: 'Starter'  },
@@ -21,7 +22,7 @@ export default function MysteryBoxPreview() {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch<any>();
   const router = useRouter();
-  const { user } = useSelector((state: any) => state.auth);
+  const { user, authReady } = useAuthStatus();
 
   useEffect(() => {
     api.get('/mystery-boxes')
@@ -35,6 +36,7 @@ export default function MysteryBoxPreview() {
   }, []);
 
   const handleAddToCart = async (box: any) => {
+    if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
     const result = await dispatch(addToCart({ itemId: box._id, itemType: 'mysteryBox', quantity: 1 } as any));
     if (addToCart.fulfilled.match(result)) {

@@ -7,19 +7,22 @@ import { fetchCart, updateCartItem, removeFromCart, applyCoupon } from '@/store/
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
+import { useAuthStatus } from '@/hooks/useAuthStatus';
 
 const FREE_SHIPPING_THRESHOLD = 500;
 
 export default function CartPage() {
   const dispatch = useDispatch<any>();
   const { items, summary, loading, couponCode } = useSelector((state: any) => state.cart);
-  const { user } = useSelector((state: any) => state.auth);
+  const { user, authReady } = useAuthStatus();
   const [couponInput, setCouponInput] = useState('');
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [removingCoupon, setRemovingCoupon] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
-  useEffect(() => { if (user) dispatch(fetchCart()); }, [user]);
+  useEffect(() => {
+    if (authReady && user) dispatch(fetchCart());
+  }, [authReady, user, dispatch]);
 
   const handleQtyChange = (itemId: string, qty: number) => dispatch(updateCartItem({ itemId, quantity: qty } as any));
 
@@ -47,6 +50,20 @@ export default function CartPage() {
   };
 
   const progressPct = Math.min(100, ((summary.subtotal || 0) / FREE_SHIPPING_THRESHOLD) * 100);
+
+  if (!authReady) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-24">
+        <div className="flex flex-col items-center gap-3 text-gray-500">
+          <svg className="h-8 w-8 animate-spin text-pink-500" fill="none" viewBox="0 0 24 24" aria-hidden>
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+          <p className="text-sm font-medium">Loading…</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">

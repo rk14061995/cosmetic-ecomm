@@ -8,40 +8,91 @@ import { fetchCart } from '@/store/slices/cartSlice';
 import api from '@/lib/api';
 import { formatPrice, loadRazorpayScript } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { useRequireUser } from '@/hooks/useRequireUser';
+import { INDIAN_STATES_AND_UTS } from '@/data/indianStates';
 
-const FIELDS = [
-  { key: 'fullName',     label: 'Full Name',               col: 'col-span-2', placeholder: 'John Doe' },
-  { key: 'phone',        label: 'Phone Number',             col: '',           placeholder: '9876543210' },
-  { key: 'pincode',      label: 'Pincode',                  col: '',           placeholder: '400001' },
-  { key: 'addressLine1', label: 'Address Line 1',           col: 'col-span-2', placeholder: 'House / Flat no., Street' },
-  { key: 'addressLine2', label: 'Address Line 2 (optional)',col: 'col-span-2', placeholder: 'Landmark, Area' },
-  { key: 'city',         label: 'City',                     col: '',           placeholder: 'Mumbai' },
-  { key: 'state',        label: 'State',                    col: '',           placeholder: 'Maharashtra' },
+type AddressDraft = {
+  fullName: string;
+  phone: string;
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  pincode: string;
+};
+
+const initialAddress: AddressDraft = {
+  fullName: '',
+  phone: '',
+  addressLine1: '',
+  addressLine2: '',
+  city: '',
+  state: '',
+  pincode: '',
+};
+
+const FIELDS: {
+  key: keyof AddressDraft;
+  label: string;
+  gridClass: string;
+  placeholder: string;
+  optional?: boolean;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode'];
+  fieldKind?: 'text' | 'select';
+}[] = [
+  { key: 'fullName', label: 'Full name', gridClass: 'sm:col-span-2', placeholder: 'e.g. Priya Sharma' },
+  {
+    key: 'phone',
+    label: 'Phone',
+    gridClass: '',
+    placeholder: '10-digit mobile number',
+    inputMode: 'numeric',
+  },
+  { key: 'addressLine1', label: 'Address line 1', gridClass: 'sm:col-span-2', placeholder: 'House / flat, building, street' },
+  {
+    key: 'addressLine2',
+    label: 'Address line 2',
+    gridClass: 'sm:col-span-2',
+    placeholder: 'Landmark, area (optional)',
+    optional: true,
+  },
+  { key: 'city', label: 'City', gridClass: '', placeholder: 'City' },
+  {
+    key: 'state',
+    label: 'State / UT',
+    gridClass: '',
+    placeholder: '',
+    fieldKind: 'select',
+  },
+  {
+    key: 'pincode',
+    label: 'PIN code',
+    gridClass: 'sm:col-span-2',
+    placeholder: '6 digits',
+    inputMode: 'numeric',
+  },
 ];
 
 export default function CheckoutPage() {
   const router   = useRouter();
   const dispatch = useDispatch<any>();
-  const { user }           = useSelector((state: any) => state.auth);
+  const { user, authReady, isAuthed } = useRequireUser();
   const { items, summary } = useSelector((state: any) => state.cart);
 
   const [selectedAddress, setSelectedAddress] = useState<any>(null);
   const [placing,         setPlacing]         = useState(false);
   const [showForm,        setShowForm]        = useState(false);
-  const [newAddress,      setNewAddress]      = useState({
-    fullName: '', phone: '', addressLine1: '', addressLine2: '',
-    city: '', state: '', pincode: '',
-  });
+  const [newAddress, setNewAddress] = useState<AddressDraft>({ ...initialAddress });
 
   useEffect(() => {
-    if (!user) { router.push('/auth/login'); return; }
+    if (!authReady || !user) return;
     dispatch(fetchCart());
     if (user.addresses?.length > 0) {
       setSelectedAddress(user.addresses.find((a: any) => a.isDefault) || user.addresses[0]);
     } else {
       setShowForm(true);
     }
-  }, [user]);
+  }, [authReady, user, dispatch]);
 
   const handleAddAddress = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +124,7 @@ export default function CheckoutPage() {
       const saved = data?.addresses?.[data.addresses.length - 1];
       setSelectedAddress(saved);
       setShowForm(false);
+      setNewAddress({ ...initialAddress });
       toast.success('Address saved');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to save address');
@@ -200,7 +252,23 @@ export default function CheckoutPage() {
     }
   };
 
-  if (!user || items.length === 0) return (
+  if (!authReady) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-3 text-gray-600">
+          <svg className="h-8 w-8 animate-spin text-indigo-500" fill="none" viewBox="0 0 24 24" aria-hidden>
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+          <p className="text-sm font-medium">Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthed) return null;
+
+  if (items.length === 0) return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex items-center justify-center px-4">
       <div className="text-center">
         <div className="w-24 h-24 bg-gradient-to-br from-indigo-100 to-cyan-100 rounded-full flex items-center justify-center text-5xl mx-auto mb-6 shadow-inner">🛒</div>
@@ -301,40 +369,127 @@ export default function CheckoutPage() {
                     <span className="text-lg leading-none">+</span> Add New Address
                   </button>
                 ) : (
-                  <form onSubmit={handleAddAddress} className="border-t border-gray-100 pt-5">
-                    <div className="rounded-[1.6rem] p-[1px] bg-gradient-to-br from-white via-white to-indigo-100/60">
-                      <div className="rounded-[calc(1.6rem-1px)] border border-slate-100 bg-gradient-to-b from-white to-slate-50/60 p-5 sm:p-6">
-                        <div className="flex items-center justify-between gap-3 mb-5">
-                          <div>
-                            <p className="text-[11px] font-bold tracking-[0.16em] text-neutral-400 uppercase">Delivery Details</p>
-                            <p className="text-base font-bold text-neutral-900 mt-1">New Address</p>
-                          </div>
-                          <span className="text-[11px] text-neutral-400">All fields required except line 2</span>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {FIELDS.map(({ key, label, col, placeholder }) => (
-                        <div key={key} className={[col, col ? `sm:${col}` : ''].join(' ').trim()}>
-                          <label className="block text-[11px] font-semibold text-neutral-500 mb-1.5 uppercase tracking-[0.12em]">{label}</label>
-                          <input
-                            type="text"
-                            placeholder={placeholder}
-                            value={(newAddress as any)[key]}
-                            onChange={(e) => setNewAddress((p) => ({ ...p, [key]: e.target.value }))}
-                            required={key !== 'addressLine2'}
-                            className="w-full bg-white border border-slate-200 rounded-2xl px-4 py-2.5 text-sm text-neutral-800 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-200 transition-all placeholder:text-neutral-300"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                        <div className="flex items-center gap-3 mt-6">
-                          <button type="submit" className="bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold px-6 py-2.5 rounded-full text-sm hover:shadow-md hover:scale-[1.02] transition-all">
-                            Save Address
-                          </button>
-                          <button type="button" onClick={() => setShowForm(false)} className="text-sm text-neutral-500 hover:text-neutral-800 transition-colors font-medium">
-                            Cancel
-                          </button>
-                        </div>
+                  <form onSubmit={handleAddAddress} className="mt-6 border-t border-gray-100 pt-6">
+                    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold tracking-tight text-gray-900">New delivery address</h3>
+                        <p className="mt-1 text-sm text-gray-500">
+                          We&apos;ll use this for shipping and order updates.
+                        </p>
                       </div>
+                      <p className="shrink-0 rounded-lg bg-gray-50 px-3 py-1.5 text-xs text-gray-600 ring-1 ring-gray-100">
+                        <span className="font-medium text-gray-800">*</span> Required · Line 2 optional
+                      </p>
+                    </div>
+
+                    <div className="space-y-8">
+                      <fieldset className="space-y-4">
+                        <legend className="text-xs font-semibold uppercase tracking-wider text-gray-400">Contact</legend>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          {(['fullName', 'phone'] as const).map((key) => {
+                            const field = FIELDS.find((f) => f.key === key);
+                            if (!field) return null;
+                            const { label, gridClass, placeholder, optional, inputMode } = field;
+                            return (
+                              <div key={key} className={gridClass || undefined}>
+                                <label htmlFor={`addr-${key}`} className="mb-1.5 block text-sm font-medium text-gray-700">
+                                  {label}
+                                  {!optional && <span className="text-rose-500"> *</span>}
+                                </label>
+                                <input
+                                  id={`addr-${key}`}
+                                  type="text"
+                                  name={key}
+                                  autoComplete={key === 'fullName' ? 'name' : 'tel'}
+                                  inputMode={inputMode}
+                                  placeholder={placeholder}
+                                  value={newAddress[key]}
+                                  onChange={(e) => setNewAddress((p) => ({ ...p, [key]: e.target.value }))}
+                                  required={!optional}
+                                  className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </fieldset>
+
+                      <fieldset className="space-y-4">
+                        <legend className="text-xs font-semibold uppercase tracking-wider text-gray-400">Address</legend>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          {(['addressLine1', 'addressLine2', 'city', 'state', 'pincode'] as const).map((key) => {
+                            const field = FIELDS.find((f) => f.key === key);
+                            if (!field) return null;
+                            const { label, gridClass, placeholder, optional, inputMode, fieldKind } = field;
+                            return (
+                              <div key={key} className={gridClass || undefined}>
+                                <label htmlFor={`addr-${key}`} className="mb-1.5 block text-sm font-medium text-gray-700">
+                                  {label}
+                                  {!optional && <span className="text-rose-500"> *</span>}
+                                </label>
+                                {fieldKind === 'select' ? (
+                                  <select
+                                    id={`addr-${key}`}
+                                    name={key}
+                                    value={newAddress.state}
+                                    onChange={(e) => setNewAddress((p) => ({ ...p, state: e.target.value }))}
+                                    required
+                                    autoComplete="address-level1"
+                                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 shadow-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                                  >
+                                    <option value="">Select state / UT</option>
+                                    {INDIAN_STATES_AND_UTS.map((s) => (
+                                      <option key={s} value={s}>
+                                        {s}
+                                      </option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <input
+                                    id={`addr-${key}`}
+                                    type="text"
+                                    name={key}
+                                    autoComplete={
+                                      key === 'addressLine1'
+                                        ? 'address-line1'
+                                        : key === 'addressLine2'
+                                          ? 'address-line2'
+                                          : key === 'pincode'
+                                            ? 'postal-code'
+                                            : 'address-level2'
+                                    }
+                                    inputMode={inputMode}
+                                    placeholder={placeholder}
+                                    value={newAddress[key]}
+                                    onChange={(e) => setNewAddress((p) => ({ ...p, [key]: e.target.value }))}
+                                    required={!optional}
+                                    className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 shadow-sm placeholder:text-gray-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                                  />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </fieldset>
+                    </div>
+
+                    <div className="mt-8 flex flex-col-reverse gap-2 border-t border-gray-100 pt-6 sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowForm(false);
+                          setNewAddress({ ...initialAddress });
+                        }}
+                        className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+                      >
+                        Save address
+                      </button>
                     </div>
                   </form>
                 )}

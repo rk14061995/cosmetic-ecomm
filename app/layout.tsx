@@ -34,12 +34,6 @@ export const metadata: Metadata = {
   creator: siteName,
   publisher: siteName,
   formatDetection: { email: false, address: false, telephone: false },
-  icons: {
-    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
-    shortcut: '/favicon.svg',
-    apple: '/favicon.svg',
-  },
-  manifest: '/site.webmanifest',
   openGraph: defaultOpenGraph(),
   twitter: defaultTwitter(),
   robots: {

@@ -1,11 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { formatPrice, formatDate } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { useRequireUser } from '@/hooks/useRequireUser';
 
 const STATUS_STEPS = ['Pending', 'Paid', 'Processing', 'Shipped', 'Delivered'];
 
@@ -76,20 +75,23 @@ function StatusTimeline({ history, currentStatus }: { history: any[]; currentSta
 }
 
 export default function OrdersPage() {
-  const { user } = useSelector((state: any) => state.auth);
-  const router = useRouter();
+  const { user, authReady, isAuthed } = useRequireUser();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [invoiceLoadingId, setInvoiceLoadingId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) { router.push('/auth/login'); return; }
+    if (!authReady || !user) {
+      if (authReady && !user) setLoading(false);
+      return;
+    }
     api.get('/orders/my-orders')
       .then(({ data }) => setOrders(data.orders || []))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [user]);
+  }, [authReady, user]);
 
   const handleCancel = async (orderId: string) => {
     if (!confirm('Are you sure you want to cancel this order?')) return;
@@ -106,6 +108,35 @@ export default function OrdersPage() {
       setCancellingId(null);
     }
   };
+
+  const handleViewInvoice = async (orderId: string) => {
+    setInvoiceLoadingId(orderId);
+    try {
+      const { data } = await api.get(`/orders/${orderId}/invoice`);
+      if (!data?.invoiceUrl) throw new Error('Missing invoice URL');
+      window.open(data.invoiceUrl, '_blank', 'noopener,noreferrer');
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Unable to open invoice');
+    } finally {
+      setInvoiceLoadingId(null);
+    }
+  };
+
+  if (!authReady) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-indigo-50 flex items-center justify-center py-24">
+        <div className="flex flex-col items-center gap-3 text-slate-500">
+          <svg className="h-8 w-8 animate-spin text-indigo-500" fill="none" viewBox="0 0 24 24" aria-hidden>
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+          <p className="text-sm font-medium">Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthed) return null;
 
   if (loading) return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-indigo-50 py-12">
@@ -202,6 +233,15 @@ export default function OrdersPage() {
                       </div>
 
                       <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                        {order.isPaid && (
+                          <button
+                            onClick={() => handleViewInvoice(order._id)}
+                            disabled={invoiceLoadingId === order._id}
+                            className="text-xs text-indigo-700 hover:text-indigo-800 font-semibold border border-indigo-200 hover:border-indigo-300 hover:bg-indigo-50 px-3 py-1.5 rounded-full transition-all disabled:opacity-60"
+                          >
+                            {invoiceLoadingId === order._id ? 'Opening…' : 'Invoice'}
+                          </button>
+                        )}
                         {['Pending', 'Paid'].includes(order.orderStatus) && (
                           <button
                             onClick={() => handleCancel(order._id)}

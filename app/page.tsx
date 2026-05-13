@@ -5,7 +5,6 @@ import MysteryBoxPreview from '@/components/products/MysteryBoxPreview';
 import BlogTeaser from '@/components/home/BlogTeaser';
 import ProductSplit from '@/components/home/ProductSplit';
 import TestimonialsCarousel from '@/components/home/TestimonialsCarousel';
-import MobileStickyCta from '@/components/home/MobileStickyCta';
 import DynamicCategories from '@/components/home/DynamicCategories';
 import ShopByBrand from '@/components/home/ShopByBrand';
 import {
@@ -276,8 +275,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      <MobileStickyCta />
 
     </div>
   );

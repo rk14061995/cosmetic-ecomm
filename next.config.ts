@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: turbopackRoot,
   },
+  async headers() {
+    return [
+      {
+        source: '/favicon.svg',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }],
+      },
+    ];
+  },
   async redirects() {
     return [
       { source: '/favicon.ico', destination: '/favicon.svg', permanent: false },
