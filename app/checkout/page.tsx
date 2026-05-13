@@ -12,6 +12,17 @@ import toast from 'react-hot-toast';
 import { useRequireUser } from '@/hooks/useRequireUser';
 import { INDIAN_STATES_AND_UTS } from '@/data/indianStates';
 
+/** Razorpay checkout: max 15 note key-value pairs; each value max 256 chars. */
+function razorpayNotes(entries: Record<string, string | number | undefined | null>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(entries)) {
+    if (Object.keys(out).length >= 15) break;
+    const s = v == null || v === '' ? '' : String(v);
+    out[k] = s.slice(0, 256);
+  }
+  return out;
+}
+
 type AddressDraft = {
   fullName: string;
   phone: string;
@@ -170,10 +181,6 @@ export default function CheckoutPage() {
 
       const { data: rpData } = await api.post('/payments/create-order', { orderId: order._id });
 
-      const itemsSummary = items
-        .map((i: any) => `${i.product?.name || i.mysteryBox?.name || 'Item'} x${i.quantity}`)
-        .join(', ');
-
       const rzp = new (window as any).Razorpay({
         key:         process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount:      rpData.amount,
@@ -193,25 +200,24 @@ export default function CheckoutPage() {
           contact: user.phone || selectedAddress?.phone || '',
         },
 
-        // Shipping address passed as notes — visible in Razorpay dashboard for every payment
-        notes: {
-          order_id:       order._id,
-          order_number:   order.orderNumber || '',
-          customer_name:  user.name,
+        // Shipping + order context for Razorpay dashboard (max 15 keys — item list is in `description` above)
+        notes: razorpayNotes({
+          order_id: order._id,
+          order_number: order.orderNumber || '',
+          customer_name: user.name,
           customer_email: user.email,
           customer_phone: user.phone || selectedAddress?.phone || '',
-          items:          itemsSummary,
-          subtotal:       `₹${summary.subtotal}`,
-          shipping:       summary.shipping === 0 ? 'Free' : `₹${summary.shipping}`,
-          discount:       summary.discount > 0 ? `₹${summary.discount}` : 'None',
-          wallet_used:    'None',
-          total_paid:     `₹${effectiveTotal}`,
-          ship_address:   selectedAddress?.addressLine1 || '',
-          ship_city:      selectedAddress?.city        || '',
-          ship_state:     selectedAddress?.state       || '',
-          ship_pincode:   selectedAddress?.pincode     || '',
-          ship_phone:     selectedAddress?.phone       || '',
-        },
+          subtotal: `₹${summary.subtotal}`,
+          shipping: summary.shipping === 0 ? 'Free' : `₹${summary.shipping}`,
+          discount: summary.discount > 0 ? `₹${summary.discount}` : 'None',
+          wallet_used: 'None',
+          total_paid: `₹${effectiveTotal}`,
+          ship_address: selectedAddress?.addressLine1 || '',
+          ship_city: selectedAddress?.city || '',
+          ship_state: selectedAddress?.state || '',
+          ship_pincode: selectedAddress?.pincode || '',
+          ship_phone: selectedAddress?.phone || '',
+        }),
 
         // Lock prefill fields so customer cannot accidentally change them
         readonly: {
