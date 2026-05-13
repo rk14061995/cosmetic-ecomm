@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSelector, useDispatch } from 'react-redux';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { logoutUser } from '@/store/slices/authSlice';
 import toast from 'react-hot-toast';
 import { getSiteName, SITE_TAGLINE } from '@/lib/seo';
@@ -42,6 +42,7 @@ function CartIcon({ className }: { className?: string }) {
 export default function Navbar() {
   const dispatch = useDispatch<any>();
   const router = useRouter();
+  const pathname = usePathname();
   const siteName = getSiteName();
   const brandInitial = siteName.charAt(0).toUpperCase();
   const { user } = useSelector((state: any) => state.auth);
@@ -89,6 +90,10 @@ export default function Navbar() {
 
   const navLinkClass =
     'rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100/90 hover:text-gray-900 transition-colors';
+
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200/70 bg-white/85 backdrop-blur-md shadow-[0_4px_24px_-12px_rgba(15,23,42,0.12)]">

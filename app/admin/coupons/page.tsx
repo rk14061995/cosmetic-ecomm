@@ -3,6 +3,18 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { formatDate, formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import {
+  AdminPageHeader,
+  AdminModal,
+  adminPanel,
+  adminStack,
+  adminTableHead,
+  adminInput,
+  adminLabel,
+  btnAccent,
+  btnPrimary,
+  btnSecondary,
+} from '@/components/admin/ui';
 
 const EMPTY_FORM = { code: '', description: '', discountType: 'percentage', discountValue: '', maxDiscountAmount: '', minOrderValue: '', usageLimit: '', perUserLimit: '1', expiryDate: '', isActive: true };
 
@@ -57,29 +69,26 @@ export default function AdminCouponsPage() {
     catch { toast.error('Failed to update'); }
   };
 
-  const inputCls = 'w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400';
-  const labelCls = 'block text-xs font-medium text-slate-600 mb-1';
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Coupons</h1>
-          <p className="text-sm text-slate-500 mt-1">Create and manage discount codes</p>
-        </div>
-        <button onClick={openCreate} className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          Create Coupon
-        </button>
-      </div>
+    <div className={adminStack}>
+      <AdminPageHeader
+        title="Coupons"
+        description="Create and manage discount codes for campaigns and checkout."
+        actions={
+          <button type="button" onClick={openCreate} className={btnAccent}>
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Create coupon
+          </button>
+        }
+      />
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className={`${adminPanel} overflow-hidden`}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs text-slate-400 font-semibold uppercase tracking-wide bg-slate-50 border-b border-slate-100">
+              <tr className={adminTableHead}>
                 <th className="px-5 py-3">Code</th>
                 <th className="px-5 py-3">Type</th>
                 <th className="px-5 py-3">Discount</th>
@@ -99,7 +108,7 @@ export default function AdminCouponsPage() {
                 coupons.map((c) => (
                   <tr key={c._id} className="hover:bg-slate-50/60 transition-colors">
                     <td className="px-5 py-4">
-                      <span className="font-mono font-bold text-violet-600 bg-violet-50 px-2.5 py-1 rounded-lg text-xs tracking-wider">{c.code}</span>
+                      <span className="rounded-md bg-slate-100 px-2.5 py-1 font-mono text-xs font-semibold tracking-wider text-slate-800">{c.code}</span>
                     </td>
                     <td className="px-5 py-4 capitalize text-slate-600">{c.discountType}</td>
                     <td className="px-5 py-4 font-semibold text-slate-800">
@@ -121,9 +130,17 @@ export default function AdminCouponsPage() {
                       </button>
                     </td>
                     <td className="px-5 py-4">
-                      <div className="flex gap-2">
-                        <button onClick={() => openEdit(c)} className="text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-200 font-medium transition-colors">Edit</button>
-                        <button onClick={() => handleDelete(c._id, c.code)} className="text-xs bg-red-100 text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-200 font-medium transition-colors">Delete</button>
+                      <div className="flex flex-wrap gap-2">
+                        <button type="button" onClick={() => openEdit(c)} className={`${btnSecondary} px-3 py-1.5 text-xs`}>
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(c._id, c.code)}
+                          className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-900 shadow-sm transition hover:bg-rose-100"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -135,69 +152,71 @@ export default function AdminCouponsPage() {
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg my-8 shadow-2xl">
-            <h3 className="font-bold text-slate-900 text-lg mb-1">{editing ? 'Edit Coupon' : 'Create Coupon'}</h3>
-            <p className="text-sm text-slate-500 mb-6">{editing ? `Editing ${editing.code}` : 'Set up a new discount code'}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm">
+          <AdminModal className="my-8 max-w-lg">
+            <h3 className="mb-1 text-lg font-semibold text-slate-900">{editing ? 'Edit coupon' : 'Create coupon'}</h3>
+            <p className="mb-6 text-sm text-slate-500">{editing ? `Editing ${editing.code}` : 'Set up a new discount code.'}</p>
             <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className={labelCls}>Coupon Code *</label>
+                <label className={adminLabel}>Coupon Code *</label>
                 <input type="text" value={form.code} onChange={(e) => setForm((p: any) => ({ ...p, code: e.target.value.toUpperCase() }))}
-                  required disabled={!!editing} className={inputCls + ' font-mono uppercase tracking-widest'} />
+                  required disabled={!!editing} className={adminInput + ' font-mono uppercase tracking-widest'} />
               </div>
               <div>
-                <label className={labelCls}>Discount Type *</label>
-                <select value={form.discountType} onChange={(e) => setForm((p: any) => ({ ...p, discountType: e.target.value }))} className={inputCls}>
+                <label className={adminLabel}>Discount Type *</label>
+                <select value={form.discountType} onChange={(e) => setForm((p: any) => ({ ...p, discountType: e.target.value }))} className={adminInput}>
                   <option value="percentage">Percentage (%)</option>
                   <option value="flat">Flat (₹)</option>
                 </select>
               </div>
               <div>
-                <label className={labelCls}>Discount Value *</label>
+                <label className={adminLabel}>Discount Value *</label>
                 <input type="number" value={form.discountValue} onChange={(e) => setForm((p: any) => ({ ...p, discountValue: e.target.value }))}
-                  required min="0" className={inputCls} />
+                  required min="0" className={adminInput} />
               </div>
               {form.discountType === 'percentage' && (
                 <div>
-                  <label className={labelCls}>Max Discount (₹)</label>
-                  <input type="number" value={form.maxDiscountAmount} onChange={(e) => setForm((p: any) => ({ ...p, maxDiscountAmount: e.target.value }))} className={inputCls} />
+                  <label className={adminLabel}>Max Discount (₹)</label>
+                  <input type="number" value={form.maxDiscountAmount} onChange={(e) => setForm((p: any) => ({ ...p, maxDiscountAmount: e.target.value }))} className={adminInput} />
                 </div>
               )}
               <div>
-                <label className={labelCls}>Min Order Value (₹)</label>
-                <input type="number" value={form.minOrderValue} onChange={(e) => setForm((p: any) => ({ ...p, minOrderValue: e.target.value }))} className={inputCls} />
+                <label className={adminLabel}>Min Order Value (₹)</label>
+                <input type="number" value={form.minOrderValue} onChange={(e) => setForm((p: any) => ({ ...p, minOrderValue: e.target.value }))} className={adminInput} />
               </div>
               <div>
-                <label className={labelCls}>Usage Limit (blank = unlimited)</label>
-                <input type="number" value={form.usageLimit} onChange={(e) => setForm((p: any) => ({ ...p, usageLimit: e.target.value }))} className={inputCls} />
+                <label className={adminLabel}>Usage Limit (blank = unlimited)</label>
+                <input type="number" value={form.usageLimit} onChange={(e) => setForm((p: any) => ({ ...p, usageLimit: e.target.value }))} className={adminInput} />
               </div>
               <div>
-                <label className={labelCls}>Per User Limit</label>
-                <input type="number" value={form.perUserLimit} onChange={(e) => setForm((p: any) => ({ ...p, perUserLimit: e.target.value }))} min="1" className={inputCls} />
+                <label className={adminLabel}>Per User Limit</label>
+                <input type="number" value={form.perUserLimit} onChange={(e) => setForm((p: any) => ({ ...p, perUserLimit: e.target.value }))} min="1" className={adminInput} />
               </div>
               <div className="col-span-2">
-                <label className={labelCls}>Expiry Date *</label>
+                <label className={adminLabel}>Expiry Date *</label>
                 <input type="date" value={form.expiryDate} onChange={(e) => setForm((p: any) => ({ ...p, expiryDate: e.target.value }))}
-                  required min={new Date().toISOString().split('T')[0]} className={inputCls} />
+                  required min={new Date().toISOString().split('T')[0]} className={adminInput} />
               </div>
               <div className="col-span-2">
-                <label className={labelCls}>Description</label>
-                <input type="text" value={form.description} onChange={(e) => setForm((p: any) => ({ ...p, description: e.target.value }))} className={inputCls} />
+                <label className={adminLabel}>Description</label>
+                <input type="text" value={form.description} onChange={(e) => setForm((p: any) => ({ ...p, description: e.target.value }))} className={adminInput} />
               </div>
               <div className="col-span-2">
                 <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
-                  <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((p: any) => ({ ...p, isActive: e.target.checked }))} className="accent-violet-600" />
+                  <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((p: any) => ({ ...p, isActive: e.target.checked }))} className="accent-indigo-600" />
                   Active
                 </label>
               </div>
               <div className="col-span-2 flex gap-3 pt-2">
-                <button type="submit" disabled={saving} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-xl disabled:opacity-50 transition-colors">
-                  {saving ? 'Saving…' : editing ? 'Update Coupon' : 'Create Coupon'}
+                <button type="submit" disabled={saving} className={`${btnPrimary} flex-1 py-3`}>
+                  {saving ? 'Saving…' : editing ? 'Update coupon' : 'Create coupon'}
                 </button>
-                <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-slate-200 font-semibold py-3 rounded-xl hover:bg-slate-50 transition-colors text-slate-700">Cancel</button>
+                <button type="button" onClick={() => setShowForm(false)} className={`${btnSecondary} flex-1 py-3`}>
+                  Cancel
+                </button>
               </div>
             </form>
-          </div>
+          </AdminModal>
         </div>
       )}
     </div>

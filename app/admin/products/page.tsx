@@ -4,6 +4,18 @@ import Image from 'next/image';
 import api from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import {
+  AdminPageHeader,
+  AdminModal,
+  adminPanel,
+  adminStack,
+  adminTableHead,
+  adminInput,
+  adminLabel,
+  btnAccent,
+  btnPrimary,
+  btnSecondary,
+} from '@/components/admin/ui';
 
 const EMPTY_FORM = {
   name: '', description: '', shortDescription: '', price: '', discountPrice: '', category: '',
@@ -183,62 +195,87 @@ export default function AdminProductsPage() {
     }
   };
 
-  const inputCls = 'w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400';
-  const labelCls = 'block text-xs font-medium text-slate-600 mb-1';
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Products</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage your product catalogue</p>
-        </div>
-        <button onClick={openCreate} className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          Add Product
-        </button>
-      </div>
+    <div className={adminStack}>
+      <AdminPageHeader
+        title="Products"
+        description="Manage catalogue, pricing, media, and merchandising flags."
+        actions={
+          <button type="button" onClick={openCreate} className={btnAccent}>
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Add product
+          </button>
+        }
+      />
 
-      {/* Category Manager */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-        <p className="text-sm font-semibold text-slate-800 mb-3">Categories</p>
-        <div className="flex items-center gap-3 mb-3">
-          <input type="text" value={newCategory} onChange={(e) => setNewCategory(e.target.value)}
-            placeholder="New category name" className="border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 w-64" />
-          <button type="button" onClick={handleCreateCategory} disabled={creatingCategory}
-            className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-4 py-2 rounded-xl disabled:opacity-50 transition-colors">
-            {creatingCategory ? 'Adding…' : 'Add'}
+      <div className={`${adminPanel} p-5 sm:p-6`}>
+        <p className="text-sm font-semibold text-slate-900">Categories</p>
+        <p className="mt-0.5 text-xs text-slate-500">Used for navigation and product assignment</p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <input
+            type="text"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="New category name"
+            className={`${adminInput} max-w-xs min-w-[12rem]`}
+          />
+          <button type="button" onClick={handleCreateCategory} disabled={creatingCategory} className={btnPrimary}>
+            {creatingCategory ? 'Adding…' : 'Add category'}
           </button>
         </div>
         {categories.length > 0 && (
-          <div className="flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             {categories.map((c) => (
-              <span key={c._id} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border ${c.isActive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+              <span
+                key={c._id}
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium ${
+                  c.isActive
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                    : 'border-slate-200 bg-slate-50 text-slate-600'
+                }`}
+              >
                 {c.name}
-                <button type="button" onClick={() => handleDeleteCategory(c)} className="text-current opacity-50 hover:opacity-100 font-bold leading-none">×</button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteCategory(c)}
+                  className="font-bold leading-none text-current opacity-50 hover:opacity-100"
+                >
+                  ×
+                </button>
               </span>
             ))}
           </div>
         )}
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-        </svg>
-        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products…"
-          className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-violet-400" />
+      <div className={`${adminPanel} p-4 sm:p-5`}>
+        <div className="relative max-w-md">
+          <svg
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search products…"
+            className={`${adminInput} pl-10`}
+          />
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className={`${adminPanel} overflow-hidden`}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs text-slate-400 font-semibold uppercase tracking-wide bg-slate-50 border-b border-slate-100">
+              <tr className={adminTableHead}>
                 <th className="px-5 py-3">Product</th>
                 <th className="px-5 py-3">Category</th>
                 <th className="px-5 py-3">Price</th>
@@ -273,7 +310,7 @@ export default function AdminProductsPage() {
                           <p className="font-medium text-slate-800 line-clamp-1">{p.name}</p>
                           <p className="text-xs text-slate-400">{p.brand}</p>
                           <div className="flex gap-1 mt-1">
-                            {p.isFeatured && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-violet-100 text-violet-700 font-semibold">Featured</span>}
+                            {p.isFeatured && <span className="rounded-md bg-indigo-100 px-1.5 py-0.5 text-[9px] font-semibold text-indigo-800">Featured</span>}
                             {p.isNewArrival && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-sky-100 text-sky-700 font-semibold">New</span>}
                             {p.isBestSeller && <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 font-semibold">Best Seller</span>}
                           </div>
@@ -299,9 +336,17 @@ export default function AdminProductsPage() {
                       </button>
                     </td>
                     <td className="px-5 py-4">
-                      <div className="flex gap-2">
-                        <button onClick={() => openEdit(p)} className="text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-200 font-medium transition-colors">Edit</button>
-                        <button onClick={() => handleDelete(p._id, p.name)} className="text-xs bg-red-100 text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-200 font-medium transition-colors">Delete</button>
+                      <div className="flex flex-wrap gap-2">
+                        <button type="button" onClick={() => openEdit(p)} className={`${btnSecondary} px-3 py-1.5 text-xs`}>
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(p._id, p.name)}
+                          className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-900 shadow-sm transition hover:bg-rose-100"
+                        >
+                          Delete
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -314,14 +359,14 @@ export default function AdminProductsPage() {
 
       {/* Product Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-5xl my-6 shadow-2xl max-h-[calc(100vh-3rem)] overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-slate-100">
-              <h3 className="font-bold text-slate-900 text-lg mb-1">{editing ? 'Edit Product' : 'Add New Product'}</h3>
-              <p className="text-sm text-slate-500">{editing ? `Editing: ${editing.name}` : 'Fill in product details below'}</p>
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/50 p-4 backdrop-blur-sm">
+          <AdminModal className="my-6 flex min-h-0 max-h-[calc(100vh-3rem)] w-full max-w-5xl flex-col overflow-hidden p-0">
+            <div className="border-b border-slate-200/90 px-6 py-4">
+              <h3 className="mb-1 text-lg font-semibold text-slate-900">{editing ? 'Edit product' : 'Add new product'}</h3>
+              <p className="text-sm text-slate-500">{editing ? `Editing: ${editing.name}` : 'Fill in product details below.'}</p>
             </div>
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-              <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-6 md:grid-cols-3">
               {[
                 { key: 'name', label: 'Product Name *', col: 'md:col-span-2', required: true },
                 { key: 'brand', label: 'Brand *', required: true },
@@ -331,23 +376,23 @@ export default function AdminProductsPage() {
                 { key: 'weight', label: 'Weight' },
               ].map(({ key, label, col, type = 'text', required }) => (
                 <div key={key} className={col || ''}>
-                  <label className={labelCls}>{label}</label>
+                  <label className={adminLabel}>{label}</label>
                   <input type={type} value={form[key]} onChange={(e) => setForm((p: any) => ({ ...p, [key]: e.target.value }))}
-                    required={required} className={inputCls} />
+                    required={required} className={adminInput} />
                 </div>
               ))}
 
               <div>
-                <label className={labelCls}>Category *</label>
-                <select value={form.category} onChange={(e) => setForm((p: any) => ({ ...p, category: e.target.value }))} className={inputCls}>
+                <label className={adminLabel}>Category *</label>
+                <select value={form.category} onChange={(e) => setForm((p: any) => ({ ...p, category: e.target.value }))} className={adminInput}>
                   <option value="">Select category</option>
                   {categories.filter((c) => c.isActive).map((c) => <option key={c._id}>{c.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className={labelCls}>Tags (comma-separated)</label>
+                <label className={adminLabel}>Tags (comma-separated)</label>
                 <input type="text" value={form.tags} onChange={(e) => setForm((p: any) => ({ ...p, tags: e.target.value }))}
-                  placeholder="moisturizer, spf, vitamin c" className={inputCls} />
+                  placeholder="moisturizer, spf, vitamin c" className={adminInput} />
               </div>
 
               {[
@@ -357,14 +402,14 @@ export default function AdminProductsPage() {
                 { key: 'howToUse', label: 'How to Use', col: 'md:col-span-1', rows: 2 },
               ].map(({ key, label, col, rows, required }) => (
                 <div key={key} className={col}>
-                  <label className={labelCls}>{label}</label>
+                  <label className={adminLabel}>{label}</label>
                   <textarea value={form[key]} onChange={(e) => setForm((p: any) => ({ ...p, [key]: e.target.value }))}
-                    required={required} rows={rows} className={inputCls + ' resize-none'} />
+                    required={required} rows={rows} className={adminInput + ' resize-none'} />
                 </div>
               ))}
 
               <div className="md:col-span-2 space-y-3">
-                <label className={labelCls}>Product Images</label>
+                <label className={adminLabel}>Product Images</label>
                 {editing && existingImages.length > 0 && (
                   <div>
                     <p className="text-xs text-slate-500 mb-2">
@@ -416,15 +461,15 @@ export default function AdminProductsPage() {
                 )}
                 <input type="file" ref={fileRef} multiple accept="image/*" onChange={(e) => setImageFiles(Array.from(e.target.files || []))} className="hidden" />
                 <button type="button" onClick={() => fileRef.current?.click()}
-                  className="w-full border-2 border-dashed border-slate-200 hover:border-violet-400 rounded-xl py-6 text-sm text-slate-400 hover:text-violet-500 transition-colors text-center">
+                  className="w-full rounded-lg border-2 border-dashed border-slate-200 py-6 text-center text-sm text-slate-400 transition-colors hover:border-indigo-300 hover:text-indigo-600">
                   {imageFiles.length > 0
-                    ? <span className="font-medium text-violet-600">{imageFiles.length} new file(s) selected — appended on save</span>
+                    ? <span className="font-medium text-indigo-600">{imageFiles.length} new file(s) selected — appended on save</span>
                     : <span>{editing ? 'Add more images' : 'Click to upload images'}</span>}
                 </button>
               </div>
 
               <div className="md:col-span-1">
-                <label className={labelCls}>Flags</label>
+                <label className={adminLabel}>Flags</label>
                 <div className="grid grid-cols-1 gap-2 mt-1 border border-slate-200 rounded-xl p-3">
                   {[
                     { key: 'isFeatured', label: 'Featured' },
@@ -435,13 +480,13 @@ export default function AdminProductsPage() {
                     { key: 'virtualTryOn', label: 'Virtual try-on (customer photo preview)' },
                   ].map(({ key, label }) => (
                     <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
-                      <input type="checkbox" checked={form[key]} onChange={(e) => setForm((p: any) => ({ ...p, [key]: e.target.checked }))} className="accent-violet-600" />
+                      <input type="checkbox" checked={form[key]} onChange={(e) => setForm((p: any) => ({ ...p, [key]: e.target.checked }))} className="accent-indigo-600" />
                       {label}
                     </label>
                   ))}
                   {form.virtualTryOn && (
                     <div className="pt-2 border-t border-slate-100 mt-2">
-                      <label className={labelCls}>Try-on tint colour</label>
+                      <label className={adminLabel}>Try-on tint colour</label>
                       <div className="flex flex-wrap items-center gap-3 mt-1">
                         <input
                           type="color"
@@ -456,7 +501,7 @@ export default function AdminProductsPage() {
                           onChange={(e) => setForm((p: any) => ({ ...p, tryOnTintHex: e.target.value }))}
                           placeholder="#db2777"
                           pattern="^#[0-9A-Fa-f]{6}$"
-                          className={`${inputCls} flex-1 min-w-[7rem] font-mono text-xs`}
+                          className={`${adminInput} flex-1 min-w-[7rem] font-mono text-xs`}
                         />
                       </div>
                       <p className="text-[11px] text-slate-500 mt-1">
@@ -467,16 +512,16 @@ export default function AdminProductsPage() {
                 </div>
               </div>
               </div>
-              <div className="px-6 py-4 border-t border-slate-100 bg-white flex gap-3">
-                <button type="submit" disabled={saving} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-xl disabled:opacity-50 transition-colors">
-                  {saving ? 'Saving…' : editing ? 'Update Product' : 'Create Product'}
+              <div className="flex gap-3 border-t border-slate-200/90 bg-white px-6 py-4">
+                <button type="submit" disabled={saving} className={`${btnPrimary} flex-1 py-3`}>
+                  {saving ? 'Saving…' : editing ? 'Update product' : 'Create product'}
                 </button>
-                <button type="button" onClick={() => setShowForm(false)} className="flex-1 border border-slate-200 font-semibold py-3 rounded-xl hover:bg-slate-50 transition-colors text-slate-700">
+                <button type="button" onClick={() => setShowForm(false)} className={`${btnSecondary} flex-1 py-3`}>
                   Cancel
                 </button>
               </div>
             </form>
-          </div>
+          </AdminModal>
         </div>
       )}
     </div>

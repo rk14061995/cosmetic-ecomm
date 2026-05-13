@@ -12,7 +12,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test tests/*.test.cjs"
+    "test": "node --test tests/*.test.cjs",
+    "test:e2e:py": "bash e2e/run.sh"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",

@@ -193,7 +193,17 @@ export default function AffiliatePage() {
                       {affiliate.referrals.slice(0, 10).map((ref: any, i: number) => (
                         <tr key={ref._id || i} className="hover:bg-gray-50 transition-colors">
                           <td className="py-3 font-mono text-gray-700">
-                            #{ref.orderId?.slice(-8)?.toUpperCase() || '—'}
+                            {(() => {
+                              const o = ref.order;
+                              if (o && typeof o === 'object') {
+                                return (o as { orderNumber?: string; _id?: string }).orderNumber
+                                  || `#${String((o as { _id?: string })._id).slice(-8).toUpperCase()}`;
+                              }
+                              if (typeof o === 'string') {
+                                return `#${o.slice(-8).toUpperCase()}`;
+                              }
+                              return '—';
+                            })()}
                           </td>
                           <td className="py-3 text-gray-500">{ref.date ? formatDate(ref.date) : '—'}</td>
                           <td className="py-3 text-right text-gray-700">{formatPrice(ref.orderAmount ?? 0)}</td>

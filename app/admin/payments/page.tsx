@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { formatPrice, formatDate } from '@/lib/utils';
+import { AdminPageHeader, adminPanel, adminStack, adminTableHead } from '@/components/admin/ui';
 
 const STATUS_STYLES: Record<string, string> = {
   paid: 'bg-emerald-100 text-emerald-700',
@@ -28,33 +29,33 @@ export default function AdminPaymentsPage() {
   const totalPages = Math.ceil(total / 20);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Payment Logs</h1>
-        <p className="text-sm text-slate-500 mt-1">Track all Razorpay transactions</p>
-      </div>
+    <div className={adminStack}>
+      <AdminPageHeader
+        title="Payment logs"
+        description="Track Razorpay order and payment attempts across the storefront."
+      />
 
       {total > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {[
-            { label: 'Total Records', value: total },
-            { label: 'This Page', value: payments.length },
+            { label: 'Total records', value: total },
+            { label: 'This page', value: payments.length },
             { label: 'Paid', value: payments.filter((p) => p.status === 'paid').length },
             { label: 'Failed', value: payments.filter((p) => p.status === 'failed').length },
           ].map((s) => (
-            <div key={s.label} className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
-              <p className="text-2xl font-bold text-slate-900">{s.value}</p>
-              <p className="text-xs text-slate-500 mt-0.5">{s.label}</p>
+            <div key={s.label} className={`${adminPanel} p-4`}>
+              <p className="text-2xl font-semibold tracking-tight text-slate-900">{s.value}</p>
+              <p className="mt-0.5 text-xs text-slate-500">{s.label}</p>
             </div>
           ))}
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className={`${adminPanel} overflow-hidden`}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs text-slate-400 font-semibold uppercase tracking-wide bg-slate-50 border-b border-slate-100">
+              <tr className={adminTableHead}>
                 <th className="px-5 py-3">Razorpay Order ID</th>
                 <th className="px-5 py-3">Payment ID</th>
                 <th className="px-5 py-3">Customer</th>
@@ -98,8 +99,8 @@ export default function AdminPaymentsPage() {
             <p className="text-xs text-slate-400">Page {page} of {totalPages} · {total} total records</p>
             <div className="flex gap-1">
               {[...Array(Math.min(totalPages, 8))].map((_, i) => (
-                <button key={i} onClick={() => setPage(i + 1)}
-                  className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${page === i + 1 ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                <button key={i} type="button" onClick={() => setPage(i + 1)}
+                  className={`h-8 w-8 rounded-lg text-xs font-medium transition-colors ${page === i + 1 ? 'bg-indigo-950 text-white shadow-sm' : 'border border-indigo-200/60 bg-white/70 text-indigo-950/70 hover:bg-indigo-50'}`}>
                   {i + 1}
                 </button>
               ))}

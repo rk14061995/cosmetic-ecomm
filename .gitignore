@@ -12,6 +12,10 @@
 
 # testing
 /coverage
+/e2e/.venv
+/e2e/__pycache__
+/e2e/.pytest_cache
+/.pytest_cache
 
 # next.js
 /.next/
