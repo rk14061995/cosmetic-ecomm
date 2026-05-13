@@ -1,11 +1,11 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import api from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { useAuthStatus } from '@/hooks/useAuthStatus';
 
 const PLACEHOLDER_GRADIENTS = [
   'from-pink-400 to-rose-400',
@@ -25,7 +25,7 @@ const COMING_SOON_PLACEHOLDERS = [
 
 export default function BundlesPage() {
   const router = useRouter();
-  const { user } = useSelector((state: any) => state.auth);
+  const { user, authReady } = useAuthStatus();
 
   const [bundles, setBundles]     = useState<any[]>([]);
   const [loading, setLoading]     = useState(true);
@@ -40,6 +40,7 @@ export default function BundlesPage() {
   }, []);
 
   const handleAddToCart = useCallback(async (bundle: any) => {
+    if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
     if (addingId) return;
     setAddingId(bundle._id);
@@ -55,7 +56,7 @@ export default function BundlesPage() {
     } finally {
       setAddingId(null);
     }
-  }, [user, router, addingId]);
+  }, [user, router, addingId, authReady]);
 
   const savePct = (original: number, price: number) =>
     Math.round(((original - price) / original) * 100);

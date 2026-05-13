@@ -1,22 +1,36 @@
 'use client';
 import { useSelector, useDispatch } from 'react-redux';
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { fetchProfile } from '@/store/slices/authSlice';
 import ProductCard from '@/components/products/ProductCard';
+import { useRequireUser } from '@/hooks/useRequireUser';
 
 export default function WishlistPage() {
-  const { user } = useSelector((state: any) => state.auth);
   const dispatch = useDispatch<any>();
-  const router = useRouter();
+  const { user, authReady, isAuthed } = useRequireUser();
 
   useEffect(() => {
-    if (!user) { router.push('/auth/login'); return; }
+    if (!authReady || !user) return;
     dispatch(fetchProfile());
-  }, []);
+  }, [authReady, user, dispatch]);
 
-  if (!user) return null;
+  if (!authReady) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-24 flex justify-center">
+        <div className="flex flex-col items-center gap-3 text-gray-500">
+          <svg className="h-8 w-8 animate-spin text-pink-500" fill="none" viewBox="0 0 24 24" aria-hidden>
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+          <p className="text-sm font-medium">Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthed || !user) return null;
+
   const wishlist = user.wishlist || [];
 
   return (

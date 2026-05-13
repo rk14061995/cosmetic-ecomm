@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import { store } from '@/store';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { fetchProfile } from '@/store/slices/authSlice';
+import { fetchProfile, setInitialized } from '@/store/slices/authSlice';
 import { fetchCart } from '@/store/slices/cartSlice';
 
 function AppInitializer({ children }: { children: React.ReactNode }) {
@@ -14,6 +14,8 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
     if (token) {
       dispatch(fetchProfile());
       dispatch(fetchCart());
+    } else {
+      dispatch(setInitialized());
     }
   }, [dispatch]);
 

@@ -4,8 +4,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { getSiteName } from '@/lib/seo';
 
 function ResetPasswordForm() {
+  const siteName = getSiteName();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -39,7 +41,7 @@ function ResetPasswordForm() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-3xl shadow-sm border border-slate-200 p-8">
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-black text-indigo-700 tracking-tight">Glowzy</Link>
+          <Link href="/" className="text-3xl font-black text-indigo-700 tracking-tight">{siteName}</Link>
           <h1 className="text-xl font-bold text-gray-900 mt-3">Set New Password</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-5">

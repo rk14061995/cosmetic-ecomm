@@ -1,22 +1,24 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { addToCart } from '@/store/slices/cartSlice';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useAuthStatus } from '@/hooks/useAuthStatus';
 
 export default function ProductCard({ product }: { product: any }) {
   const dispatch = useDispatch<any>();
   const router = useRouter();
-  const { user } = useSelector((state: any) => state.auth);
+  const { user, authReady } = useAuthStatus();
   const discount = product.discountPrice
     ? Math.round(((product.price - product.discountPrice) / product.price) * 100)
     : 0;
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
+    if (!authReady) return;
     if (!user) {
       router.push('/auth/login');
       return;

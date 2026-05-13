@@ -1,10 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { logoutUser } from '@/store/slices/authSlice';
 import toast from 'react-hot-toast';
+import { getSiteName, SITE_TAGLINE } from '@/lib/seo';
 
 const normalizeEmail = (email?: string) => (email || '').trim().toLowerCase();
 const STATIC_ADMIN_EMAILS = (process.env.NEXT_PUBLIC_STATIC_ADMIN_EMAILS || '')
@@ -41,9 +42,13 @@ function CartIcon({ className }: { className?: string }) {
 export default function Navbar() {
   const dispatch = useDispatch<any>();
   const router = useRouter();
+  const siteName = getSiteName();
+  const brandInitial = siteName.charAt(0).toUpperCase();
   const { user } = useSelector((state: any) => state.auth);
   const { cartCount } = useSelector((state: any) => state.cart);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountWrapRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const hasAdminAccess =
     !!user &&
@@ -60,10 +65,27 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await dispatch(logoutUser());
+    setAccountOpen(false);
     toast.success('Logged out successfully');
     router.push('/');
     setMenuOpen(false);
   };
+
+  useEffect(() => {
+    if (!accountOpen) return;
+    const closeOnOutside = (e: MouseEvent) => {
+      if (accountWrapRef.current && !accountWrapRef.current.contains(e.target as Node)) setAccountOpen(false);
+    };
+    const closeOnEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setAccountOpen(false);
+    };
+    document.addEventListener('mousedown', closeOnOutside);
+    document.addEventListener('keydown', closeOnEsc);
+    return () => {
+      document.removeEventListener('mousedown', closeOnOutside);
+      document.removeEventListener('keydown', closeOnEsc);
+    };
+  }, [accountOpen]);
 
   const navLinkClass =
     'rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100/90 hover:text-gray-900 transition-colors';
@@ -72,27 +94,29 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 border-b border-gray-200/70 bg-white/85 backdrop-blur-md shadow-[0_4px_24px_-12px_rgba(15,23,42,0.12)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3 sm:gap-4 h-[4.25rem]">
-          {/* Logo */}
+          {/* Brand lockup — uses NEXT_PUBLIC_SITE_NAME (same as title / manifest) */}
           <Link
             href="/"
-            className="flex items-center gap-2.5 shrink-0 rounded-xl pr-1 -ml-1 pl-1 py-1 hover:bg-gray-50/80 transition-colors"
+            className="group flex min-w-0 items-center gap-2.5 sm:gap-3 shrink-0 rounded-2xl -ml-1 pl-1 pr-2 py-1.5 transition-colors hover:bg-slate-50/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50 focus-visible:ring-offset-2"
+            aria-label={`${siteName} — home`}
           >
             <span
-              className="grid h-9 w-9 place-items-center rounded-xl text-sm font-black text-white shadow-md shadow-indigo-500/20"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl text-[15px] font-black text-white shadow-lg shadow-indigo-500/25 ring-2 ring-white/80 transition-transform duration-200 group-hover:scale-[1.03]"
               style={{
-                background: 'linear-gradient(135deg, #6366f1 0%, #22d3ee 100%)',
+                background: 'linear-gradient(145deg, #6366f1 0%, #7c3aed 48%, #22d3ee 100%)',
               }}
               aria-hidden
             >
-              K
+              {brandInitial}
             </span>
-            <span className="hidden sm:flex flex-col leading-none">
-              <span className="text-lg font-black tracking-tight text-gray-900">KosmeticX</span>
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-pink-600 mt-0.5">
-                Beauty & care
+            <span className="flex min-w-0 flex-col justify-center leading-tight">
+              <span className="truncate text-[15px] font-extrabold tracking-tight text-slate-900 sm:text-lg sm:tracking-tight">
+                {siteName}
+              </span>
+              <span className="hidden truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-500 sm:block">
+                {SITE_TAGLINE.split(',')[0].trim()}
               </span>
             </span>
-            <span className="sm:hidden text-lg font-black tracking-tight text-gray-900">KX</span>
           </Link>
 
           {/* Search — desktop */}
@@ -173,19 +197,25 @@ export default function Navbar() {
             </Link>
 
             {user ? (
-              <div className="relative group hidden sm:block">
+              <div className="relative hidden sm:block" ref={accountWrapRef}>
                 <button
                   type="button"
                   className="flex items-center gap-2 rounded-xl pl-1 pr-2 py-1 hover:bg-gray-100 transition-colors"
                   aria-haspopup="menu"
-                  aria-expanded={undefined}
+                  aria-expanded={accountOpen}
+                  onClick={() => setAccountOpen((o) => !o)}
                 >
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-100 to-indigo-100 ring-2 ring-white shadow-sm flex items-center justify-center text-pink-700 font-bold text-sm">
                     {user.name?.charAt(0).toUpperCase()}
                   </div>
+                  <svg className="hidden lg:block h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
                 <div
-                  className="absolute right-0 top-full pt-2 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all z-50"
+                  className={`absolute right-0 top-full z-50 pt-2 w-56 transition-all duration-150 ${
+                    accountOpen ? 'visible opacity-100' : 'invisible opacity-0 pointer-events-none'
+                  }`}
                   role="menu"
                 >
                   <div className="bg-white border border-gray-200/90 rounded-2xl shadow-xl shadow-gray-900/10 overflow-hidden py-1">
@@ -193,19 +223,21 @@ export default function Navbar() {
                       <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
                       <p className="text-xs text-gray-500 truncate">{user.email}</p>
                     </div>
-                    <Link href="/profile" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50">
+                    <Link href="/profile" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50" role="menuitem" onClick={() => setAccountOpen(false)}>
                       My profile
                     </Link>
-                    <Link href="/profile/orders" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50">
+                    <Link href="/profile/orders" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50" role="menuitem" onClick={() => setAccountOpen(false)}>
                       Orders
                     </Link>
-                    <Link href="/profile/wishlist" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50">
+                    <Link href="/profile/wishlist" className="block px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50" role="menuitem" onClick={() => setAccountOpen(false)}>
                       Wishlist
                     </Link>
                     {hasAdminAccess && (
                       <Link
                         href="/admin"
                         className="block px-4 py-2.5 text-sm text-purple-600 hover:bg-purple-50 font-medium"
+                        role="menuitem"
+                        onClick={() => setAccountOpen(false)}
                       >
                         Admin
                       </Link>
@@ -214,6 +246,7 @@ export default function Navbar() {
                       type="button"
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 border-t border-gray-100"
+                      role="menuitem"
                     >
                       Log out
                     </button>
@@ -329,8 +362,8 @@ export default function Navbar() {
             <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
               <Link
                 href="/cart"
-                className="inline-flex flex-1 min-w-[8rem] items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-gray-800 hover:bg-gray-50"
                 onClick={() => setMenuOpen(false)}
+                className="inline-flex flex-1 min-w-[8rem] items-center justify-center gap-2 rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-gray-800 hover:bg-gray-50"
               >
                 <CartIcon className="w-5 h-5" />
                 Cart {cartCount > 0 ? `(${cartCount})` : ''}

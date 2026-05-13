@@ -74,8 +74,17 @@ const authSlice = createSlice({
         state.loading = false;
         state.initialized = true;
       })
+      .addCase(logoutUser.pending, (state) => {
+        state.user = null;
+      })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
+        state.loading = false;
+        state.initialized = true;
+      })
+      .addCase(logoutUser.rejected, (state) => {
+        state.user = null;
+        state.loading = false;
         state.initialized = true;
       });
   },

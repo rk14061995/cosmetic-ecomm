@@ -3,8 +3,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { getSiteName } from '@/lib/seo';
 
 export default function ForgotPasswordPage() {
+  const siteName = getSiteName();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -27,7 +29,7 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-3xl shadow-sm border border-slate-200 p-8">
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-black text-indigo-700 tracking-tight">Glowzy</Link>
+          <Link href="/" className="text-3xl font-black text-indigo-700 tracking-tight">{siteName}</Link>
           <h1 className="text-xl font-bold text-gray-900 mt-3">{sent ? 'Check your email' : 'Forgot Password'}</h1>
           <p className="text-gray-500 text-sm mt-1">
             {sent ? `We've sent a reset link to ${email}` : 'Enter your email and we\'ll send a reset link'}

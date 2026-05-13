@@ -1,12 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { addToCart } from '@/store/slices/cartSlice';
 import api from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { useAuthStatus } from '@/hooks/useAuthStatus';
 
 /** Inline gradients: Tailwind `from-pink-*` + `bg-gradient-to-r` is broken by globals.css palette overrides. */
 const TIER_CONFIG: Record<
@@ -36,7 +37,7 @@ export default function MysteryBoxesPage() {
   const [selected, setSelected] = useState<any>(null);
   const dispatch = useDispatch<any>();
   const router = useRouter();
-  const { user } = useSelector((state: any) => state.auth);
+  const { user, authReady } = useAuthStatus();
 
   useEffect(() => {
     api.get('/mystery-boxes')
@@ -46,6 +47,7 @@ export default function MysteryBoxesPage() {
   }, []);
 
   const handleAddToCart = async (box: any) => {
+    if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
     const result = await dispatch(addToCart({ itemId: box._id, itemType: 'mysteryBox', quantity: 1 } as any));
     if (addToCart.fulfilled.match(result)) {

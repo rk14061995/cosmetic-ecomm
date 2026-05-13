@@ -1,19 +1,51 @@
 'use client';
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '@/store/slices/authSlice';
 import { fetchCart } from '@/store/slices/cartSlice';
 import toast from 'react-hot-toast';
+import { getSiteName } from '@/lib/seo';
 
 function LoginForm() {
+  const siteName = getSiteName();
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch<any>();
+  const { user, initialized } = useSelector((state: any) => state.auth);
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPwd, setShowPwd] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!initialized) return;
+    if (user) {
+      router.replace(searchParams.get('redirect') || '/');
+    }
+  }, [initialized, user, router, searchParams]);
+
+  if (!initialized) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-3 text-gray-500">
+          <svg className="h-8 w-8 animate-spin text-indigo-500" fill="none" viewBox="0 0 24 24" aria-hidden>
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+          <p className="text-sm font-medium">Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 flex items-center justify-center px-4">
+        <p className="text-sm text-gray-500">Redirecting…</p>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +67,7 @@ function LoginForm() {
       <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-3xl shadow-sm border border-slate-200 p-8">
         <div className="text-center mb-8">
           <Link href="/" className="text-3xl font-black text-indigo-700 tracking-tight">
-            Glowzy
+            {siteName}
           </Link>
           <h1 className="text-xl font-bold text-gray-900 mt-3">Welcome back</h1>
           <p className="text-gray-500 text-sm mt-1">Sign in to your account</p>

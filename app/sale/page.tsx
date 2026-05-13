@@ -1,11 +1,12 @@
 'use client';
 import { useState, useEffect, useRef, Fragment } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { addToCart } from '@/store/slices/cartSlice';
 import { formatPrice } from '@/lib/utils';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useAuthStatus } from '@/hooks/useAuthStatus';
 
 // ─── Countdown Timer ──────────────────────────────────────────────────────────
 
@@ -79,7 +80,7 @@ function CountdownTimer({ endsAt }: { endsAt: number }) {
 function SaleCard({ product, endsAt }: { product: any; endsAt: number }) {
   const dispatch = useDispatch<any>();
   const router = useRouter();
-  const { user } = useSelector((state: any) => state.auth);
+  const { user, authReady } = useAuthStatus();
   const [adding, setAdding] = useState(false);
 
   const originalPrice = product.price;
@@ -89,6 +90,7 @@ function SaleCard({ product, endsAt }: { product: any; endsAt: number }) {
     : 0;
 
   const handleAddToCart = async () => {
+    if (!authReady) return;
     if (!user) {
       router.push('/auth/login');
       return;
@@ -257,7 +259,7 @@ export default function SalePage() {
   const endTimesRef = useRef<Record<string, number>>({});
 
   useEffect(() => {
-    document.title = 'Flash Sale | Glowzy';
+    document.title = `Flash Sale | ${process.env.NEXT_PUBLIC_SITE_NAME || 'KosmeticX'}`;
   }, []);
 
   useEffect(() => {

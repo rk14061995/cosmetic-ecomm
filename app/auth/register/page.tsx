@@ -6,8 +6,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { registerUser } from '@/store/slices/authSlice';
 import { fetchCart } from '@/store/slices/cartSlice';
 import toast from 'react-hot-toast';
+import { getSiteName } from '@/lib/seo';
 
 function RegisterForm() {
+  const siteName = getSiteName();
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch<any>();
@@ -24,7 +26,7 @@ function RegisterForm() {
     const result = await dispatch(registerUser(form as any));
     if (registerUser.fulfilled.match(result)) {
       dispatch(fetchCart());
-      toast.success(`Welcome to Glowzy, ${result.payload.user.name}!`);
+      toast.success(`Welcome to ${siteName}, ${result.payload.user.name}!`);
       router.push('/');
     } else {
       toast.error(result.payload as string || 'Registration failed');
@@ -36,7 +38,7 @@ function RegisterForm() {
       <div className="w-full max-w-md bg-white/95 backdrop-blur rounded-3xl shadow-sm border border-slate-200 p-8">
         <div className="text-center mb-8">
           <Link href="/" className="text-3xl font-black text-indigo-700 tracking-tight">
-            Glowzy
+            {siteName}
           </Link>
           <h1 className="text-xl font-bold text-gray-900 mt-3">Create your account</h1>
           <p className="text-gray-500 text-sm mt-1">Join thousands of beauty lovers</p>
