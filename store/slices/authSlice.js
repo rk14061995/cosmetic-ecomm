@@ -1,11 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '@/lib/api';
+import { persistAuthTokens, clearAuthTokens } from '@/lib/authTokens';
+import { getAttributionForRegister, clearStoredAttribution } from '@/lib/attribution';
 
 export const loginUser = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
   try {
     const { data } = await api.post('/auth/login', credentials);
-    localStorage.setItem('accessToken', data.accessToken);
-    localStorage.setItem('refreshToken', data.refreshToken);
+    persistAuthTokens(data.accessToken, data.refreshToken);
     return data;
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || 'Login failed');
@@ -14,9 +15,12 @@ export const loginUser = createAsyncThunk('auth/login', async (credentials, { re
 
 export const registerUser = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
   try {
-    const { data } = await api.post('/auth/register', userData);
-    localStorage.setItem('accessToken', data.accessToken);
-    localStorage.setItem('refreshToken', data.refreshToken);
+    const attribution = getAttributionForRegister();
+    const payload =
+      attribution && attribution.source ? { ...userData, attribution } : userData;
+    const { data } = await api.post('/auth/register', payload);
+    if (attribution && attribution.source) clearStoredAttribution();
+    persistAuthTokens(data.accessToken, data.refreshToken);
     return data;
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || 'Registration failed');
@@ -34,8 +38,7 @@ export const fetchProfile = createAsyncThunk('auth/fetchProfile', async (_, { re
 
 export const logoutUser = createAsyncThunk('auth/logout', async () => {
   try { await api.post('/auth/logout'); } catch {}
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
+  clearAuthTokens();
 });
 
 const authSlice = createSlice({

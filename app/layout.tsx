@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import Providers from '@/components/Providers';
 import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import ConditionalFooter from '@/components/layout/ConditionalFooter';
 import OrganizationJsonLd from '@/components/seo/OrganizationJsonLd';
 import { Toaster } from 'react-hot-toast';
 import {
@@ -60,7 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <Navbar />
           <main className="min-h-screen">{children}</main>
-          <Footer />
+          <ConditionalFooter />
           <Toaster
             position="top-right"
             toastOptions={{

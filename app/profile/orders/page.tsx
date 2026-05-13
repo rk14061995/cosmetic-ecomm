@@ -2,7 +2,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
+import { persistOrderForInvoicePage } from '@/lib/orderInvoiceTransfer';
 import { formatPrice, formatDate } from '@/lib/utils';
+import { getPublicOrderRef, formatOrderLabelForDisplay } from '@/lib/orderDisplay';
 import toast from 'react-hot-toast';
 import { useRequireUser } from '@/hooks/useRequireUser';
 
@@ -80,7 +82,6 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
-  const [invoiceLoadingId, setInvoiceLoadingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authReady || !user) {
@@ -97,10 +98,12 @@ export default function OrdersPage() {
     if (!confirm('Are you sure you want to cancel this order?')) return;
     setCancellingId(orderId);
     try {
-      await api.put(`/orders/${orderId}/cancel`, { reason: 'Cancelled by user' });
-      setOrders((prev) => prev.map((o) =>
-        o._id === orderId ? { ...o, orderStatus: 'Cancelled', statusHistory: [...(o.statusHistory || []), { status: 'Cancelled', timestamp: new Date(), note: 'Cancelled by user' }] } : o
-      ));
+      const { data } = await api.put(`/orders/${encodeURIComponent(orderId)}/cancel`, { reason: 'Cancelled by user' });
+      if (data?.order?._id) {
+        setOrders((prev) => prev.map((o) =>
+          String(o._id) === String(data.order._id) ? { ...o, ...data.order } : o
+        ));
+      }
       toast.success('Order cancelled successfully');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to cancel order');
@@ -109,17 +112,15 @@ export default function OrdersPage() {
     }
   };
 
-  const handleViewInvoice = async (orderId: string) => {
-    setInvoiceLoadingId(orderId);
+  const handleViewInvoice = (publicRef: string, order: Record<string, unknown>) => {
     try {
-      const { data } = await api.get(`/orders/${orderId}/invoice`);
-      if (!data?.invoiceUrl) throw new Error('Missing invoice URL');
-      window.open(data.invoiceUrl, '_blank', 'noopener,noreferrer');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Unable to open invoice');
-    } finally {
-      setInvoiceLoadingId(null);
+      persistOrderForInvoicePage(publicRef, order);
+    } catch {
+      toast.error('Could not open invoice. Try again.');
+      return;
     }
+    const path = `/profile/orders/${encodeURIComponent(publicRef)}/invoice`;
+    window.open(path, '_blank', 'noopener,noreferrer');
   };
 
   if (!authReady) {
@@ -178,8 +179,9 @@ export default function OrdersPage() {
         ) : (
           <div className="space-y-5">
             {orders.map((order) => {
+              const publicRef = getPublicOrderRef(order);
               const isExpanded = expandedOrder === order._id;
-              const isCancelling = cancellingId === order._id;
+              const isCancelling = cancellingId === publicRef;
 
               return (
                 <div
@@ -192,7 +194,7 @@ export default function OrdersPage() {
                       <div className="flex items-center gap-4 flex-wrap">
                         <div>
                           <p className="text-xs text-slate-400 uppercase tracking-widest font-medium mb-1">Order ID</p>
-                          <p className="font-mono font-bold text-slate-900">#{order._id.slice(-8).toUpperCase()}</p>
+                          <p className="font-mono font-bold text-slate-900">{formatOrderLabelForDisplay(order)}</p>
                         </div>
                         <div className="w-px h-10 bg-slate-100 hidden sm:block" />
                         <div>
@@ -235,16 +237,16 @@ export default function OrdersPage() {
                       <div className="flex items-center gap-2 flex-shrink-0 ml-4">
                         {order.isPaid && (
                           <button
-                            onClick={() => handleViewInvoice(order._id)}
-                            disabled={invoiceLoadingId === order._id}
-                            className="text-xs text-indigo-700 hover:text-indigo-800 font-semibold border border-indigo-200 hover:border-indigo-300 hover:bg-indigo-50 px-3 py-1.5 rounded-full transition-all disabled:opacity-60"
+                            type="button"
+                            onClick={() => handleViewInvoice(publicRef, order)}
+                            className="text-xs text-indigo-700 hover:text-indigo-800 font-semibold border border-indigo-200 hover:border-indigo-300 hover:bg-indigo-50 px-3 py-1.5 rounded-full transition-all"
                           >
-                            {invoiceLoadingId === order._id ? 'Opening…' : 'Invoice'}
+                            Invoice
                           </button>
                         )}
                         {['Pending', 'Paid'].includes(order.orderStatus) && (
                           <button
-                            onClick={() => handleCancel(order._id)}
+                            onClick={() => handleCancel(publicRef)}
                             disabled={isCancelling}
                             className="text-xs text-rose-600 hover:text-rose-700 font-semibold border border-rose-200 hover:border-rose-300 px-3 py-1.5 rounded-full transition-all disabled:opacity-50"
                           >

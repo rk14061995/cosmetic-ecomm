@@ -2,6 +2,15 @@
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import {
+  AdminPageHeader,
+  adminInput,
+  adminLabel,
+  adminPanel,
+  adminStack,
+  btnPrimary,
+  btnSecondary,
+} from '@/components/admin/ui';
 
 const EMPTY_FORM = { title: '', creator: '', image: '', ctaLink: '/mystery-boxes', section: 'mystery-boxes', isActive: true, sortOrder: 0 };
 
@@ -43,56 +52,53 @@ export default function AdminReelsPage() {
     catch (err: any) { toast.error(err.response?.data?.message || 'Failed to delete reel'); }
   };
 
-  const inputCls = 'w-full border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 bg-white';
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Unboxing Reels</h1>
-        <p className="text-sm text-slate-500 mt-1">Manage social proof reels shown on the homepage</p>
-      </div>
+    <div className={adminStack}>
+      <AdminPageHeader
+        title="Unboxing reels"
+        description="Manage social proof reels shown on the homepage and mystery box funnel."
+      />
 
-      {/* Form */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-        <h2 className="font-semibold text-slate-900 mb-4">{editing ? 'Edit Reel' : 'Add New Reel'}</h2>
-        <form onSubmit={submit} className="grid md:grid-cols-2 gap-4">
+      <div className={`${adminPanel} p-6`}>
+        <h2 className="mb-4 text-sm font-semibold text-slate-900">{editing ? 'Edit reel' : 'Add new reel'}</h2>
+        <form onSubmit={submit} className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Reel Title *</label>
+            <label className={adminLabel}>Reel title *</label>
             <input value={form.title} onChange={(e) => setForm((p: any) => ({ ...p, title: e.target.value }))}
-              placeholder="e.g. Unboxing Premium Box" required className={inputCls} />
+              placeholder="e.g. Unboxing Premium Box" required className={adminInput} />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Creator Handle *</label>
+            <label className={adminLabel}>Creator handle *</label>
             <input value={form.creator} onChange={(e) => setForm((p: any) => ({ ...p, creator: e.target.value }))}
-              placeholder="@riya.beauty" required className={inputCls} />
+              placeholder="@riya.beauty" required className={adminInput} />
           </div>
           <div className="md:col-span-2">
-            <label className="block text-xs font-medium text-slate-600 mb-1">Image URL *</label>
+            <label className={adminLabel}>Image URL *</label>
             <input value={form.image} onChange={(e) => setForm((p: any) => ({ ...p, image: e.target.value }))}
-              placeholder="https://res.cloudinary.com/…" required className={inputCls} />
+              placeholder="https://res.cloudinary.com/…" required className={adminInput} />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">CTA Link</label>
+            <label className={adminLabel}>CTA link</label>
             <input value={form.ctaLink} onChange={(e) => setForm((p: any) => ({ ...p, ctaLink: e.target.value }))}
-              placeholder="/mystery-boxes" className={inputCls} />
+              placeholder="/mystery-boxes" className={adminInput} />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Sort Order</label>
+            <label className={adminLabel}>Sort order</label>
             <input type="number" value={form.sortOrder} onChange={(e) => setForm((p: any) => ({ ...p, sortOrder: Number(e.target.value) }))}
-              className={inputCls} />
+              className={adminInput} />
           </div>
           <div className="md:col-span-2">
-            <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
-              <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((p: any) => ({ ...p, isActive: e.target.checked }))} className="accent-violet-600" />
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+              <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((p: any) => ({ ...p, isActive: e.target.checked }))} className="accent-indigo-600" />
               Active (visible on homepage)
             </label>
           </div>
-          <div className="md:col-span-2 flex gap-3">
-            <button type="submit" disabled={saving} className="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-5 py-2.5 rounded-xl disabled:opacity-50 transition-colors">
-              {saving ? 'Saving…' : editing ? 'Update Reel' : 'Add Reel'}
+          <div className="flex flex-wrap gap-3 md:col-span-2">
+            <button type="submit" disabled={saving} className={btnPrimary}>
+              {saving ? 'Saving…' : editing ? 'Update reel' : 'Add reel'}
             </button>
             {editing && (
-              <button type="button" onClick={resetForm} className="border border-slate-200 px-5 py-2.5 rounded-xl hover:bg-slate-50 font-medium text-slate-700 transition-colors">
+              <button type="button" onClick={resetForm} className={btnSecondary}>
                 Cancel
               </button>
             )}
@@ -100,10 +106,9 @@ export default function AdminReelsPage() {
         </form>
       </div>
 
-      {/* Reels List */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100">
-          <h2 className="font-semibold text-slate-900">Existing Reels</h2>
+      <div className={`${adminPanel} overflow-hidden`}>
+        <div className="border-b border-slate-200/90 px-6 py-4">
+          <h2 className="text-sm font-semibold text-slate-900">Existing reels</h2>
         </div>
         {loading ? (
           <div className="p-6 space-y-3">
@@ -123,15 +128,15 @@ export default function AdminReelsPage() {
                     </span>
                   </div>
                   <p className="text-xs text-slate-500">{reel.creator} &middot; Order: {reel.sortOrder}</p>
-                  <p className="text-xs text-violet-500 mt-1 truncate max-w-sm">{reel.image}</p>
+                  <p className="mt-1 max-w-sm truncate text-xs text-indigo-600">{reel.image}</p>
                 </div>
-                <div className="flex gap-2 flex-shrink-0">
-                  <button onClick={() => { setEditing(reel); setForm({ ...reel }); }}
-                    className="text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-200 font-medium transition-colors">
+                <div className="flex flex-shrink-0 flex-wrap gap-2">
+                  <button type="button" onClick={() => { setEditing(reel); setForm({ ...reel }); }}
+                    className={`${btnSecondary} px-3 py-1.5 text-xs`}>
                     Edit
                   </button>
-                  <button onClick={() => deleteReel(reel._id)}
-                    className="text-xs bg-red-100 text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-200 font-medium transition-colors">
+                  <button type="button" onClick={() => deleteReel(reel._id)}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-medium text-rose-900 shadow-sm transition hover:bg-rose-100">
                     Delete
                   </button>
                 </div>

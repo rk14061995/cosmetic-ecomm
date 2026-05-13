@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { fetchCart } from '@/store/slices/cartSlice';
 import api from '@/lib/api';
 import { formatPrice, loadRazorpayScript } from '@/lib/utils';
+import { formatOrderLabelForDisplay } from '@/lib/orderDisplay';
 import toast from 'react-hot-toast';
 import { useRequireUser } from '@/hooks/useRequireUser';
 import { INDIAN_STATES_AND_UTS } from '@/data/indianStates';
@@ -162,6 +163,7 @@ export default function CheckoutPage() {
       });
 
       const order = orderRes.order;
+      const orderLabel = formatOrderLabelForDisplay(order);
 
       const loaded = await loadRazorpayScript();
       if (!loaded) { toast.error('Failed to load payment gateway'); setPlacing(false); return; }
@@ -180,7 +182,7 @@ export default function CheckoutPage() {
         // Brand identity shown in the Razorpay modal
         name:        process.env.NEXT_PUBLIC_SITE_NAME || 'KosmeticX',
         image:       `${process.env.NEXT_PUBLIC_SITE_URL || ''}/logo.png`,
-        description: `Order #${order._id.slice(-8).toUpperCase()} · ${items.length} item${items.length > 1 ? 's' : ''}`,
+        description: `${orderLabel} · ${items.length} item${items.length > 1 ? 's' : ''}`,
 
         order_id: rpData.razorpayOrderId,
 
@@ -194,6 +196,7 @@ export default function CheckoutPage() {
         // Shipping address passed as notes — visible in Razorpay dashboard for every payment
         notes: {
           order_id:       order._id,
+          order_number:   order.orderNumber || '',
           customer_name:  user.name,
           customer_email: user.email,
           customer_phone: user.phone || selectedAddress?.phone || '',

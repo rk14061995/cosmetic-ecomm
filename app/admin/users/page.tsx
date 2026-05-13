@@ -1,8 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import api from '@/lib/api';
 import { formatDate, formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
+import { AdminPageHeader, adminPanel, adminStack, adminTableHead, adminInput, btnSecondary } from '@/components/admin/ui';
+
+type AcqStat = { source: string; count: number };
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
@@ -10,6 +14,7 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState('');
   const [pagination, setPagination] = useState<any>(null);
   const [page, setPage] = useState(1);
+  const [acqStats, setAcqStats] = useState<AcqStat[]>([]);
 
   const fetchUsers = () => {
     const params = new URLSearchParams({ page: String(page), limit: '20' });
@@ -20,7 +25,16 @@ export default function AdminUsersPage() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { fetchUsers(); }, [search, page]);
+  useEffect(() => {
+    fetchUsers();
+  }, [search, page]);
+
+  useEffect(() => {
+    api
+      .get('/users/acquisition-stats')
+      .then(({ data }) => setAcqStats(data.stats || []))
+      .catch(() => setAcqStats([]));
+  }, []);
 
   const toggleBlock = async (userId: string, name: string, isBlocked: boolean) => {
     if (!confirm(`${isBlocked ? 'Unblock' : 'Block'} user "${name}"?`)) return;
@@ -32,29 +46,71 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Users</h1>
-        <p className="text-sm text-slate-500 mt-1">Manage customer accounts and access</p>
-      </div>
+    <div className={adminStack}>
+      <AdminPageHeader
+        title="Customers"
+        description="Accounts, wallet balances, referral codes, and acquisition source for each signup."
+      />
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
-        <div className="relative max-w-sm">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      {acqStats.length > 0 && (
+        <div className={`${adminPanel} p-5 sm:p-6`}>
+          <h2 className="text-sm font-semibold text-slate-900">Acquisition</h2>
+          <p className="mt-0.5 text-xs text-slate-500">Signups grouped by first-touch campaign parameter</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {acqStats.map((row) => (
+              <span
+                key={row.source}
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700"
+              >
+                <span className="capitalize text-slate-600">{row.source}</span>
+                <span className="tabular-nums font-semibold text-slate-900">{row.count}</span>
+              </span>
+            ))}
+          </div>
+          <p className="mt-4 text-xs leading-relaxed text-slate-500">
+            Share the <span className="font-medium text-slate-700">acquisition</span> URL from{' '}
+            <Link href="/admin/marketing-links" className="font-medium text-indigo-700 underline decoration-indigo-300 underline-offset-2 hover:text-indigo-900">
+              Acquisition links
+            </Link>{' '}
+            (or any URL with{' '}
+            <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-slate-700">?utm_source=…</code> or{' '}
+            <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-slate-700">?from=…</code>). Do not use{' '}
+            <code className="rounded bg-slate-100 px-1 py-0.5 font-mono text-slate-700">ref</code> — reserved for referral codes.
+          </p>
+        </div>
+      )}
+
+      <div className={`${adminPanel} p-4 sm:p-5`}>
+        <div className="relative max-w-md">
+          <svg
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
-          <input type="text" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search by name or email…"
-            className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-400" />
+            className={`${adminInput} pl-10`}
+          />
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className={`${adminPanel} overflow-hidden`}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs text-slate-400 font-semibold uppercase tracking-wide bg-slate-50 border-b border-slate-100">
+              <tr className={adminTableHead}>
                 <th className="px-5 py-3">User</th>
+                <th className="px-5 py-3">Source</th>
                 <th className="px-5 py-3">Phone</th>
                 <th className="px-5 py-3">Wallet</th>
                 <th className="px-5 py-3">Referral Code</th>
@@ -66,15 +122,15 @@ export default function AdminUsersPage() {
             <tbody className="divide-y divide-slate-50">
               {loading ? (
                 [...Array(5)].map((_, i) => (
-                  <tr key={i}><td colSpan={7} className="px-5 py-3">
+                  <tr key={i}><td colSpan={8} className="px-5 py-3">
                     <div className="h-4 bg-slate-100 animate-pulse rounded-lg" />
                   </td></tr>
                 ))
               ) : users.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-14 text-slate-400">No users found</td></tr>
+                <tr><td colSpan={8} className="text-center py-14 text-slate-400">No users found</td></tr>
               ) : (
                 users.map((user) => (
-                  <tr key={user._id} className="hover:bg-slate-50/60 transition-colors">
+                  <tr key={user._id} className="transition-colors hover:bg-slate-50/90">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-600 font-bold text-sm flex-shrink-0">
@@ -85,6 +141,14 @@ export default function AdminUsersPage() {
                           <p className="text-xs text-slate-400">{user.email}</p>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="text-xs font-semibold capitalize text-slate-600">
+                        {user.acquisitionSource?.trim() ? user.acquisitionSource : 'direct'}
+                      </span>
+                      {user.acquisitionMedium?.trim() ? (
+                        <p className="text-[10px] text-slate-400 mt-0.5">{user.acquisitionMedium}</p>
+                      ) : null}
                     </td>
                     <td className="px-5 py-4 text-slate-500 text-sm">{user.phone || '—'}</td>
                     <td className="px-5 py-4 font-semibold text-slate-800">{formatPrice(user.wallet || 0)}</td>
@@ -99,8 +163,13 @@ export default function AdminUsersPage() {
                       </span>
                     </td>
                     <td className="px-5 py-4">
-                      <button onClick={() => toggleBlock(user._id, user.name, user.isBlocked)}
-                        className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${user.isBlocked ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}>
+                      <button
+                        type="button"
+                        onClick={() => toggleBlock(user._id, user.name, user.isBlocked)}
+                        className={`${btnSecondary} px-3 py-1.5 text-xs ${
+                          user.isBlocked ? 'border-emerald-200 text-emerald-800 hover:bg-emerald-50' : 'border-rose-200 text-rose-800 hover:bg-rose-50'
+                        }`}
+                      >
                         {user.isBlocked ? 'Unblock' : 'Block'}
                       </button>
                     </td>
