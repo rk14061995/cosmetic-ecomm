@@ -7,6 +7,7 @@ import { formatPrice, formatDate } from '@/lib/utils';
 import { getPublicOrderRef, formatOrderLabelForDisplay } from '@/lib/orderDisplay';
 import toast from 'react-hot-toast';
 import { useRequireUser } from '@/hooks/useRequireUser';
+import type { Order, OrderItem, OrderStatusHistory, ApiError } from '@/types/api';
 
 const STATUS_STEPS = ['Pending', 'Paid', 'Processing', 'Shipped', 'Delivered'];
 
@@ -30,7 +31,7 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function StatusTimeline({ history, currentStatus }: { history: any[]; currentStatus: string }) {
+function StatusTimeline({ history, currentStatus }: { history: OrderStatusHistory[]; currentStatus: string }) {
   const isCancelled = currentStatus === 'Cancelled';
   const currentIdx = STATUS_STEPS.indexOf(currentStatus);
 
@@ -78,14 +79,15 @@ function StatusTimeline({ history, currentStatus }: { history: any[]; currentSta
 
 export default function OrdersPage() {
   const { user, authReady, isAuthed } = useRequireUser();
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authReady || !user) {
-      if (authReady && !user) setLoading(false);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (authReady && !user) setLoading(false);
       return;
     }
     api.get('/orders/my-orders')
@@ -105,14 +107,14 @@ export default function OrdersPage() {
         ));
       }
       toast.success('Order cancelled successfully');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to cancel order');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to cancel order');
     } finally {
       setCancellingId(null);
     }
   };
 
-  const handleViewInvoice = (publicRef: string, order: Record<string, unknown>) => {
+  const handleViewInvoice = (publicRef: string, order: Order) => {
     try {
       persistOrderForInvoicePage(publicRef, order);
     } catch {
@@ -215,14 +217,14 @@ export default function OrdersPage() {
                     {/* Status Timeline */}
                     {order.orderStatus !== 'Cancelled' && order.orderStatus !== 'Refunded' && (
                       <div className="mb-5 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                        <StatusTimeline history={order.statusHistory} currentStatus={order.orderStatus} />
+                        <StatusTimeline history={order.statusHistory ?? []} currentStatus={order.orderStatus} />
                       </div>
                     )}
 
                     {/* Items preview */}
                     <div className="flex items-center justify-between">
                       <div className="flex flex-wrap gap-x-3 gap-y-1">
-                        {order.orderItems.slice(0, 3).map((item: any, i: number) => (
+                        {order.orderItems.slice(0, 3).map((item: OrderItem, i: number) => (
                           <span key={i} className="text-sm text-slate-600">
                             {item.name}
                             <span className="text-slate-400"> ×{item.quantity}</span>
@@ -273,7 +275,7 @@ export default function OrdersPage() {
                         <div>
                           <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Items & Pricing</h4>
                           <div className="space-y-3">
-                            {order.orderItems.map((item: any) => (
+                            {order.orderItems.map((item: OrderItem) => (
                               <div key={item._id} className="flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-2 min-w-0">
                                   <div className="w-8 h-8 rounded-xl bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0">
@@ -301,13 +303,13 @@ export default function OrdersPage() {
                                 {order.shippingPrice === 0 ? 'FREE' : formatPrice(order.shippingPrice)}
                               </span>
                             </div>
-                            {order.discountAmount > 0 && (
+                            {(order.discountAmount ?? 0) > 0 && (
                               <div className="flex justify-between text-sm text-emerald-600 font-medium">
                                 <span>Discount {order.couponCode && <span className="text-xs font-mono bg-emerald-100 px-1.5 py-0.5 rounded-md ml-1">{order.couponCode}</span>}</span>
                                 <span>− {formatPrice(order.discountAmount)}</span>
                               </div>
                             )}
-                            {order.walletAmountUsed > 0 && (
+                            {(order.walletAmountUsed ?? 0) > 0 && (
                               <div className="flex justify-between text-sm text-blue-600 font-medium">
                                 <span>Wallet Used</span>
                                 <span>− {formatPrice(order.walletAmountUsed)}</span>
@@ -345,7 +347,7 @@ export default function OrdersPage() {
                           <div>
                             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Status History</h4>
                             <div className="space-y-2">
-                              {order.statusHistory?.map((h: any, i: number) => (
+                              {order.statusHistory?.map((h, i: number) => (
                                 <div key={i} className="flex items-start gap-3">
                                   <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0 mt-0.5 bg-slate-900 text-white">
                                     ●

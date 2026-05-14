@@ -11,18 +11,19 @@ import {
   btnPrimary,
   btnSecondary,
 } from '@/components/admin/ui';
+import type { Reel, ApiError } from '@/types/api';
 
 const EMPTY_FORM = { title: '', creator: '', image: '', ctaLink: '/mystery-boxes', section: 'mystery-boxes', isActive: true, sortOrder: 0 };
+type ReelForm = typeof EMPTY_FORM;
 
 export default function AdminReelsPage() {
-  const [reels, setReels] = useState<any[]>([]);
+  const [reels, setReels] = useState<Reel[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState<any>(EMPTY_FORM);
-  const [editing, setEditing] = useState<any>(null);
+  const [form, setForm] = useState<ReelForm>(EMPTY_FORM);
+  const [editing, setEditing] = useState<Reel | null>(null);
   const [saving, setSaving] = useState(false);
 
   const fetchReels = () => {
-    setLoading(true);
     api.get('/reels?includeInactive=true&section=mystery-boxes')
       .then(({ data }) => setReels(data.reels || []))
       .catch(() => toast.error('Failed to load reels'))
@@ -41,15 +42,15 @@ export default function AdminReelsPage() {
       else { await api.post('/reels', form); toast.success('Reel created'); }
       fetchReels();
       resetForm();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to save reel');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to save reel');
     } finally { setSaving(false); }
   };
 
   const deleteReel = async (id: string) => {
     if (!confirm('Delete this reel?')) return;
     try { await api.delete(`/reels/${id}`); toast.success('Reel deleted'); fetchReels(); }
-    catch (err: any) { toast.error(err.response?.data?.message || 'Failed to delete reel'); }
+    catch (err) { toast.error((err as ApiError).response?.data?.message || 'Failed to delete reel'); }
   };
 
   return (
@@ -64,32 +65,32 @@ export default function AdminReelsPage() {
         <form onSubmit={submit} className="grid gap-4 md:grid-cols-2">
           <div>
             <label className={adminLabel}>Reel title *</label>
-            <input value={form.title} onChange={(e) => setForm((p: any) => ({ ...p, title: e.target.value }))}
+            <input value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
               placeholder="e.g. Unboxing Premium Box" required className={adminInput} />
           </div>
           <div>
             <label className={adminLabel}>Creator handle *</label>
-            <input value={form.creator} onChange={(e) => setForm((p: any) => ({ ...p, creator: e.target.value }))}
+            <input value={form.creator} onChange={(e) => setForm((p) => ({ ...p, creator: e.target.value }))}
               placeholder="@riya.beauty" required className={adminInput} />
           </div>
           <div className="md:col-span-2">
             <label className={adminLabel}>Image URL *</label>
-            <input value={form.image} onChange={(e) => setForm((p: any) => ({ ...p, image: e.target.value }))}
+            <input value={form.image} onChange={(e) => setForm((p) => ({ ...p, image: e.target.value }))}
               placeholder="https://res.cloudinary.com/…" required className={adminInput} />
           </div>
           <div>
             <label className={adminLabel}>CTA link</label>
-            <input value={form.ctaLink} onChange={(e) => setForm((p: any) => ({ ...p, ctaLink: e.target.value }))}
+            <input value={form.ctaLink} onChange={(e) => setForm((p) => ({ ...p, ctaLink: e.target.value }))}
               placeholder="/mystery-boxes" className={adminInput} />
           </div>
           <div>
             <label className={adminLabel}>Sort order</label>
-            <input type="number" value={form.sortOrder} onChange={(e) => setForm((p: any) => ({ ...p, sortOrder: Number(e.target.value) }))}
+            <input type="number" value={form.sortOrder} onChange={(e) => setForm((p) => ({ ...p, sortOrder: Number(e.target.value) }))}
               className={adminInput} />
           </div>
           <div className="md:col-span-2">
             <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
-              <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((p: any) => ({ ...p, isActive: e.target.checked }))} className="accent-indigo-600" />
+              <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))} className="accent-indigo-600" />
               Active (visible on homepage)
             </label>
           </div>
@@ -131,7 +132,7 @@ export default function AdminReelsPage() {
                   <p className="mt-1 max-w-sm truncate text-xs text-indigo-600">{reel.image}</p>
                 </div>
                 <div className="flex flex-shrink-0 flex-wrap gap-2">
-                  <button type="button" onClick={() => { setEditing(reel); setForm({ ...reel }); }}
+                  <button type="button" onClick={() => { setEditing(reel); setForm({ title: reel.title, creator: reel.creator, image: reel.image, ctaLink: reel.ctaLink || '/mystery-boxes', section: reel.section || 'mystery-boxes', isActive: reel.isActive, sortOrder: reel.sortOrder }); }}
                     className={`${btnSecondary} px-3 py-1.5 text-xs`}>
                     Edit
                   </button>

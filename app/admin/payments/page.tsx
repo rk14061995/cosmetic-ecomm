@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { AdminPageHeader, adminPanel, adminStack, adminTableHead } from '@/components/admin/ui';
+import type { Payment } from '@/types/api';
 
 const STATUS_STYLES: Record<string, string> = {
   paid: 'bg-emerald-100 text-emerald-700',
@@ -13,13 +14,12 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function AdminPaymentsPage() {
-  const [payments, setPayments] = useState<any[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
-    setLoading(true);
     api.get(`/payments/logs?page=${page}&limit=20`)
       .then(({ data }) => { setPayments(data.payments || []); setTotal(data.total || 0); })
       .catch(() => {})

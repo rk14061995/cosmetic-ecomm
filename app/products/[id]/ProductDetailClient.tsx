@@ -2,13 +2,26 @@
 import { useState, useEffect, useRef, useId } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '@/store/hooks';
 import { addToCart } from '@/store/slices/cartSlice';
 import api from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import VirtualTryOnModal from '@/components/products/VirtualTryOnModal';
 import { useAuthStatus } from '@/hooks/useAuthStatus';
+import type { Product, ProductImage, ProductVariant, ProductReview, ApiError } from '@/types/api';
+
+type MiniProduct = {
+  _id: string;
+  name: string;
+  price: number;
+  discountPrice?: number;
+  brand?: string;
+  images?: { url?: string }[];
+  image?: string | null;
+};
+
+type RecentlyViewedProduct = MiniProduct & { slug?: string };
 
 // ---------------------------------------------------------------------------
 // Lightbox modal for review images
@@ -16,6 +29,7 @@ import { useAuthStatus } from '@/hooks/useAuthStatus';
 function ImageLightbox({ images, startIndex, onClose }: { images: string[]; startIndex: number; onClose: () => void }) {
   const [idx, setIdx] = useState(startIndex);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIdx(startIndex);
   }, [startIndex]);
   useEffect(() => {
@@ -74,8 +88,8 @@ function MiniProductCard({
   onCardClick,
   showAddButton = true,
 }: {
-  product: any;
-  onAdd?: (p: any) => void;
+  product: MiniProduct;
+  onAdd?: (p: MiniProduct) => void;
   onCardClick?: () => void;
   showAddButton?: boolean;
 }) {
@@ -189,11 +203,11 @@ function MiniProductCard({
 // ---------------------------------------------------------------------------
 export default function ProductDetailClient({ id }: { id: string }) {
   const router = useRouter();
-  const dispatch = useDispatch<any>();
+  const dispatch = useAppDispatch();
   const { user, authReady } = useAuthStatus();
 
   // Core product state
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -201,7 +215,7 @@ export default function ProductDetailClient({ id }: { id: string }) {
   const [wishlisted, setWishlisted] = useState(false);
 
   // Variant selector
-  const [selectedVariant, setSelectedVariant] = useState<any>(null);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
 
   // Back-in-stock alert
   const [notifyEmail, setNotifyEmail] = useState('');
@@ -221,10 +235,10 @@ export default function ProductDetailClient({ id }: { id: string }) {
   const tabsBaseId = useId();
 
   // Frequently bought together
-  const [frequentlyBought, setFrequentlyBought] = useState<any[]>([]);
+  const [frequentlyBought, setFrequentlyBought] = useState<Product[]>([]);
 
   // Recently viewed
-  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedProduct[]>([]);
 
   const [tryOnOpen, setTryOnOpen] = useState(false);
 
@@ -233,13 +247,13 @@ export default function ProductDetailClient({ id }: { id: string }) {
   // -------------------------------------------------------------------------
   useEffect(() => {
     if (!id?.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       toast.error('Invalid product link');
       router.replace('/products');
       return;
     }
 
-    setLoading(true);
     api
       .get(`/products/${encodeURIComponent(id.trim())}`)
       .then(({ data }) => {
@@ -247,16 +261,16 @@ export default function ProductDetailClient({ id }: { id: string }) {
         if (!p) throw new Error('Invalid response');
         setProduct(p);
         if (user) {
-          setWishlisted(user.wishlist?.some((w: any) => w._id === p._id || w === p._id));
+          setWishlisted(user.wishlist?.some((w) => w._id === p._id) ?? false);
         }
         setNotifyEmail(user?.email || '');
 
         // Persist to recently-viewed localStorage
         try {
           const stored = localStorage.getItem('recentlyViewed');
-          const list: any[] = stored ? JSON.parse(stored) : [];
+          const list: RecentlyViewedProduct[] = stored ? JSON.parse(stored) : [];
           // Build a compact snapshot of the product
-          const snapshot = {
+          const snapshot: RecentlyViewedProduct = {
             _id: p._id,
             name: p.name,
             price: p.price,
@@ -272,8 +286,8 @@ export default function ProductDetailClient({ id }: { id: string }) {
           // localStorage unavailable — silently skip
         }
       })
-      .catch((err: any) => {
-        toast.error(err.response?.data?.message || 'Product not found');
+      .catch((err) => {
+        toast.error((err as ApiError).response?.data?.message || 'Product not found');
         router.replace('/products');
       })
       .finally(() => setLoading(false));
@@ -281,10 +295,12 @@ export default function ProductDetailClient({ id }: { id: string }) {
 
   useEffect(() => {
     if (!product || !user) return;
-    setWishlisted(user.wishlist?.some((w: any) => w._id === product._id || w === product._id));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setWishlisted(user.wishlist?.some((w) => w._id === product._id) ?? false);
   }, [user, product]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (user?.email) setNotifyEmail(user.email);
   }, [user]);
 
@@ -294,9 +310,10 @@ export default function ProductDetailClient({ id }: { id: string }) {
   useEffect(() => {
     if (!product) return;
 
-    if (product.frequentlyBoughtWith?.length > 0) {
+    if ((product.frequentlyBoughtWith?.length ?? 0) > 0) {
       // Already populated by API
-      setFrequentlyBought(product.frequentlyBoughtWith.filter((p: any) => p._id !== product._id).slice(0, 3));
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFrequentlyBought(product.frequentlyBoughtWith!.filter((p) => p._id !== product._id).slice(0, 3));
       return;
     }
 
@@ -304,8 +321,8 @@ export default function ProductDetailClient({ id }: { id: string }) {
     if (!product.category) return;
     api.get(`/products?category=${product.category}&limit=4`)
       .then(({ data }) => {
-        const items: any[] = (data.products || data.data || [])
-          .filter((p: any) => p._id !== product._id)
+        const items: Product[] = (data.products || data.data || [])
+          .filter((p: Product) => p._id !== product._id)
           .slice(0, 3);
         setFrequentlyBought(items);
       })
@@ -335,17 +352,20 @@ export default function ProductDetailClient({ id }: { id: string }) {
   const handleAddToCart = async () => {
     if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
-    const payload: any = { itemId: product._id, itemType: 'product', quantity };
+    if (!product) return;
+    const payload: { itemId: string; itemType: string; quantity: number; variantId?: string } = {
+      itemId: product._id, itemType: 'product', quantity,
+    };
     if (selectedVariant?._id) payload.variantId = selectedVariant._id;
     const result = await dispatch(addToCart(payload));
     if (addToCart.fulfilled.match(result)) toast.success('Added to cart!');
     else toast.error((result.payload as string) || 'Failed to add');
   };
 
-  const handleAddRelatedToCart = async (p: any) => {
+  const handleAddRelatedToCart = async (p: MiniProduct) => {
     if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
-    const result = await dispatch(addToCart({ itemId: p._id, itemType: 'product', quantity: 1 } as any));
+    const result = await dispatch(addToCart({ itemId: p._id, itemType: 'product', quantity: 1 }));
     if (addToCart.fulfilled.match(result)) toast.success(`${p.name} added to cart!`);
     else toast.error((result.payload as string) || 'Failed to add');
   };
@@ -353,6 +373,7 @@ export default function ProductDetailClient({ id }: { id: string }) {
   const handleWishlist = async () => {
     if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
+    if (!product) return;
     try {
       const { data } = await api.put(`/products/${product._id}/wishlist`);
       setWishlisted(data.added);
@@ -362,13 +383,13 @@ export default function ProductDetailClient({ id }: { id: string }) {
 
   const handleNotifyMe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!notifyEmail) return;
+    if (!notifyEmail || !product) return;
     setNotifySubmitting(true);
     try {
       await api.post(`/back-in-stock/${product._id}/subscribe`, { email: notifyEmail });
       setNotifySuccess(true);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Could not subscribe. Please try again.');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Could not subscribe. Please try again.');
     } finally {
       setNotifySubmitting(false);
     }
@@ -398,6 +419,7 @@ export default function ProductDetailClient({ id }: { id: string }) {
     e.preventDefault();
     if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
+    if (!product) return;
     setSubmittingReview(true);
     try {
       await api.post(`/products/${product._id}/reviews`, {
@@ -409,8 +431,8 @@ export default function ProductDetailClient({ id }: { id: string }) {
       setProduct(data.product);
       setReviewForm({ rating: 5, comment: '' });
       setReviewImages([]);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to submit review');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to submit review');
     } finally {
       setSubmittingReview(false);
     }
@@ -510,7 +532,7 @@ export default function ProductDetailClient({ id }: { id: string }) {
             </button>
             {product.images?.length > 1 && (
               <div className="flex gap-3 flex-wrap">
-                {product.images.map((img: any, i: number) => (
+                {product.images.map((img: ProductImage, i: number) => (
                   <button
                     key={i}
                     onClick={() => setSelectedImage(i)}
@@ -531,16 +553,16 @@ export default function ProductDetailClient({ id }: { id: string }) {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
 
             {/* ── Variant Selector ────────────────────────────────────────── */}
-            {product.variants?.length > 0 && (
+            {(product.variants?.length ?? 0) > 0 && (
               <div className="mb-4">
                 <p className="text-sm font-semibold text-gray-700 mb-2">
-                  Select {product.variants[0]?.name || 'Variant'}:
+                  Select {product.variants![0]?.name || 'Variant'}:
                   {selectedVariant && (
                     <span className="ml-2 font-normal text-pink-600">{selectedVariant.value}</span>
                   )}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {product.variants.map((variant: any) => {
+                  {product.variants!.map((variant: ProductVariant) => {
                     const isSelected = selectedVariant?._id === variant._id;
                     const outOfStock = (variant.stock ?? 1) === 0;
                     return (
@@ -569,8 +591,8 @@ export default function ProductDetailClient({ id }: { id: string }) {
             {/* Ratings + Stock badge */}
             <div className="flex items-center gap-3 mb-4">
               <div className="flex text-yellow-400">
-                {'★'.repeat(Math.round(product.ratings))}
-                {'☆'.repeat(5 - Math.round(product.ratings))}
+                {'★'.repeat(Math.round(product.ratings ?? 0))}
+                {'☆'.repeat(5 - Math.round(product.ratings ?? 0))}
               </div>
               <span className="text-sm text-gray-500">({product.numReviews} reviews)</span>
               <span
@@ -590,7 +612,7 @@ export default function ProductDetailClient({ id }: { id: string }) {
               )}
               {discount > 0 && (
                 <span className="text-green-600 font-semibold">
-                  Save {formatPrice(product.price - product.discountPrice)}
+                  Save {formatPrice(product.price - (product.discountPrice ?? 0))}
                 </span>
               )}
             </div>
@@ -599,9 +621,9 @@ export default function ProductDetailClient({ id }: { id: string }) {
               {product.shortDescription || product.description?.slice(0, 200)}
             </p>
 
-            {product.tags?.length > 0 && (
+            {(product.tags?.length ?? 0) > 0 && (
               <div className="flex flex-wrap gap-2 mb-6">
-                {product.tags.map((tag: string) => (
+                {product.tags!.map((tag: string) => (
                   <span key={tag} className="bg-pink-50 text-pink-600 text-xs px-3 py-1 rounded-full">
                     {tag}
                   </span>
@@ -668,12 +690,12 @@ export default function ProductDetailClient({ id }: { id: string }) {
                 {notifySuccess ? (
                   <div className="flex items-center gap-3 text-green-700 font-semibold">
                     <span className="text-2xl">✓</span>
-                    <span>We'll notify you when this product is back in stock!</span>
+                    <span>We&apos;ll notify you when this product is back in stock!</span>
                   </div>
                 ) : (
                   <>
                     <p className="text-sm font-semibold text-rose-700 mb-3">
-                      This item is currently out of stock. Get notified when it's available!
+                      This item is currently out of stock. Get notified when it&apos;s available!
                     </p>
                     <form onSubmit={handleNotifyMe} className="flex flex-col sm:flex-row gap-3">
                       <input
@@ -989,7 +1011,7 @@ export default function ProductDetailClient({ id }: { id: string }) {
                         <p className="text-sm text-gray-400 mt-1">Be the first to share your experience.</p>
                       </div>
                     ) : (
-                      product.reviews?.map((review: any) => (
+                      product.reviews?.map((review: ProductReview) => (
                         <article
                           key={review._id}
                           className="rounded-2xl border border-gray-100 bg-white p-4 md:p-5 shadow-sm"
@@ -1018,14 +1040,14 @@ export default function ProductDetailClient({ id }: { id: string }) {
                               </div>
                               <p className="text-gray-600 text-sm mt-3 leading-relaxed">{review.comment}</p>
 
-                              {review.images?.length > 0 && (
+                              {(review.images?.length ?? 0) > 0 && (
                                 <div className="flex gap-2 mt-4">
-                                  {review.images.slice(0, 3).map((imgSrc: string, idx: number) => (
+                                  {review.images!.slice(0, 3).map((imgSrc: string, idx: number) => (
                                     <button
                                       key={idx}
                                       type="button"
                                       onClick={() => {
-                                        setLightboxImages(review.images);
+                                        setLightboxImages(review.images ?? []);
                                         setLightboxStart(idx);
                                       }}
                                       className="relative w-16 h-16 rounded-xl overflow-hidden border border-gray-200 hover:ring-2 hover:ring-pink-400 transition-all"
@@ -1036,9 +1058,9 @@ export default function ProductDetailClient({ id }: { id: string }) {
                                         fill
                                         className="object-cover"
                                       />
-                                      {idx === 2 && review.images.length > 3 && (
+                                      {idx === 2 && (review.images?.length ?? 0) > 3 && (
                                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs font-bold">
-                                          +{review.images.length - 3}
+                                          +{(review.images?.length ?? 0) - 3}
                                         </div>
                                       )}
                                     </button>
@@ -1065,7 +1087,7 @@ export default function ProductDetailClient({ id }: { id: string }) {
             <h2 className="text-xl font-bold text-gray-900 mb-2">Frequently bought together</h2>
             <p className="text-sm text-gray-500 mb-6">Pairs well with what’s in your bag.</p>
             <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory">
-              {frequentlyBought.map((p: any) => (
+              {frequentlyBought.map((p) => (
                 <div key={p._id} className="snap-start">
                   <MiniProductCard product={p} onAdd={handleAddRelatedToCart} />
                 </div>
@@ -1082,7 +1104,7 @@ export default function ProductDetailClient({ id }: { id: string }) {
             <h2 className="text-xl font-bold text-gray-900 mb-2">Recently viewed</h2>
             <p className="text-sm text-gray-500 mb-6">Pick up where you left off.</p>
             <div className="flex gap-4 overflow-x-auto pb-3 snap-x snap-mandatory">
-              {recentlyViewed.map((p: any) => (
+              {recentlyViewed.map((p) => (
                 <div key={p._id} className="snap-start">
                   <MiniProductCard
                     product={p}

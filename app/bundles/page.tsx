@@ -6,6 +6,7 @@ import api from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { useAuthStatus } from '@/hooks/useAuthStatus';
+import type { Bundle, ApiError } from '@/types/api';
 
 const PLACEHOLDER_GRADIENTS = [
   'from-pink-400 to-rose-400',
@@ -27,7 +28,7 @@ export default function BundlesPage() {
   const router = useRouter();
   const { user, authReady } = useAuthStatus();
 
-  const [bundles, setBundles]     = useState<any[]>([]);
+  const [bundles, setBundles]     = useState<Bundle[]>([]);
   const [loading, setLoading]     = useState(true);
   const [error, setError]         = useState('');
   const [addingId, setAddingId]   = useState<string | null>(null);
@@ -39,7 +40,7 @@ export default function BundlesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleAddToCart = useCallback(async (bundle: any) => {
+  const handleAddToCart = useCallback(async (bundle: Bundle) => {
     if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
     if (addingId) return;
@@ -51,8 +52,8 @@ export default function BundlesPage() {
         quantity: 1,
       });
       toast.success(`${bundle.name} added to cart!`);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to add bundle to cart.');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to add bundle to cart.');
     } finally {
       setAddingId(null);
     }
@@ -146,7 +147,7 @@ export default function BundlesPage() {
         ) : (
           /* Bundle grid */
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {bundles.map((bundle: any, idx: number) => {
+            {bundles.map((bundle, idx: number) => {
               const price = bundle.bundlePrice ?? bundle.price;
               const saving = bundle.originalPrice && price
                 ? savePct(bundle.originalPrice, price)
@@ -192,9 +193,9 @@ export default function BundlesPage() {
                     )}
 
                     {/* Product chips */}
-                    {bundle.products?.length > 0 && (
+                    {(bundle.products?.length ?? 0) > 0 && (
                       <div className="flex flex-wrap gap-2 mb-5">
-                        {bundle.products.map((item: any, i: number) => (
+                        {(bundle.products ?? []).map((item: { _id?: string; name?: string; product?: { name?: string } }, i: number) => (
                           <span
                             key={item._id || i}
                             className="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1 rounded-full font-medium"
@@ -217,9 +218,9 @@ export default function BundlesPage() {
                       </div>
 
                       {/* Items count */}
-                      {bundle.products?.length > 0 && (
+                      {(bundle.products?.length ?? 0) > 0 && (
                         <p className="text-xs text-gray-400 mb-4">
-                          {bundle.products.length} items included
+                          {bundle.products?.length} items included
                         </p>
                       )}
 

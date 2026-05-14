@@ -2,7 +2,7 @@
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { registerUser } from '@/store/slices/authSlice';
 import { fetchCart } from '@/store/slices/cartSlice';
 import toast from 'react-hot-toast';
@@ -12,8 +12,8 @@ function RegisterForm() {
   const siteName = getSiteName();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const dispatch = useDispatch<any>();
-  const { loading } = useSelector((state: any) => state.auth);
+  const dispatch = useAppDispatch();
+  const { loading } = useAppSelector((state) => state.auth);
   const [form, setForm] = useState({
     name: '', email: '', password: '', phone: '',
     referralCode: searchParams.get('ref') || '',
@@ -23,7 +23,7 @@ function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
-    const result = await dispatch(registerUser(form as any));
+    const result = await dispatch(registerUser(form));
     if (registerUser.fulfilled.match(result)) {
       dispatch(fetchCart());
       toast.success(`Welcome to ${siteName}, ${result.payload.user.name}!`);

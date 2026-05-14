@@ -16,6 +16,7 @@ import {
   btnPrimary,
   btnSecondary,
 } from '@/components/admin/ui';
+import type { Product, Category, ApiError } from '@/types/api';
 
 const EMPTY_FORM = {
   name: '', description: '', shortDescription: '', price: '', discountPrice: '', category: '',
@@ -24,6 +25,7 @@ const EMPTY_FORM = {
   virtualTryOn: false,
   tryOnTintHex: '#db2777',
 };
+type ProductForm = typeof EMPTY_FORM;
 
 /** Only these keys are sent as multipart fields; excludes nested docs like images/reviews from spread form. */
 const PRODUCT_FORM_KEYS = [
@@ -42,15 +44,15 @@ function appendProductFields(fd: FormData, form: Record<string, unknown>) {
 }
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState<any>(EMPTY_FORM);
+  const [editing, setEditing] = useState<Product | null>(null);
+  const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [creatingCategory, setCreatingCategory] = useState(false);
   const [existingImages, setExistingImages] = useState<{ url: string; publicId?: string }[]>([]);
@@ -69,9 +71,9 @@ export default function AdminProductsPage() {
   useEffect(() => {
     api.get('/categories?includeInactive=true')
       .then(({ data }) => {
-        const list = data.categories || [];
+        const list: Category[] = data.categories || [];
         setCategories(list);
-        if (!form.category && list.length > 0) setForm((p: any) => ({ ...p, category: list[0].name }));
+        if (!form.category && list.length > 0) setForm((p) => ({ ...p, category: list[0].name }));
       })
       .catch(() => setCategories([]));
   }, []);
@@ -83,22 +85,34 @@ export default function AdminProductsPage() {
     setExistingImages([]);
     setShowForm(true);
   };
-  const openEdit = (p: any) => {
+  const openEdit = (p: Product) => {
     setEditing(p);
     const hex = typeof p.tryOnTintHex === 'string' && /^#[0-9A-Fa-f]{6}$/.test(p.tryOnTintHex.trim())
       ? p.tryOnTintHex.trim()
       : '#db2777';
     setForm({
-      ...p,
-      price: p.price,
-      discountPrice: p.discountPrice || '',
-      stock: p.stock,
+      name: p.name,
+      description: p.description,
+      shortDescription: p.shortDescription || '',
+      price: String(p.price),
+      discountPrice: p.discountPrice ? String(p.discountPrice) : '',
+      category: p.category,
+      brand: p.brand,
+      stock: String(p.stock),
       tags: p.tags?.join(', ') || '',
+      ingredients: p.ingredients || '',
+      howToUse: p.howToUse || '',
+      weight: p.weight || '',
+      isFeatured: Boolean(p.isFeatured),
+      isNewArrival: Boolean(p.isNewArrival),
+      isBestSeller: Boolean(p.isBestSeller),
+      isActive: p.isActive !== false,
+      eligibleForMysteryBox: Boolean(p.eligibleForMysteryBox),
       virtualTryOn: Boolean(p.virtualTryOn),
       tryOnTintHex: hex,
     });
     setImageFiles([]);
-    setExistingImages(Array.isArray(p.images) ? p.images.map((img: any) => ({ url: img.url, publicId: img.publicId })) : []);
+    setExistingImages(Array.isArray(p.images) ? p.images.map((img) => ({ url: img.url, publicId: img.publicId })) : []);
     setShowForm(true);
   };
 
@@ -124,10 +138,10 @@ export default function AdminProductsPage() {
       const { data } = await api.delete(`/products/${editing._id}/images/${encodeURIComponent(publicId)}`);
       const next = data.images || [];
       setExistingImages(next);
-      setEditing((prev: any) => (prev ? { ...prev, images: next } : null));
+      setEditing((prev) => (prev ? { ...prev, images: next } : null));
       toast.success('Image removed');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to remove image');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to remove image');
     } finally {
       setRemovingPublicId(null);
     }
@@ -152,8 +166,8 @@ export default function AdminProductsPage() {
       }
       setShowForm(false);
       fetchProducts();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to save product');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to save product');
     } finally { setSaving(false); }
   };
 
@@ -163,7 +177,7 @@ export default function AdminProductsPage() {
     catch { toast.error('Failed to delete product'); }
   };
 
-  const toggleActive = async (product: any) => {
+  const toggleActive = async (product: Product) => {
     try { await api.put(`/products/${product._id}`, { isActive: !product.isActive }); fetchProducts(); }
     catch { toast.error('Failed to update'); }
   };
@@ -175,23 +189,23 @@ export default function AdminProductsPage() {
       const { data } = await api.post('/categories', { name: newCategory.trim() });
       const created = data.category;
       setCategories((prev) => [...prev, created].sort((a, b) => a.name.localeCompare(b.name)));
-      setForm((p: any) => ({ ...p, category: created.name }));
+      setForm((p) => ({ ...p, category: created.name }));
       setNewCategory('');
       toast.success('Category created');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to create category');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to create category');
     } finally { setCreatingCategory(false); }
   };
 
-  const handleDeleteCategory = async (category: any) => {
+  const handleDeleteCategory = async (category: Category) => {
     if (!confirm(`Delete category "${category.name}"?`)) return;
     try {
       await api.delete(`/categories/${category._id}`);
       setCategories((prev) => prev.filter((c) => c._id !== category._id));
-      if (form.category === category.name) setForm((p: any) => ({ ...p, category: '' }));
+      if (form.category === category.name) setForm((p) => ({ ...p, category: '' }));
       toast.success('Category deleted');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to delete category');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to delete category');
     }
   };
 
@@ -377,21 +391,21 @@ export default function AdminProductsPage() {
               ].map(({ key, label, col, type = 'text', required }) => (
                 <div key={key} className={col || ''}>
                   <label className={adminLabel}>{label}</label>
-                  <input type={type} value={form[key]} onChange={(e) => setForm((p: any) => ({ ...p, [key]: e.target.value }))}
+                  <input type={type} value={form[key as keyof ProductForm] as string} onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.value } as ProductForm))}
                     required={required} className={adminInput} />
                 </div>
               ))}
 
               <div>
                 <label className={adminLabel}>Category *</label>
-                <select value={form.category} onChange={(e) => setForm((p: any) => ({ ...p, category: e.target.value }))} className={adminInput}>
+                <select value={form.category} onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))} className={adminInput}>
                   <option value="">Select category</option>
                   {categories.filter((c) => c.isActive).map((c) => <option key={c._id}>{c.name}</option>)}
                 </select>
               </div>
               <div>
                 <label className={adminLabel}>Tags (comma-separated)</label>
-                <input type="text" value={form.tags} onChange={(e) => setForm((p: any) => ({ ...p, tags: e.target.value }))}
+                <input type="text" value={form.tags} onChange={(e) => setForm((p) => ({ ...p, tags: e.target.value }))}
                   placeholder="moisturizer, spf, vitamin c" className={adminInput} />
               </div>
 
@@ -403,7 +417,7 @@ export default function AdminProductsPage() {
               ].map(({ key, label, col, rows, required }) => (
                 <div key={key} className={col}>
                   <label className={adminLabel}>{label}</label>
-                  <textarea value={form[key]} onChange={(e) => setForm((p: any) => ({ ...p, [key]: e.target.value }))}
+                  <textarea value={form[key as keyof ProductForm] as string} onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.value } as ProductForm))}
                     required={required} rows={rows} className={adminInput + ' resize-none'} />
                 </div>
               ))}
@@ -480,7 +494,7 @@ export default function AdminProductsPage() {
                     { key: 'virtualTryOn', label: 'Virtual try-on (customer photo preview)' },
                   ].map(({ key, label }) => (
                     <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
-                      <input type="checkbox" checked={form[key]} onChange={(e) => setForm((p: any) => ({ ...p, [key]: e.target.checked }))} className="accent-indigo-600" />
+                      <input type="checkbox" checked={form[key as keyof ProductForm] as boolean} onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.checked } as ProductForm))} className="accent-indigo-600" />
                       {label}
                     </label>
                   ))}
@@ -491,14 +505,14 @@ export default function AdminProductsPage() {
                         <input
                           type="color"
                           value={/^#[0-9A-Fa-f]{6}$/.test(String(form.tryOnTintHex || '').trim()) ? String(form.tryOnTintHex).trim() : '#db2777'}
-                          onChange={(e) => setForm((p: any) => ({ ...p, tryOnTintHex: e.target.value }))}
+                          onChange={(e) => setForm((p) => ({ ...p, tryOnTintHex: e.target.value }))}
                           className="h-10 w-14 cursor-pointer rounded-lg border border-slate-200 bg-white p-0.5"
                           title="Shade used for the on-device tint overlay"
                         />
                         <input
                           type="text"
                           value={form.tryOnTintHex || ''}
-                          onChange={(e) => setForm((p: any) => ({ ...p, tryOnTintHex: e.target.value }))}
+                          onChange={(e) => setForm((p) => ({ ...p, tryOnTintHex: e.target.value }))}
                           placeholder="#db2777"
                           pattern="^#[0-9A-Fa-f]{6}$"
                           className={`${adminInput} flex-1 min-w-[7rem] font-mono text-xs`}

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '@/store/hooks';
 
 /**
  * Redirects to login only after auth has finished hydrating (token → /auth/me).
@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
  */
 export function useRequireUser(loginPath = '/auth/login') {
   const router = useRouter();
-  const { user, initialized } = useSelector((state: any) => state.auth);
+  const { user, initialized } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     if (!initialized) return;

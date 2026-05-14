@@ -1,12 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { fetchCart } from '@/store/slices/cartSlice';
 import api from '@/lib/api';
 import { formatPrice, loadRazorpayScript } from '@/lib/utils';
+import type { UserAddress, ApiError } from '@/types/api';
 import { formatOrderLabelForDisplay } from '@/lib/orderDisplay';
 import toast from 'react-hot-toast';
 import { useRequireUser } from '@/hooks/useRequireUser';
@@ -87,11 +88,11 @@ const FIELDS: {
 
 export default function CheckoutPage() {
   const router   = useRouter();
-  const dispatch = useDispatch<any>();
+  const dispatch = useAppDispatch();
   const { user, authReady, isAuthed } = useRequireUser();
-  const { items, summary } = useSelector((state: any) => state.cart);
+  const { items, summary } = useAppSelector((state) => state.cart);
 
-  const [selectedAddress, setSelectedAddress] = useState<any>(null);
+  const [selectedAddress, setSelectedAddress] = useState<UserAddress | null>(null);
   const [placing,         setPlacing]         = useState(false);
   const [showForm,        setShowForm]        = useState(false);
   const [newAddress, setNewAddress] = useState<AddressDraft>({ ...initialAddress });
@@ -100,7 +101,8 @@ export default function CheckoutPage() {
     if (!authReady || !user) return;
     dispatch(fetchCart());
     if (user.addresses?.length > 0) {
-      setSelectedAddress(user.addresses.find((a: any) => a.isDefault) || user.addresses[0]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedAddress(user.addresses.find((a) => a.isDefault) || user.addresses[0]);
     } else {
       setShowForm(true);
     }
@@ -138,8 +140,8 @@ export default function CheckoutPage() {
       setShowForm(false);
       setNewAddress({ ...initialAddress });
       toast.success('Address saved');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to save address');
+    } catch (err) {
+      toast.error((err as ApiError)?.response?.data?.message || 'Failed to save address');
     }
   };
 
@@ -151,7 +153,7 @@ export default function CheckoutPage() {
 
     setPlacing(true);
     try {
-      const orderItems = items.map((item: any) => ({
+      const orderItems = items.map((item) => ({
         ...(item.product?._id ? { product: item.product._id } : {}),
         ...(item.mysteryBox?._id ? { mysteryBox: item.mysteryBox._id } : {}),
         quantity: item.quantity,
@@ -181,7 +183,7 @@ export default function CheckoutPage() {
 
       const { data: rpData } = await api.post('/payments/create-order', { orderId: order._id });
 
-      const rzp = new (window as any).Razorpay({
+      const rzp = new (window as unknown as { Razorpay: new (opts: Record<string, unknown>) => { open(): void } }).Razorpay({
         key:         process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount:      rpData.amount,
         currency:    rpData.currency || 'INR',
@@ -195,18 +197,18 @@ export default function CheckoutPage() {
 
         // Full customer details — helps Razorpay dashboard & support lookups
         prefill: {
-          name:    user.name  || '',
-          email:   user.email || '',
-          contact: user.phone || selectedAddress?.phone || '',
+          name:    user?.name  || '',
+          email:   user?.email || '',
+          contact: user?.phone || selectedAddress?.phone || '',
         },
 
         // Shipping + order context for Razorpay dashboard (max 15 keys — item list is in `description` above)
         notes: razorpayNotes({
           order_id: order._id,
           order_number: order.orderNumber || '',
-          customer_name: user.name,
-          customer_email: user.email,
-          customer_phone: user.phone || selectedAddress?.phone || '',
+          customer_name: user?.name || '',
+          customer_email: user?.email || '',
+          customer_phone: user?.phone || selectedAddress?.phone || '',
           subtotal: `₹${summary.subtotal}`,
           shipping: summary.shipping === 0 ? 'Free' : `₹${summary.shipping}`,
           discount: summary.discount > 0 ? `₹${summary.discount}` : 'None',
@@ -222,7 +224,7 @@ export default function CheckoutPage() {
         // Lock prefill fields so customer cannot accidentally change them
         readonly: {
           email:   true,
-          contact: !!user.phone,
+          contact: !!(user?.phone),
         },
 
         // Payment config
@@ -230,7 +232,7 @@ export default function CheckoutPage() {
         retry:   { enabled: true, max_count: 3 },
         timeout: 900, // 15 min before the modal auto-closes
 
-        handler: async (response: any) => {
+        handler: async (response: Record<string, string>) => {
           try {
             await api.post('/payments/verify', {
               razorpay_order_id:   response.razorpay_order_id,
@@ -255,8 +257,8 @@ export default function CheckoutPage() {
         },
       });
       rzp.open();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to place order');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to place order');
       setPlacing(false);
     }
   };
@@ -333,9 +335,9 @@ export default function CheckoutPage() {
               </div>
 
               <div className="p-6">
-                {user.addresses?.length > 0 && (
+                {(user?.addresses?.length ?? 0) > 0 && (
                   <div className="space-y-3 mb-5">
-                    {user.addresses.map((addr: any) => {
+                    {(user?.addresses ?? []).map((addr) => {
                       const selected = selectedAddress?._id === addr._id;
                       return (
                         <label
@@ -545,14 +547,14 @@ export default function CheckoutPage() {
 
               {/* Items list */}
               <div className="px-6 py-4 space-y-3 max-h-64 overflow-y-auto">
-                {items.map((item: any) => {
+                {items.map((item) => {
                   const name  = item.product?.name || item.mysteryBox?.name || item.name;
                   const image = item.product?.images?.[0]?.url || item.image;
                   return (
                     <div key={item._id} className="flex items-center gap-3 group">
                       <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-pink-50 to-rose-50 flex-shrink-0 shadow-sm">
                         {image
-                          ? <Image src={image} alt={name} fill className="object-cover group-hover:scale-105 transition-transform" />
+                          ? <Image src={image} alt={name ?? ''} fill className="object-cover group-hover:scale-105 transition-transform" />
                           : <div className="w-full h-full flex items-center justify-center text-xl">{item.itemType === 'mysteryBox' ? '🎁' : '💄'}</div>
                         }
                       </div>

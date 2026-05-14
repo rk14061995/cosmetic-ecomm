@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
         {sent ? (
           <div className="text-center">
             <div className="text-5xl mb-4">📧</div>
-            <p className="text-sm text-gray-600 mb-6">Didn't receive it? Check your spam folder or try again.</p>
+            <p className="text-sm text-gray-600 mb-6">Didn&apos;t receive it? Check your spam folder or try again.</p>
             <button onClick={() => setSent(false)} className="text-indigo-600 font-medium text-sm hover:text-indigo-700">Try again</button>
           </div>
         ) : (

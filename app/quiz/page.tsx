@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import ProductCard from '@/components/products/ProductCard';
+import type { Product } from '@/types/api';
 
 // ─── Quiz data ────────────────────────────────────────────────────────────────
 
@@ -62,7 +63,7 @@ const QUESTIONS: Question[] = [
 function StepCard({ children, stepKey }: { children: React.ReactNode; stepKey: number }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
-    // Trigger entrance animation on each new step
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setVisible(false);
     const t = setTimeout(() => setVisible(true), 30);
     return () => clearTimeout(t);
@@ -87,7 +88,7 @@ export default function QuizPage() {
   const [step, setStep] = useState(0);           // 0-4 = questions, 5 = loading, 6 = results
   const [answers, setAnswers] = useState<string[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
   // Set page title
   useEffect(() => {
@@ -176,7 +177,7 @@ export default function QuizPage() {
               Your Perfect Picks
             </h1>
             <p className="text-pink-100 text-base md:text-lg">
-              Based on your skin profile, we've handpicked these products for you.
+              Based on your skin profile, we&apos;ve handpicked these products for you.
             </p>
 
             {/* Answer chips */}
@@ -202,7 +203,7 @@ export default function QuizPage() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-              {products.map((p: any) => (
+              {products.map((p) => (
                 <ProductCard key={p._id} product={p} />
               ))}
             </div>

@@ -1,5 +1,6 @@
 'use client';
-import { useSelector, useDispatch } from 'react-redux';
+import { useAppDispatch } from '@/store/hooks';
+import type { Product } from '@/types/api';
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { fetchProfile } from '@/store/slices/authSlice';
@@ -7,7 +8,7 @@ import ProductCard from '@/components/products/ProductCard';
 import { useRequireUser } from '@/hooks/useRequireUser';
 
 export default function WishlistPage() {
-  const dispatch = useDispatch<any>();
+  const dispatch = useAppDispatch();
   const { user, authReady, isAuthed } = useRequireUser();
 
   useEffect(() => {
@@ -49,7 +50,7 @@ export default function WishlistPage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {wishlist.map((product: any) => (
+          {wishlist.map((product: Product) => (
             <ProductCard key={product._id} product={product} />
           ))}
         </div>

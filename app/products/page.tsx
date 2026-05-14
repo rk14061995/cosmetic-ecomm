@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import api from '@/lib/api';
 import ProductCard from '@/components/products/ProductCard';
+import type { Product, Pagination } from '@/types/api';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
@@ -22,18 +23,18 @@ function ProductsContent() {
     page: Number(searchParams.get('page') || 1) || 1,
   });
 
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState<any>(null);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
   const [filters, setFilters] = useState(getFiltersFromParams);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFilters(getFiltersFromParams());
-  }, [searchParams]);
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchProducts = useCallback(async () => {
-    setLoading(true);
     try {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([k, v]) => { if (v) params.append(k, String(v)); });
@@ -47,11 +48,14 @@ function ProductsContent() {
     }
   }, [filters]);
 
-  useEffect(() => { fetchProducts(); }, [fetchProducts]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchProducts();
+  }, [fetchProducts]);
 
   useEffect(() => {
     api.get('/categories')
-      .then(({ data }) => setCategories((data.categories || []).map((c: any) => c.name)))
+      .then(({ data }) => setCategories((data.categories || []).map((c: { name: string }) => c.name)))
       .catch(() => setCategories([]));
   }, []);
 

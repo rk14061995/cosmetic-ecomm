@@ -23,8 +23,9 @@ function ResetPasswordForm() {
       await api.put(`/auth/reset-password/${token}`, { password: form.password });
       toast.success('Password reset successfully!');
       router.push('/auth/login');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Reset failed. Link may be expired.');
+    } catch (err) {
+      const e = err as { response?: { data?: { message?: string } } };
+      toast.error(e.response?.data?.message || 'Reset failed. Link may be expired.');
     } finally { setLoading(false); }
   };
 

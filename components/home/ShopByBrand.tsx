@@ -3,9 +3,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import api from '@/lib/api';
+import type { Brand } from '@/types/api';
 
 export default function ShopByBrand() {
-  const [brands, setBrands] = useState<any[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
 
   useEffect(() => {
     api.get('/brands')

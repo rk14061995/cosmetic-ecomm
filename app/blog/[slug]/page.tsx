@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
+import type { BlogPost, Product } from '@/types/api';
 import { formatDate, formatPrice } from '@/lib/utils';
 
 const HERO_GRADIENTS = [
@@ -38,7 +39,7 @@ function SkeletonDetail() {
   );
 }
 
-function RelatedProductCard({ product }: { product: any }) {
+function RelatedProductCard({ product }: { product: Product }) {
   return (
     <Link href={`/products/${product._id}`} className="group flex-shrink-0 w-44">
       <div className="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm hover:shadow-md hover:scale-[1.03] transition-all duration-200">
@@ -70,12 +71,12 @@ function RelatedProductCard({ product }: { product: any }) {
 export default function BlogPostPage() {
   const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
-  const [post, setPost] = useState<any>(null);
+  const [post, setPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
+  const [heroGradient] = useState(() => HERO_GRADIENTS[Math.floor(Math.random() * HERO_GRADIENTS.length)]);
 
   useEffect(() => {
     if (!slug) return;
-    setLoading(true);
     api.get(`/blog/${slug}`)
       .then(({ data }) => setPost(data.post ?? data))
       .catch(() => router.push('/blog'))
@@ -85,7 +86,6 @@ export default function BlogPostPage() {
   if (loading) return <SkeletonDetail />;
   if (!post) return null;
 
-  const heroGradient = HERO_GRADIENTS[Math.floor(Math.random() * HERO_GRADIENTS.length)];
   const hasRelatedProducts = Array.isArray(post.relatedProducts) && post.relatedProducts.length > 0;
 
   return (
@@ -204,7 +204,7 @@ export default function BlogPostPage() {
             [&_pre]:bg-gray-50 [&_pre]:rounded-xl [&_pre]:p-4 [&_pre]:overflow-x-auto [&_pre]:text-sm [&_pre]:mb-5
             [&_code]:bg-pink-50 [&_code]:text-pink-700 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm
           "
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          dangerouslySetInnerHTML={{ __html: post.content ?? '' }}
         />
 
         {/* Divider */}
@@ -236,7 +236,7 @@ export default function BlogPostPage() {
               <h2 className="text-2xl font-bold text-gray-900">Shop the Story</h2>
             </div>
             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-none">
-              {post.relatedProducts.map((product: any) => (
+              {(post.relatedProducts ?? []).map((product) => (
                 <RelatedProductCard key={product._id} product={product} />
               ))}
             </div>

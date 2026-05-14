@@ -1,13 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '@/store/hooks';
 import { useRouter } from 'next/navigation';
 import { addToCart } from '@/store/slices/cartSlice';
 import api from '@/lib/api';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { useAuthStatus } from '@/hooks/useAuthStatus';
+import type { MysteryBox } from '@/types/api';
 
 /** Inline gradients: Tailwind `from-pink-*` + `bg-gradient-to-r` is broken by globals.css palette overrides. */
 const TIER_CONFIG: Record<
@@ -32,10 +33,10 @@ const TIER_CONFIG: Record<
 };
 
 export default function MysteryBoxesPage() {
-  const [boxes, setBoxes] = useState<any[]>([]);
+  const [boxes, setBoxes] = useState<MysteryBox[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<any>(null);
-  const dispatch = useDispatch<any>();
+  const [selected, setSelected] = useState<MysteryBox | null>(null);
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const { user, authReady } = useAuthStatus();
 
@@ -46,10 +47,10 @@ export default function MysteryBoxesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleAddToCart = async (box: any) => {
+  const handleAddToCart = async (box: MysteryBox) => {
     if (!authReady) return;
     if (!user) { router.push('/auth/login'); return; }
-    const result = await dispatch(addToCart({ itemId: box._id, itemType: 'mysteryBox', quantity: 1 } as any));
+    const result = await dispatch(addToCart({ itemId: box._id, itemType: 'mysteryBox', quantity: 1 }));
     if (addToCart.fulfilled.match(result)) {
       toast.success(`${box.name} added to cart! 🎁`);
     } else {
@@ -152,18 +153,18 @@ export default function MysteryBoxesPage() {
                     </div>
                   </div>
 
-                  {box.possibleItems?.length > 0 && (
+                  {(box.possibleItems?.length ?? 0) > 0 && (
                     <div className="mb-6">
                       <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Possible Items Preview</p>
                       <div className="flex gap-2 flex-wrap">
-                        {box.possibleItems.slice(0, 4).map((item: any, i: number) => (
+                        {box.possibleItems!.slice(0, 4).map((item, i: number) => (
                           <div key={i} className="flex items-center gap-1 bg-white/70 rounded-full px-3 py-1 text-xs text-gray-700">
-                            {item.image && <Image src={item.image} alt={item.name} width={16} height={16} className="rounded-full" />}
+                            {item.image && <Image src={item.image} alt={item.name ?? ''} width={16} height={16} className="rounded-full" />}
                             {item.name}
                           </div>
                         ))}
-                        {box.possibleItems.length > 4 && (
-                          <span className="text-xs text-gray-400 px-2 py-1">+{box.possibleItems.length - 4} more</span>
+                        {(box.possibleItems?.length ?? 0) > 4 && (
+                          <span className="text-xs text-gray-400 px-2 py-1">+{(box.possibleItems?.length ?? 0) - 4} more</span>
                         )}
                       </div>
                     </div>
@@ -187,11 +188,11 @@ export default function MysteryBoxesPage() {
                     </button>
                   </div>
 
-                  {selected?._id === box._id && box.possibleItems?.length > 0 && (
+                  {selected?._id === box._id && (box.possibleItems?.length ?? 0) > 0 && (
                     <div className="mt-4 border-t pt-4">
                       <p className="text-sm font-semibold text-gray-700 mb-3">All Possible Items:</p>
                       <div className="space-y-2">
-                        {box.possibleItems.map((item: any, i: number) => (
+                        {box.possibleItems!.map((item, i: number) => (
                           <div key={i} className="flex items-center gap-3 text-sm text-gray-600">
                             <span className="text-pink-400">•</span>
                             <span className="font-medium">{item.name}</span>

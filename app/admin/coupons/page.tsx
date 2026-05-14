@@ -15,15 +15,17 @@ import {
   btnPrimary,
   btnSecondary,
 } from '@/components/admin/ui';
+import type { Coupon, ApiError } from '@/types/api';
 
 const EMPTY_FORM = { code: '', description: '', discountType: 'percentage', discountValue: '', maxDiscountAmount: '', minOrderValue: '', usageLimit: '', perUserLimit: '1', expiryDate: '', isActive: true };
+type CouponForm = typeof EMPTY_FORM;
 
 export default function AdminCouponsPage() {
-  const [coupons, setCoupons] = useState<any[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState<any>(EMPTY_FORM);
+  const [editing, setEditing] = useState<Coupon | null>(null);
+  const [form, setForm] = useState<CouponForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
 
   const fetchCoupons = () => {
@@ -36,9 +38,20 @@ export default function AdminCouponsPage() {
   useEffect(() => { fetchCoupons(); }, []);
 
   const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setShowForm(true); };
-  const openEdit = (c: any) => {
+  const openEdit = (c: Coupon) => {
     setEditing(c);
-    setForm({ ...c, expiryDate: new Date(c.expiryDate).toISOString().split('T')[0], usageLimit: c.usageLimit || '' });
+    setForm({
+      code: c.code,
+      description: c.description || '',
+      discountType: c.discountType,
+      discountValue: String(c.discountValue),
+      maxDiscountAmount: c.maxDiscountAmount ? String(c.maxDiscountAmount) : '',
+      minOrderValue: c.minOrderValue ? String(c.minOrderValue) : '',
+      usageLimit: c.usageLimit ? String(c.usageLimit) : '',
+      perUserLimit: String(c.perUserLimit ?? 1),
+      expiryDate: new Date(c.expiryDate).toISOString().split('T')[0],
+      isActive: c.isActive,
+    });
     setShowForm(true);
   };
 
@@ -46,15 +59,18 @@ export default function AdminCouponsPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const payload = { ...form };
-      if (!payload.usageLimit) delete payload.usageLimit;
-      if (!payload.maxDiscountAmount) delete payload.maxDiscountAmount;
+      const { usageLimit, maxDiscountAmount, ...rest } = form;
+      const payload = {
+        ...rest,
+        ...(usageLimit ? { usageLimit } : {}),
+        ...(maxDiscountAmount ? { maxDiscountAmount } : {}),
+      };
       if (editing) { await api.put(`/coupons/${editing._id}`, payload); toast.success('Coupon updated'); }
       else { await api.post('/coupons', payload); toast.success('Coupon created'); }
       setShowForm(false);
       fetchCoupons();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to save');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to save');
     } finally { setSaving(false); }
   };
 
@@ -64,7 +80,7 @@ export default function AdminCouponsPage() {
     catch { toast.error('Failed to delete'); }
   };
 
-  const toggleActive = async (coupon: any) => {
+  const toggleActive = async (coupon: Coupon) => {
     try { await api.put(`/coupons/${coupon._id}`, { isActive: !coupon.isActive }); fetchCoupons(); }
     catch { toast.error('Failed to update'); }
   };
@@ -115,7 +131,7 @@ export default function AdminCouponsPage() {
                       {c.discountType === 'percentage' ? `${c.discountValue}%` : formatPrice(c.discountValue)}
                       {c.maxDiscountAmount && <span className="text-xs text-slate-400 ml-1 font-normal">(max {formatPrice(c.maxDiscountAmount)})</span>}
                     </td>
-                    <td className="px-5 py-4 text-slate-500">{c.minOrderValue > 0 ? formatPrice(c.minOrderValue) : '—'}</td>
+                    <td className="px-5 py-4 text-slate-500">{(c.minOrderValue ?? 0) > 0 ? formatPrice(c.minOrderValue!) : '—'}</td>
                     <td className="px-5 py-4 text-slate-500 text-xs font-mono">{c.usedCount}/{c.usageLimit || '∞'}</td>
                     <td className="px-5 py-4 text-xs">
                       <span className={new Date(c.expiryDate) < new Date() ? 'text-red-500 font-medium' : 'text-slate-500'}>
@@ -159,51 +175,51 @@ export default function AdminCouponsPage() {
             <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <label className={adminLabel}>Coupon Code *</label>
-                <input type="text" value={form.code} onChange={(e) => setForm((p: any) => ({ ...p, code: e.target.value.toUpperCase() }))}
+                <input type="text" value={form.code} onChange={(e) => setForm((p) => ({ ...p, code: e.target.value.toUpperCase() }))}
                   required disabled={!!editing} className={adminInput + ' font-mono uppercase tracking-widest'} />
               </div>
               <div>
                 <label className={adminLabel}>Discount Type *</label>
-                <select value={form.discountType} onChange={(e) => setForm((p: any) => ({ ...p, discountType: e.target.value }))} className={adminInput}>
+                <select value={form.discountType} onChange={(e) => setForm((p) => ({ ...p, discountType: e.target.value }))} className={adminInput}>
                   <option value="percentage">Percentage (%)</option>
                   <option value="flat">Flat (₹)</option>
                 </select>
               </div>
               <div>
                 <label className={adminLabel}>Discount Value *</label>
-                <input type="number" value={form.discountValue} onChange={(e) => setForm((p: any) => ({ ...p, discountValue: e.target.value }))}
+                <input type="number" value={form.discountValue} onChange={(e) => setForm((p) => ({ ...p, discountValue: e.target.value }))}
                   required min="0" className={adminInput} />
               </div>
               {form.discountType === 'percentage' && (
                 <div>
                   <label className={adminLabel}>Max Discount (₹)</label>
-                  <input type="number" value={form.maxDiscountAmount} onChange={(e) => setForm((p: any) => ({ ...p, maxDiscountAmount: e.target.value }))} className={adminInput} />
+                  <input type="number" value={form.maxDiscountAmount} onChange={(e) => setForm((p) => ({ ...p, maxDiscountAmount: e.target.value }))} className={adminInput} />
                 </div>
               )}
               <div>
                 <label className={adminLabel}>Min Order Value (₹)</label>
-                <input type="number" value={form.minOrderValue} onChange={(e) => setForm((p: any) => ({ ...p, minOrderValue: e.target.value }))} className={adminInput} />
+                <input type="number" value={form.minOrderValue} onChange={(e) => setForm((p) => ({ ...p, minOrderValue: e.target.value }))} className={adminInput} />
               </div>
               <div>
                 <label className={adminLabel}>Usage Limit (blank = unlimited)</label>
-                <input type="number" value={form.usageLimit} onChange={(e) => setForm((p: any) => ({ ...p, usageLimit: e.target.value }))} className={adminInput} />
+                <input type="number" value={form.usageLimit} onChange={(e) => setForm((p) => ({ ...p, usageLimit: e.target.value }))} className={adminInput} />
               </div>
               <div>
                 <label className={adminLabel}>Per User Limit</label>
-                <input type="number" value={form.perUserLimit} onChange={(e) => setForm((p: any) => ({ ...p, perUserLimit: e.target.value }))} min="1" className={adminInput} />
+                <input type="number" value={form.perUserLimit} onChange={(e) => setForm((p) => ({ ...p, perUserLimit: e.target.value }))} min="1" className={adminInput} />
               </div>
               <div className="col-span-2">
                 <label className={adminLabel}>Expiry Date *</label>
-                <input type="date" value={form.expiryDate} onChange={(e) => setForm((p: any) => ({ ...p, expiryDate: e.target.value }))}
+                <input type="date" value={form.expiryDate} onChange={(e) => setForm((p) => ({ ...p, expiryDate: e.target.value }))}
                   required min={new Date().toISOString().split('T')[0]} className={adminInput} />
               </div>
               <div className="col-span-2">
                 <label className={adminLabel}>Description</label>
-                <input type="text" value={form.description} onChange={(e) => setForm((p: any) => ({ ...p, description: e.target.value }))} className={adminInput} />
+                <input type="text" value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} className={adminInput} />
               </div>
               <div className="col-span-2">
                 <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
-                  <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((p: any) => ({ ...p, isActive: e.target.checked }))} className="accent-indigo-600" />
+                  <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))} className="accent-indigo-600" />
                   Active
                 </label>
               </div>

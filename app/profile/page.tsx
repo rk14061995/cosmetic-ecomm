@@ -155,7 +155,7 @@ export default function ProfilePage() {
                 <p className="text-xs text-gray-500 mt-1.5">
                   {remaining > 0
                     ? <><span className="font-semibold text-gray-700">{remaining.toLocaleString()} pts</span> to reach {tier.next}</>
-                    : <span className="font-semibold text-green-600">You've hit the threshold — upgrade incoming!</span>
+                    : <span className="font-semibold text-green-600">You&apos;ve hit the threshold — upgrade incoming!</span>
                   }
                 </p>
               </div>
@@ -188,7 +188,7 @@ export default function ProfilePage() {
               <p className="text-sm text-slate-400">No addresses saved yet.</p>
             ) : (
               <div className="space-y-3">
-                {user.addresses?.map((addr: any) => (
+                {user.addresses?.map((addr) => (
                   <div key={addr._id} className="border border-slate-200 rounded-2xl p-4 text-sm bg-slate-50/40">
                     <div className="flex items-center gap-2 mb-1">
                       <p className="font-semibold text-slate-900">{addr.fullName}</p>

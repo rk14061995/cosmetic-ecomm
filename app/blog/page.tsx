@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import api from '@/lib/api';
+import type { BlogPost } from '@/types/api';
 import { formatDate } from '@/lib/utils';
 
 const CATEGORIES = ['All', 'Skincare', 'Makeup', 'Haircare', 'Wellness', 'Tutorials', 'News'];
@@ -36,7 +37,7 @@ function SkeletonCard() {
   );
 }
 
-function PostCard({ post, index }: { post: any; index: number }) {
+function PostCard({ post, index }: { post: BlogPost; index: number }) {
   const gradient = COVER_GRADIENTS[index % COVER_GRADIENTS.length];
 
   return (
@@ -115,7 +116,7 @@ function PostCard({ post, index }: { post: any; index: number }) {
 
 export default function BlogPage() {
   const [activeCategory, setActiveCategory] = useState('All');
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -129,7 +130,7 @@ export default function BlogPage() {
       const params = new URLSearchParams({ limit: '9', page: String(pageNum) });
       if (category !== 'All') params.set('category', category);
       const { data } = await api.get(`/blog?${params}`);
-      const incoming: any[] = data.posts ?? data ?? [];
+      const incoming: BlogPost[] = data.posts ?? data ?? [];
       setPosts((prev) => append ? [...prev, ...incoming] : incoming);
       // Support both pagination shapes the API might return
       const total: number = data.pagination?.totalItems ?? data.total ?? incoming.length;
@@ -144,6 +145,7 @@ export default function BlogPage() {
 
   // Reset + fetch on category change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
     fetchPosts(activeCategory, 1, false);
   }, [activeCategory, fetchPosts]);

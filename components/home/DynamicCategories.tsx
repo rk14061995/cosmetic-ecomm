@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
+import type { Category } from '@/types/api';
 
 const FALLBACK_COLORS = [
   'from-white to-indigo-50/40',
@@ -13,7 +14,7 @@ const FALLBACK_COLORS = [
 ];
 
 export default function DynamicCategories() {
-  const [categories, setCategories] = useState<any[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     api.get('/categories')

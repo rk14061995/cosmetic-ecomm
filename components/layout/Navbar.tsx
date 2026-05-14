@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useSelector, useDispatch } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { useRouter, usePathname } from 'next/navigation';
 import { logoutUser } from '@/store/slices/authSlice';
 import toast from 'react-hot-toast';
@@ -40,13 +40,13 @@ function CartIcon({ className }: { className?: string }) {
 }
 
 export default function Navbar() {
-  const dispatch = useDispatch<any>();
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const pathname = usePathname();
   const siteName = getSiteName();
   const brandInitial = siteName.charAt(0).toUpperCase();
-  const { user } = useSelector((state: any) => state.auth);
-  const { cartCount } = useSelector((state: any) => state.cart);
+  const { user } = useAppSelector((state) => state.auth);
+  const { cartCount } = useAppSelector((state) => state.cart);
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const accountWrapRef = useRef<HTMLDivElement>(null);

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCart, updateCartItem, removeFromCart, applyCoupon } from '@/store/slices/cartSlice';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
@@ -12,8 +12,8 @@ import { useAuthStatus } from '@/hooks/useAuthStatus';
 const FREE_SHIPPING_THRESHOLD = 500;
 
 export default function CartPage() {
-  const dispatch = useDispatch<any>();
-  const { items, summary, loading, couponCode } = useSelector((state: any) => state.cart);
+  const dispatch = useAppDispatch();
+  const { items, summary, loading, couponCode } = useAppSelector((state) => state.cart);
   const { user, authReady } = useAuthStatus();
   const [couponInput, setCouponInput] = useState('');
   const [applyingCoupon, setApplyingCoupon] = useState(false);
@@ -24,11 +24,11 @@ export default function CartPage() {
     if (authReady && user) dispatch(fetchCart());
   }, [authReady, user, dispatch]);
 
-  const handleQtyChange = (itemId: string, qty: number) => dispatch(updateCartItem({ itemId, quantity: qty } as any));
+  const handleQtyChange = (itemId: string, qty: number) => dispatch(updateCartItem({ itemId, quantity: qty }));
 
   const handleRemove = async (itemId: string) => {
     setRemovingId(itemId);
-    await dispatch(removeFromCart(itemId as any));
+    await dispatch(removeFromCart(itemId));
     toast.success('Removed from cart');
     setRemovingId(null);
   };
@@ -36,7 +36,7 @@ export default function CartPage() {
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
     setApplyingCoupon(true);
-    const result = await dispatch(applyCoupon(couponInput.trim() as any));
+    const result = await dispatch(applyCoupon(couponInput.trim()));
     if (applyCoupon.fulfilled.match(result)) toast.success(`Coupon applied! You save ${formatPrice(result.payload.discount)}`);
     else toast.error((result.payload as string) || 'Invalid coupon');
     setApplyingCoupon(false);
@@ -140,7 +140,7 @@ export default function CartPage() {
 
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {items.map((item: any) => {
+            {items.map((item) => {
               const image = item.product?.images?.[0]?.url || item.mysteryBox?.image || item.image;
               const name = item.product?.name || item.mysteryBox?.name || item.name;
               const isRemoving = removingId === item._id;
@@ -152,7 +152,7 @@ export default function CartPage() {
                   {/* Image */}
                   <div className="relative w-20 h-20 rounded-2xl overflow-hidden bg-slate-50 flex-shrink-0 ring-1 ring-slate-100">
                     {image ? (
-                      <Image src={image} alt={name} fill className="object-cover" />
+                      <Image src={image!} alt={name ?? ''} fill className="object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <svg className="w-8 h-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>

@@ -5,8 +5,16 @@ import api from '@/lib/api';
 import { formatPrice, formatDate } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { useAuthStatus } from '@/hooks/useAuthStatus';
+import type { ApiError } from '@/types/api';
 
 type Tier = 'basic' | 'standard' | 'premium';
+
+type Subscription = {
+  tier?: string;
+  status?: string;
+  nextBillingDate?: string;
+  startDate?: string;
+};
 
 const TIERS: {
   id: Tier;
@@ -109,7 +117,7 @@ export default function SubscribePage() {
   const router = useRouter();
   const { user, authReady } = useAuthStatus();
 
-  const [subscription, setSubscription] = useState<any>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [subLoading, setSubLoading]     = useState(true);
   const [subError, setSubError]         = useState('');
 
@@ -120,6 +128,7 @@ export default function SubscribePage() {
 
   useEffect(() => {
     if (!authReady) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!user) { setSubLoading(false); return; }
     api.get('/subscriptions/my')
       .then(({ data }) => setSubscription(data.subscription || null))
@@ -140,8 +149,8 @@ export default function SubscribePage() {
       });
       setSubscription(data.subscription);
       toast.success(`Subscribed to ${tier.charAt(0).toUpperCase() + tier.slice(1)} plan!`);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to subscribe. Please try again.');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to subscribe. Please try again.');
     } finally {
       setSubscribing(null);
     }
@@ -153,8 +162,8 @@ export default function SubscribePage() {
       const { data } = await api.put('/subscriptions/pause');
       setSubscription(data.subscription);
       toast.success('Subscription paused successfully.');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to pause subscription.');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to pause subscription.');
     } finally {
       setPausing(false);
     }
@@ -167,8 +176,8 @@ export default function SubscribePage() {
       setSubscription(null);
       setConfirmCancel(false);
       toast.success('Subscription cancelled.');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to cancel subscription.');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to cancel subscription.');
     } finally {
       setCancelling(false);
     }
@@ -205,7 +214,7 @@ export default function SubscribePage() {
                     {formatPrice(TIERS.find((t) => t.id === subscription.tier)?.price ?? 0)}/month
                   </p>
                 </div>
-                <span className={`px-4 py-2 rounded-full text-sm font-bold capitalize ${STATUS_COLORS[subscription.status] || 'bg-gray-100 text-gray-600'}`}>
+                <span className={`px-4 py-2 rounded-full text-sm font-bold capitalize ${STATUS_COLORS[subscription.status ?? ''] || 'bg-gray-100 text-gray-600'}`}>
                   {subscription.status?.replace('_', ' ')}
                 </span>
               </div>

@@ -14,6 +14,14 @@ import {
   btnPrimary,
   btnSecondary,
 } from '@/components/admin/ui';
+import type { MysteryBox, Product, ApiError } from '@/types/api';
+
+type MysteryBoxPoolEntry = { product: string; weight: number };
+type MysteryBoxForm = {
+  name: string; tier: string; price: string | number; description: string;
+  minProducts: number; maxProducts: number; minValue: string | number;
+  stock: number; isActive: boolean; productPool: MysteryBoxPoolEntry[]; possibleItems: unknown[];
+};
 
 const TIER_COLORS: Record<string, string> = {
   basic: 'bg-slate-100 text-slate-700',
@@ -22,13 +30,13 @@ const TIER_COLORS: Record<string, string> = {
 };
 
 export default function AdminMysteryBoxesPage() {
-  const [boxes, setBoxes] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
+  const [boxes, setBoxes] = useState<MysteryBox[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
+  const [editing, setEditing] = useState<MysteryBox | null>(null);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState<any>({ name: '', tier: 'basic', price: '', description: '', minProducts: 3, maxProducts: 5, minValue: '', stock: 100, isActive: true, productPool: [], possibleItems: [] });
+  const [form, setForm] = useState<MysteryBoxForm>({ name: '', tier: 'basic', price: '', description: '', minProducts: 3, maxProducts: 5, minValue: '', stock: 100, isActive: true, productPool: [], possibleItems: [] });
 
   const fetchData = () => {
     Promise.all([
@@ -47,7 +55,26 @@ export default function AdminMysteryBoxesPage() {
     setForm({ name: '', tier: 'basic', price: '', description: '', minProducts: 3, maxProducts: 5, minValue: '', stock: 100, isActive: true, productPool: [], possibleItems: [] });
     setShowForm(true);
   };
-  const openEdit = (b: any) => { setEditing(b); setForm({ ...b }); setShowForm(true); };
+  const openEdit = (b: MysteryBox) => {
+    setEditing(b);
+    setForm({
+      name: b.name,
+      tier: b.tier,
+      price: b.price,
+      description: b.description,
+      minProducts: b.minProducts,
+      maxProducts: b.maxProducts,
+      minValue: b.minValue,
+      stock: b.stock,
+      isActive: b.isActive,
+      productPool: (b.productPool || []).map((pp) => ({
+        product: typeof pp.product === 'string' ? pp.product : pp.product._id,
+        weight: pp.weight ?? 1,
+      })),
+      possibleItems: [],
+    });
+    setShowForm(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,8 +94,8 @@ export default function AdminMysteryBoxesPage() {
       }
       setShowForm(false);
       fetchData();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to save');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to save');
     } finally { setSaving(false); }
   };
 
@@ -80,10 +107,10 @@ export default function AdminMysteryBoxesPage() {
 
   const toggleProduct = (productId: string) => {
     const pool = form.productPool || [];
-    const exists = pool.find((p: any) => p.product === productId);
-    setForm((prev: any) => ({
+    const exists = pool.find((p) => p.product === productId);
+    setForm((prev) => ({
       ...prev,
-      productPool: exists ? pool.filter((p: any) => p.product !== productId) : [...pool, { product: productId, weight: 1 }],
+      productPool: exists ? pool.filter((p) => p.product !== productId) : [...pool, { product: productId, weight: 1 }],
     }));
   };
 
@@ -172,11 +199,11 @@ export default function AdminMysteryBoxesPage() {
             <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
               <div>
                 <label className={adminLabel}>Name *</label>
-                <input type="text" value={form.name} onChange={(e) => setForm((p: any) => ({ ...p, name: e.target.value }))} required className={adminInput} />
+                <input type="text" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} required className={adminInput} />
               </div>
               <div>
                 <label className={adminLabel}>Tier *</label>
-                <select value={form.tier} onChange={(e) => setForm((p: any) => ({ ...p, tier: e.target.value }))} className={adminInput}>
+                <select value={form.tier} onChange={(e) => setForm((p) => ({ ...p, tier: e.target.value }))} className={adminInput}>
                   <option value="basic">Basic</option>
                   <option value="standard">Standard</option>
                   <option value="premium">Premium</option>
@@ -191,12 +218,12 @@ export default function AdminMysteryBoxesPage() {
               ].map(({ key, label, required }) => (
                 <div key={key}>
                   <label className={adminLabel}>{label}</label>
-                  <input type="number" value={form[key]} onChange={(e) => setForm((p: any) => ({ ...p, [key]: e.target.value }))} required={required} className={adminInput} />
+                  <input type="number" value={form[key as keyof MysteryBoxForm] as string | number} onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.value } as MysteryBoxForm))} required={required} className={adminInput} />
                 </div>
               ))}
               <div className="col-span-2">
                 <label className={adminLabel}>Description *</label>
-                <textarea value={form.description} onChange={(e) => setForm((p: any) => ({ ...p, description: e.target.value }))} required rows={3} className={adminInput + ' resize-none'} />
+                <textarea value={form.description} onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))} required rows={3} className={adminInput + ' resize-none'} />
               </div>
               <div className="col-span-2">
                 <label className={adminLabel}>Product Pool ({form.productPool?.length || 0} selected)</label>
@@ -204,7 +231,7 @@ export default function AdminMysteryBoxesPage() {
                   {products.length === 0 ? (
                     <p className="p-4 text-xs text-slate-400">No products marked as Mystery Box eligible. Edit products to enable.</p>
                   ) : products.map((p) => {
-                    const inPool = form.productPool?.find((pp: any) => pp.product === p._id || pp.product?._id === p._id);
+                    const inPool = form.productPool?.find((pp) => pp.product === p._id);
                     return (
                       <label key={p._id} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer">
                         <input type="checkbox" checked={!!inPool} onChange={() => toggleProduct(p._id)} className="accent-indigo-600" />
@@ -217,7 +244,7 @@ export default function AdminMysteryBoxesPage() {
               </div>
               <div className="col-span-2">
                 <label className="flex items-center gap-2 cursor-pointer text-sm text-slate-700">
-                  <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((p: any) => ({ ...p, isActive: e.target.checked }))} className="accent-indigo-600" />
+                  <input type="checkbox" checked={form.isActive} onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))} className="accent-indigo-600" />
                   Active
                 </label>
               </div>

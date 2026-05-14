@@ -5,14 +5,15 @@ import api from '@/lib/api';
 import { formatDate, formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { AdminPageHeader, adminPanel, adminStack, adminTableHead, adminInput, btnSecondary } from '@/components/admin/ui';
+import type { User, Pagination } from '@/types/api';
 
 type AcqStat = { source: string; count: number };
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [pagination, setPagination] = useState<any>(null);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
   const [page, setPage] = useState(1);
   const [acqStats, setAcqStats] = useState<AcqStat[]>([]);
 
@@ -27,7 +28,7 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     fetchUsers();
-  }, [search, page]);
+  }, [search, page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     api
@@ -165,7 +166,7 @@ export default function AdminUsersPage() {
                     <td className="px-5 py-4">
                       <button
                         type="button"
-                        onClick={() => toggleBlock(user._id, user.name, user.isBlocked)}
+                        onClick={() => toggleBlock(user._id, user.name, user.isBlocked ?? false)}
                         className={`${btnSecondary} px-3 py-1.5 text-xs ${
                           user.isBlocked ? 'border-emerald-200 text-emerald-800 hover:bg-emerald-50' : 'border-rose-200 text-rose-800 hover:bg-rose-50'
                         }`}

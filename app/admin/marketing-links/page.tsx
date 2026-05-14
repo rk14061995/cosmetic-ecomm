@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { buildAcquisitionShareUrl, MARKETING_CHANNELS, type MarketingChannel } from '@/lib/marketingAcquisitionUrl';
+import type { MarketingLink, ApiError } from '@/types/api';
 import {
   AdminModal,
   AdminPageHeader,
@@ -53,16 +54,15 @@ async function copyText(text: string) {
 }
 
 export default function AdminMarketingLinksPage() {
-  const [links, setLinks] = useState<any[]>([]);
+  const [links, setLinks] = useState<MarketingLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [channelFilter, setChannelFilter] = useState<MarketingChannel | 'all'>('all');
   const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
+  const [editing, setEditing] = useState<MarketingLink | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
 
   const fetchLinks = useCallback(() => {
-    setLoading(true);
     const q = channelFilter === 'all' ? '' : `?channel=${channelFilter}`;
     api
       .get(`/marketing-links${q}`)
@@ -83,7 +83,7 @@ export default function AdminMarketingLinksPage() {
     setShowForm(true);
   };
 
-  const openEdit = (row: any) => {
+  const openEdit = (row: MarketingLink) => {
     setEditing(row);
     setForm({
       channel: row.channel,
@@ -113,8 +113,8 @@ export default function AdminMarketingLinksPage() {
       }
       setShowForm(false);
       fetchLinks();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to save');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to save');
     } finally {
       setSaving(false);
     }
@@ -131,7 +131,7 @@ export default function AdminMarketingLinksPage() {
     }
   };
 
-  const toggleActive = async (row: any) => {
+  const toggleActive = async (row: MarketingLink) => {
     try {
       await api.put(`/marketing-links/${row._id}`, { isActive: !row.isActive });
       fetchLinks();

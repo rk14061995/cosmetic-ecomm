@@ -2,7 +2,7 @@
 import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { loginUser } from '@/store/slices/authSlice';
 import { fetchCart } from '@/store/slices/cartSlice';
 import toast from 'react-hot-toast';
@@ -12,8 +12,8 @@ function LoginForm() {
   const siteName = getSiteName();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const dispatch = useDispatch<any>();
-  const { user, initialized } = useSelector((state: any) => state.auth);
+  const dispatch = useAppDispatch();
+  const { user, initialized } = useAppSelector((state) => state.auth);
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPwd, setShowPwd] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -50,7 +50,7 @@ function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    const result = await dispatch(loginUser(form as any));
+    const result = await dispatch(loginUser(form));
     if (loginUser.fulfilled.match(result)) {
       dispatch(fetchCart());
       toast.success(`Welcome back, ${result.payload.user.name}!`);

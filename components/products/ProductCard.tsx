@@ -1,15 +1,16 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '@/store/hooks';
 import { addToCart } from '@/store/slices/cartSlice';
 import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/hooks/useAuthStatus';
+import type { Product } from '@/types/api';
 
-export default function ProductCard({ product }: { product: any }) {
-  const dispatch = useDispatch<any>();
+export default function ProductCard({ product }: { product: Product }) {
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const { user, authReady } = useAuthStatus();
   const discount = product.discountPrice
@@ -23,7 +24,7 @@ export default function ProductCard({ product }: { product: any }) {
       router.push('/auth/login');
       return;
     }
-    const result = await dispatch(addToCart({ itemId: product._id, itemType: 'product', quantity: 1 } as any));
+    const result = await dispatch(addToCart({ itemId: product._id, itemType: 'product', quantity: 1 }));
     if (addToCart.fulfilled.match(result)) {
       toast.success('Added to cart!');
     } else {

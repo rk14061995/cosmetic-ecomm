@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '@/store/hooks';
+import type { GiftCard, ApiError } from '@/types/api';
 import api from '@/lib/api';
 import { formatPrice, formatDate } from '@/lib/utils';
 import toast from 'react-hot-toast';
@@ -15,7 +16,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function GiftCardsPage() {
-  const { user } = useSelector((state: any) => state.auth);
+  const { user } = useAppSelector((state) => state.auth);
 
   // Purchase form state
   const [amount, setAmount]               = useState<number>(500);
@@ -23,16 +24,15 @@ export default function GiftCardsPage() {
   const [recipientEmail, setRecipientEmail] = useState('');
   const [message, setMessage]             = useState('');
   const [purchasing, setPurchasing]       = useState(false);
-  const [successCard, setSuccessCard]     = useState<any>(null);
+  const [successCard, setSuccessCard]     = useState<GiftCard | null>(null);
 
   // My cards state
-  const [myCards, setMyCards]   = useState<any[]>([]);
+  const [myCards, setMyCards]   = useState<GiftCard[]>([]);
   const [cardsLoading, setCardsLoading] = useState(false);
   const [cardsError, setCardsError]     = useState('');
 
   useEffect(() => {
     if (!user) return;
-    setCardsLoading(true);
     api.get('/gift-cards/my-cards')
       .then(({ data }) => setMyCards(data.giftCards || []))
       .catch(() => setCardsError('Failed to load your gift cards.'))
@@ -58,8 +58,8 @@ export default function GiftCardsPage() {
       setRecipientEmail('');
       setMessage('');
       toast.success('Gift card sent successfully!');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to send gift card. Please try again.');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to send gift card. Please try again.');
     } finally {
       setPurchasing(false);
     }
@@ -253,11 +253,11 @@ export default function GiftCardsPage() {
             ) : myCards.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-3xl border border-gray-100">
                 <div className="text-4xl mb-3">🎁</div>
-                <p className="text-gray-500">You haven't purchased any gift cards yet.</p>
+                <p className="text-gray-500">You haven&apos;t purchased any gift cards yet.</p>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {myCards.map((card: any) => (
+                {myCards.map((card) => (
                   <div
                     key={card._id}
                     className="bg-gradient-to-br from-pink-500 to-rose-500 rounded-3xl p-6 text-white shadow-md hover:shadow-xl transition-all"

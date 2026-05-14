@@ -15,6 +15,14 @@ const eslintConfig = defineConfig([
     ".venv-e2e/**",
     "**/node_modules/**",
   ]),
+  // CJS test files must use require() — disable ESM-only rules for them.
+  {
+    files: ["**/*.cjs"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "@next/next/no-assign-module-variable": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

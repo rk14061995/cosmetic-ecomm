@@ -2,14 +2,14 @@
 import { Provider } from 'react-redux';
 import { store } from '@/store';
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '@/store/hooks';
 import { fetchProfile, setInitialized } from '@/store/slices/authSlice';
 import { fetchCart } from '@/store/slices/cartSlice';
 import { getAccessToken, getRefreshToken, persistAuthTokens } from '@/lib/authTokens';
 import { captureFirstTouchAttribution } from '@/lib/attribution';
 
 function AppInitializer({ children }: { children: React.ReactNode }) {
-  const dispatch = useDispatch<any>();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     captureFirstTouchAttribution();

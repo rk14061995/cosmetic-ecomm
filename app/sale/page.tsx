@@ -1,17 +1,18 @@
 'use client';
-import { useState, useEffect, useRef, Fragment } from 'react';
-import { useDispatch } from 'react-redux';
+import { useState, useEffect, Fragment } from 'react';
+import { useAppDispatch } from '@/store/hooks';
 import { addToCart } from '@/store/slices/cartSlice';
 import { formatPrice } from '@/lib/utils';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/hooks/useAuthStatus';
+import type { Product } from '@/types/api';
 
 // ─── Countdown Timer ──────────────────────────────────────────────────────────
 
 function CountdownTimer({ endsAt }: { endsAt: number }) {
-  const [timeLeft, setTimeLeft] = useState<number>(endsAt - Date.now());
+  const [timeLeft, setTimeLeft] = useState<number>(() => endsAt - Date.now());
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -77,8 +78,8 @@ function CountdownTimer({ endsAt }: { endsAt: number }) {
 
 // ─── Sale Product Card ────────────────────────────────────────────────────────
 
-function SaleCard({ product, endsAt }: { product: any; endsAt: number }) {
-  const dispatch = useDispatch<any>();
+function SaleCard({ product, endsAt }: { product: Product; endsAt: number }) {
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const { user, authReady } = useAuthStatus();
   const [adding, setAdding] = useState(false);
@@ -97,7 +98,7 @@ function SaleCard({ product, endsAt }: { product: any; endsAt: number }) {
     }
     setAdding(true);
     const result = await dispatch(
-      addToCart({ itemId: product._id, itemType: 'product', quantity: 1 } as any)
+      addToCart({ itemId: product._id, itemType: 'product', quantity: 1 })
     );
     if (addToCart.fulfilled.match(result)) {
       toast.success('Added to cart!');
@@ -253,10 +254,10 @@ function LiveDot() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function SalePage() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   // Store end-times per product id — generated once, never re-randomised
-  const endTimesRef = useRef<Record<string, number>>({});
+  const [endTimes, setEndTimes] = useState<Record<string, number>>({});
 
   useEffect(() => {
     document.title = `Flash Sale | ${process.env.NEXT_PUBLIC_SITE_NAME || 'KosmeticX'}`;
@@ -266,19 +267,18 @@ export default function SalePage() {
     (async () => {
       try {
         const { data } = await api.get('/products?limit=12');
-        let items: any[] = data.products || [];
+        const items: Product[] = data.products || [];
         const saleItems = items.filter((p) => p.discountPrice);
         const finalItems = saleItems.length > 0 ? saleItems : items;
 
         // Generate end-times once
+        const newEndTimes: Record<string, number> = {};
         finalItems.forEach((p) => {
-          if (!endTimesRef.current[p._id]) {
-            // 2–24 hours from now, biased towards urgency (2–22.8 h)
-            endTimesRef.current[p._id] =
-              Date.now() + Math.random() * 86400000 * 0.9 + 7200000;
-          }
+          // 2–24 hours from now, biased towards urgency (2–22.8 h)
+          newEndTimes[p._id] = Date.now() + Math.random() * 86400000 * 0.9 + 7200000;
         });
 
+        setEndTimes(newEndTimes);
         setProducts(finalItems);
       } catch {
         setProducts([]);
@@ -389,11 +389,11 @@ export default function SalePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-            {products.map((p: any) => (
+            {products.map((p) => (
               <SaleCard
                 key={p._id}
                 product={p}
-                endsAt={endTimesRef.current[p._id]}
+                endsAt={endTimes[p._id] || 0}
               />
             ))}
           </div>
@@ -403,7 +403,7 @@ export default function SalePage() {
         {!loading && products.length > 0 && (
           <div className="mt-12 bg-gradient-to-r from-purple-900 to-pink-900 rounded-3xl p-6 md:p-8 text-center text-white">
             <p className="text-2xl font-black mb-2">
-              Don't miss out! ⚡
+              Don&apos;t miss out! ⚡
             </p>
             <p className="text-pink-200 text-sm md:text-base max-w-md mx-auto">
               These flash prices are only valid while the countdown is live. Once the timer hits zero, prices go back up instantly.

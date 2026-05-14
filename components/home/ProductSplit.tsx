@@ -3,10 +3,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import ProductCard from '@/components/products/ProductCard';
+import type { Product } from '@/types/api';
 
 export default function ProductSplit() {
-  const [popular, setPopular] = useState<any[]>([]);
-  const [newArrivals, setNewArrivals] = useState<any[]>([]);
+  const [popular, setPopular] = useState<Product[]>([]);
+  const [newArrivals, setNewArrivals] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

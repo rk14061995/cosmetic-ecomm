@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '@/store/hooks';
 import api from '@/lib/api';
+import type { Affiliate, AffiliateReferral, ApiError } from '@/types/api';
 import { formatPrice, formatDate } from '@/lib/utils';
 import toast from 'react-hot-toast';
 
@@ -21,9 +22,9 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 export default function AffiliatePage() {
-  const { user } = useSelector((state: any) => state.auth);
+  const { user } = useAppSelector((state) => state.auth);
 
-  const [affiliate, setAffiliate]         = useState<any>(null);
+  const [affiliate, setAffiliate]         = useState<Affiliate | null>(null);
   const [affiliateLoading, setAffiliateLoading] = useState(true);
   const [affiliateError, setAffiliateError]     = useState('');
 
@@ -52,6 +53,7 @@ export default function AffiliatePage() {
       .finally(() => setAffiliateLoading(false));
   }, [user]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchAffiliate(); }, [fetchAffiliate]);
 
   const handleApply = async (e: React.FormEvent) => {
@@ -69,8 +71,8 @@ export default function AffiliatePage() {
       });
       setSubmitted(true);
       toast.success('Application submitted!');
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to submit application.');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to submit application.');
     } finally {
       setSubmitting(false);
     }
@@ -175,7 +177,7 @@ export default function AffiliatePage() {
             </div>
 
             {/* Commission history */}
-            {affiliate.referrals?.length > 0 && (
+            {(affiliate.referrals?.length ?? 0) > 0 && (
               <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
                 <h3 className="text-xl font-bold text-gray-900 mb-5">Commission History</h3>
                 <div className="overflow-x-auto">
@@ -190,7 +192,7 @@ export default function AffiliatePage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
-                      {affiliate.referrals.slice(0, 10).map((ref: any, i: number) => (
+                      {(affiliate.referrals ?? []).slice(0, 10).map((ref: AffiliateReferral, i: number) => (
                         <tr key={ref._id || i} className="hover:bg-gray-50 transition-colors">
                           <td className="py-3 font-mono text-gray-700">
                             {(() => {
@@ -231,7 +233,7 @@ export default function AffiliatePage() {
             <div className="text-6xl mb-5">🎉</div>
             <h2 className="text-2xl font-bold text-gray-900 mb-3">Application Submitted!</h2>
             <p className="text-gray-500">
-              We'll review your application and get back to you within{' '}
+              We&apos;ll review your application and get back to you within{' '}
               <span className="font-semibold text-gray-700">48 hours</span>. Keep an eye on your inbox!
             </p>
           </div>

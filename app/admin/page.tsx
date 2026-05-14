@@ -6,8 +6,9 @@ import { formatPrice, formatDate, getOrderStatusColor } from '@/lib/utils';
 import { formatOrderLabelForDisplay } from '@/lib/orderDisplay';
 import toast from 'react-hot-toast';
 import { AdminPageHeader, adminPanel, adminStack, adminTableHead, btnSecondary } from '@/components/admin/ui';
+import type { AdminStats, MonthlyRevenue, Order, ApiError } from '@/types/api';
 
-const statCards = (stats: any) => [
+const statCards = (stats: AdminStats | null) => [
   {
     label: 'Total orders',
     value: stats?.totalOrders ?? 0,
@@ -54,14 +55,14 @@ const quickActions = [
 ];
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api
       .get('/orders/admin/stats')
       .then(({ data }) => setStats(data.stats))
-      .catch((err: any) => toast.error(err.response?.data?.message || 'Failed to load stats'))
+      .catch((err: unknown) => toast.error((err as ApiError).response?.data?.message || 'Failed to load stats'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -104,10 +105,10 @@ export default function AdminDashboard() {
         <div className={`${adminPanel} p-6 lg:col-span-2`}>
           <h2 className="text-sm font-semibold text-indigo-950">Revenue by month</h2>
           <p className="mt-0.5 text-xs text-indigo-950/50">Trailing window from your latest recorded months</p>
-          {stats?.monthlyRevenue?.length > 0 ? (
+          {(stats?.monthlyRevenue?.length ?? 0) > 0 ? (
             <div className="mt-8 flex h-44 items-end gap-2 sm:gap-3">
-              {[...stats.monthlyRevenue].reverse().slice(-6).map((m: any, i: number) => {
-                const maxRev = Math.max(...stats.monthlyRevenue.map((r: any) => r.revenue), 1);
+              {[...stats!.monthlyRevenue].reverse().slice(-6).map((m: MonthlyRevenue, i: number) => {
+                const maxRev = Math.max(...stats!.monthlyRevenue.map((r: MonthlyRevenue) => r.revenue), 1);
                 const height = Math.max((m.revenue / maxRev) * 100, 5);
                 return (
                   <div key={i} className="group flex flex-1 flex-col items-center gap-2">
@@ -181,8 +182,8 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-indigo-100/60">
-              {stats?.recentOrders?.length > 0 ? (
-                stats.recentOrders.map((order: any) => (
+              {(stats?.recentOrders?.length ?? 0) > 0 ? (
+                stats!.recentOrders.map((order: Order) => (
                   <tr key={order._id} className="transition hover:bg-indigo-50/50">
                     <td className="px-5 py-3.5 font-mono text-xs font-semibold text-slate-800 sm:px-6">
                       {formatOrderLabelForDisplay(order)}

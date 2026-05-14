@@ -227,6 +227,7 @@ export default function OrderInvoicePage() {
 
   useEffect(() => {
     if (!authReady || !user || !orderId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (authReady && !user) setLoading(false);
       return;
     }

@@ -21,7 +21,10 @@ function normalizeHex(input: string, fallback: string) {
   return /^#[0-9A-Fa-f]{6}$/.test(t) ? t : fallback;
 }
 
-export default function VirtualTryOnModal({ open, onClose, productName, tintHex }: VirtualTryOnModalProps) {
+type TryOnContentProps = Omit<VirtualTryOnModalProps, 'open'>;
+
+// Mounts fresh each time the modal opens — state resets automatically on unmount.
+function TryOnContent({ onClose, productName, tintHex }: TryOnContentProps) {
   const fallback = '#db2777';
   const tint = normalizeHex(tintHex, fallback);
 
@@ -38,13 +41,12 @@ export default function VirtualTryOnModal({ open, onClose, productName, tintHex 
   const offsetRef = useRef({ dx: 0, dy: 0 });
 
   useEffect(() => {
-    if (!open) return;
     const esc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', esc);
     return () => window.removeEventListener('keydown', esc);
-  }, [open, onClose]);
+  }, [onClose]);
 
   useEffect(() => {
     return () => {
@@ -53,19 +55,24 @@ export default function VirtualTryOnModal({ open, onClose, productName, tintHex 
   }, [fileUrl]);
 
   useEffect(() => {
-    if (!open) {
-      setFileUrl((prev) => {
-        if (prev) URL.revokeObjectURL(prev);
-        return null;
-      });
-      setX(50);
-      setY(58);
-      setWPct(30);
-      setHPct(11);
-      setOpacity(0.52);
-      setBlend('soft-light');
-    }
-  }, [open]);
+    const move = (e: PointerEvent) => {
+      if (!draggingRef.current || !wrapRef.current) return;
+      const rect = wrapRef.current.getBoundingClientRect();
+      const px = ((e.clientX - rect.left) / rect.width) * 100 - offsetRef.current.dx;
+      const py = ((e.clientY - rect.top) / rect.height) * 100 - offsetRef.current.dy;
+      setX(Math.min(100, Math.max(0, px)));
+      setY(Math.min(100, Math.max(0, py)));
+    };
+    const up = () => { draggingRef.current = false; };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+    return () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+    };
+  }, []);
 
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -99,31 +106,6 @@ export default function VirtualTryOnModal({ open, onClose, productName, tintHex 
     offsetRef.current = { dx: px - x, dy: py - y };
     draggingRef.current = true;
   };
-
-  useEffect(() => {
-    if (!open) return;
-    const move = (e: PointerEvent) => {
-      if (!draggingRef.current || !wrapRef.current) return;
-      const rect = wrapRef.current.getBoundingClientRect();
-      const px = ((e.clientX - rect.left) / rect.width) * 100 - offsetRef.current.dx;
-      const py = ((e.clientY - rect.top) / rect.height) * 100 - offsetRef.current.dy;
-      setX(Math.min(100, Math.max(0, px)));
-      setY(Math.min(100, Math.max(0, py)));
-    };
-    const up = () => {
-      draggingRef.current = false;
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-    window.addEventListener('pointercancel', up);
-    return () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      window.removeEventListener('pointercancel', up);
-    };
-  }, [open]);
-
-  if (!open) return null;
 
   return (
     <div
@@ -275,4 +257,10 @@ export default function VirtualTryOnModal({ open, onClose, productName, tintHex 
       </div>
     </div>
   );
+}
+
+// Wrapper: mounts TryOnContent only when open so state resets on close.
+export default function VirtualTryOnModal({ open, onClose, productName, tintHex }: VirtualTryOnModalProps) {
+  if (!open) return null;
+  return <TryOnContent onClose={onClose} productName={productName} tintHex={tintHex} />;
 }

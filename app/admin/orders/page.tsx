@@ -17,24 +17,24 @@ import {
   btnSuccess,
   filterPill,
 } from '@/components/admin/ui';
+import type { Order, Pagination, OrderItem, ApiError } from '@/types/api';
 
 const STATUSES = ['Pending', 'Paid', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('');
   const [paymentFilter, setPaymentFilter] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [pagination, setPagination] = useState<any>(null);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [updateModal, setUpdateModal] = useState<any>(null);
-  const [detailOrder, setDetailOrder] = useState<any>(null);
+  const [updateModal, setUpdateModal] = useState<Order | null>(null);
+  const [detailOrder, setDetailOrder] = useState<Order | null>(null);
   const [updateForm, setUpdateForm] = useState({ status: '', trackingNumber: '', note: '' });
 
   const fetchOrders = () => {
-    setLoading(true);
     const q = new URLSearchParams();
     if (filterStatus) q.set('status', filterStatus);
     if (paymentFilter) q.set('paymentMethod', paymentFilter);
@@ -43,13 +43,13 @@ export default function AdminOrdersPage() {
     q.set('limit', '20');
     api.get(`/orders?${q.toString()}`)
       .then(({ data }) => { setOrders(data.orders || []); setPagination(data.pagination || null); })
-      .catch((err: any) => { toast.error(err.response?.data?.message || 'Failed to load orders'); setOrders([]); })
+      .catch((err) => { toast.error((err as ApiError).response?.data?.message || 'Failed to load orders'); setOrders([]); })
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { fetchOrders(); }, [filterStatus, paymentFilter, page]);
+  useEffect(() => { fetchOrders(); }, [filterStatus, paymentFilter, page]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const openUpdateModal = (order: any) => {
+  const openUpdateModal = (order: Order) => {
     setUpdateModal(order);
     setUpdateForm({ status: order.orderStatus, trackingNumber: order.trackingNumber || '', note: '' });
   };
@@ -62,8 +62,8 @@ export default function AdminOrdersPage() {
       toast.success('Order status updated');
       setUpdateModal(null);
       fetchOrders();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to update');
+    } catch (err) {
+      toast.error((err as ApiError).response?.data?.message || 'Failed to update');
     } finally { setUpdatingId(null); }
   };
 
@@ -307,7 +307,7 @@ export default function AdminOrdersPage() {
             <div className="mb-6">
               <p className="text-xs uppercase text-slate-400 font-semibold mb-3 tracking-wide">Items</p>
               <div className="space-y-2">
-                {(detailOrder.orderItems || []).map((item: any, i: number) => (
+                {(detailOrder.orderItems || []).map((item: OrderItem, i: number) => (
                   <div key={i} className="flex items-center justify-between bg-slate-50 rounded-xl px-4 py-3">
                     <div>
                       <p className="text-sm font-medium text-slate-800">{item.name}</p>

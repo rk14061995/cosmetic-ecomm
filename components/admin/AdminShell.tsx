@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logoutUser } from '@/store/slices/authSlice';
 import toast from 'react-hot-toast';
 import { getSiteName } from '@/lib/seo';
@@ -77,8 +77,8 @@ function NavGlyph({ name, className = 'h-5 w-5' }: { name: AdminNavIconId; class
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const dispatch = useDispatch<any>();
-  const { user } = useSelector((state: any) => state.auth);
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
   const siteName = getSiteName();
 
   const handleLogout = async () => {
