@@ -40,10 +40,10 @@ const CONTACT_METHODS = [
 ];
 
 const FAQS = [
-  { q: 'Where is my order?', a: 'Track your order from "My Orders" in your account. You'll also get an SMS/email with a tracking link once shipped.' },
-  { q: 'How do I return a product?', a: 'Go to "My Orders", select the item, and click "Request Return". Our team reviews it within 2 business days.' },
+  { q: 'Where is my order?', a: "Track your order from \"My Orders\" in your account. You’ll also get an SMS/email with a tracking link once shipped." },
+  { q: 'How do I return a product?', a: "Go to \"My Orders\", select the item, and click \"Request Return\". Our team reviews it within 2 business days." },
   { q: 'My payment failed but money was deducted.', a: 'Failed payments are auto-refunded within 5–7 business days. Email us with your order ID for faster resolution.' },
-  { q: 'Can I change my delivery address after ordering?', a: 'Address changes are possible only within 2 hours of placing the order. Contact us immediately via WhatsApp.' },
+  { q: 'Can I change my delivery address after ordering?', a: "Address changes are possible only within 2 hours of placing the order. Contact us immediately via WhatsApp." },
   { q: 'Do you ship outside India?', a: 'We currently ship only within India. International shipping is coming soon!' },
 ];
 
@@ -62,7 +62,7 @@ export default function ContactPage() {
     setSending(true);
     // Simulate sending — replace with real API call if backend endpoint exists
     await new Promise((r) => setTimeout(r, 1200));
-    toast.success('Message sent! We'll get back to you within 24 hours.');
+    toast.success("Message sent! We'll get back to you within 24 hours.");
     setForm({ name: '', email: '', subject: '', message: '' });
     setSending(false);
   };

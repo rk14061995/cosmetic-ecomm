@@ -186,7 +186,7 @@ export default function CheckoutPage() {
       const { data: rpData } = await api.post('/payments/create-order', { orderId: order._id });
 
       const rzp = new (window as unknown as { Razorpay: new (opts: Record<string, unknown>) => { open(): void } }).Razorpay({
-        key:         process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        key:         rpData.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount:      rpData.amount,
         currency:    rpData.currency || 'INR',
 
