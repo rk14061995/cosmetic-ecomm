@@ -27,6 +27,7 @@ export interface Product {
   shortDescription?: string;
   price: number;
   discountPrice?: number;
+  costPrice?: number;
   category: string;
   brand: string;
   stock: number;
@@ -267,6 +268,10 @@ export interface AdminStats {
   totalUsers: number;
   recentOrders: Order[];
   monthlyRevenue: MonthlyRevenue[];
+  totalInvestment: number;
+  totalCogs: number;
+  totalProfit: number;
+  profitMargin: number;
 }
 
 export interface ApiError {

@@ -19,7 +19,7 @@ import {
 import type { Product, Category, ApiError } from '@/types/api';
 
 const EMPTY_FORM = {
-  name: '', description: '', shortDescription: '', price: '', discountPrice: '', category: '',
+  name: '', description: '', shortDescription: '', price: '', discountPrice: '', costPrice: '', category: '',
   brand: '', stock: '', tags: '', ingredients: '', howToUse: '', weight: '',
   isFeatured: false, isNewArrival: false, isBestSeller: false, isActive: true, eligibleForMysteryBox: false,
   virtualTryOn: false,
@@ -29,7 +29,7 @@ type ProductForm = typeof EMPTY_FORM;
 
 /** Only these keys are sent as multipart fields; excludes nested docs like images/reviews from spread form. */
 const PRODUCT_FORM_KEYS = [
-  'name', 'description', 'shortDescription', 'price', 'discountPrice', 'category', 'brand', 'stock',
+  'name', 'description', 'shortDescription', 'price', 'discountPrice', 'costPrice', 'category', 'brand', 'stock',
   'tags', 'ingredients', 'howToUse', 'weight', 'slug',
   'isFeatured', 'isNewArrival', 'isBestSeller', 'isActive', 'eligibleForMysteryBox',
   'virtualTryOn', 'tryOnTintHex',
@@ -96,6 +96,7 @@ export default function AdminProductsPage() {
       shortDescription: p.shortDescription || '',
       price: String(p.price),
       discountPrice: p.discountPrice ? String(p.discountPrice) : '',
+      costPrice: p.costPrice != null && p.costPrice !== 0 ? String(p.costPrice) : '',
       category: p.category,
       brand: p.brand,
       stock: String(p.stock),
@@ -293,6 +294,7 @@ export default function AdminProductsPage() {
                 <th className="px-5 py-3">Product</th>
                 <th className="px-5 py-3">Category</th>
                 <th className="px-5 py-3">Price</th>
+                <th className="px-5 py-3">Cost Price</th>
                 <th className="px-5 py-3">Stock</th>
                 <th className="px-5 py-3">Rating</th>
                 <th className="px-5 py-3">Status</th>
@@ -303,7 +305,7 @@ export default function AdminProductsPage() {
               {loading ? (
                 [...Array(5)].map((_, i) => <tr key={i}><td colSpan={7} className="px-5 py-3"><div className="h-4 bg-slate-100 animate-pulse rounded-lg" /></td></tr>)
               ) : products.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-14 text-slate-400">No products found</td></tr>
+                <tr><td colSpan={8} className="text-center py-14 text-slate-400">No products found</td></tr>
               ) : (
                 products.map((p) => (
                   <tr key={p._id} className="hover:bg-slate-50/60 transition-colors">
@@ -335,6 +337,20 @@ export default function AdminProductsPage() {
                     <td className="px-5 py-4">
                       <span className="font-semibold text-slate-900">{formatPrice(p.discountPrice || p.price)}</span>
                       {p.discountPrice && <span className="text-xs text-slate-400 line-through ml-1">{formatPrice(p.price)}</span>}
+                    </td>
+                    <td className="px-5 py-4">
+                      {p.costPrice ? (
+                        <div>
+                          <span className="font-medium text-amber-700">{formatPrice(p.costPrice)}</span>
+                          <span className={`block text-[10px] font-semibold mt-0.5 ${(p.discountPrice || p.price) > p.costPrice ? 'text-emerald-600' : 'text-rose-500'}`}>
+                            {(p.discountPrice || p.price) > p.costPrice
+                              ? `+${formatPrice((p.discountPrice || p.price) - p.costPrice)}`
+                              : `-${formatPrice(p.costPrice - (p.discountPrice || p.price))}`}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-slate-300 text-xs">—</span>
+                      )}
                     </td>
                     <td className="px-5 py-4">
                       <span className={`font-medium ${p.stock === 0 ? 'text-red-600' : p.stock < 10 ? 'text-amber-600' : 'text-slate-700'}`}>{p.stock}</span>
@@ -384,8 +400,9 @@ export default function AdminProductsPage() {
               {[
                 { key: 'name', label: 'Product Name *', col: 'md:col-span-2', required: true },
                 { key: 'brand', label: 'Brand *', required: true },
-                { key: 'price', label: 'Price (₹) *', type: 'number', required: true },
+                { key: 'price', label: 'Selling Price (₹) *', type: 'number', required: true },
                 { key: 'discountPrice', label: 'Discount Price (₹)', type: 'number' },
+                { key: 'costPrice', label: 'Cost Price (₹)', type: 'number' },
                 { key: 'stock', label: 'Stock *', type: 'number', required: true },
                 { key: 'weight', label: 'Weight' },
               ].map(({ key, label, col, type = 'text', required }) => (

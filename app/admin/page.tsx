@@ -12,6 +12,8 @@ const statCards = (stats: AdminStats | null) => [
   {
     label: 'Total orders',
     value: stats?.totalOrders ?? 0,
+    sub: null,
+    color: 'indigo',
     icon: (
       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974a1.125 1.125 0 011.119 1.007z" />
@@ -21,6 +23,8 @@ const statCards = (stats: AdminStats | null) => [
   {
     label: 'Net revenue',
     value: formatPrice(stats?.totalRevenue ?? 0),
+    sub: null,
+    color: 'indigo',
     icon: (
       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-3.75h6M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -30,6 +34,8 @@ const statCards = (stats: AdminStats | null) => [
   {
     label: 'Customers',
     value: stats?.totalUsers ?? 0,
+    sub: null,
+    color: 'indigo',
     icon: (
       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0z" />
@@ -38,10 +44,34 @@ const statCards = (stats: AdminStats | null) => [
   },
   {
     label: 'Avg. order value',
-    value: formatPrice(stats?.totalOrders ? stats.totalRevenue / stats.totalOrders : 0),
+    value: formatPrice(stats?.totalOrders ? (stats.totalRevenue / stats.totalOrders) : 0),
+    sub: null,
+    color: 'indigo',
     icon: (
       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Inventory investment',
+    value: formatPrice(stats?.totalInvestment ?? 0),
+    sub: 'Cost price × units in stock',
+    color: 'amber',
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Net profit',
+    value: formatPrice(Math.max(0, stats?.totalProfit ?? 0)),
+    sub: stats ? `${Math.max(0, stats.profitMargin ?? 0).toFixed(1)}% margin · Investment ${formatPrice(stats.totalInvestment ?? 0)}` : null,
+    color: (stats?.totalProfit ?? 0) >= 0 ? 'emerald' : 'rose',
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
       </svg>
     ),
   },
@@ -89,16 +119,23 @@ export default function AdminDashboard() {
         description="High-level performance for your storefront. Figures reflect paid and fulfilled commerce activity."
       />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-5">
-        {cards.map((card) => (
-          <div key={card.label} className={`${adminPanel} p-5 transition hover:border-indigo-300/80 hover:shadow-md hover:shadow-indigo-950/10`}>
-            <div className="flex items-start justify-between gap-3">
-              <div className="rounded-lg bg-indigo-100/90 p-2 text-indigo-700">{card.icon}</div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {cards.map((card) => {
+          const isEmerald = card.color === 'emerald';
+          const isRose = card.color === 'rose';
+          const isAmber = card.color === 'amber';
+          const iconBg = isEmerald ? 'bg-emerald-100/90 text-emerald-700' : isRose ? 'bg-rose-100/90 text-rose-700' : isAmber ? 'bg-amber-100/90 text-amber-700' : 'bg-indigo-100/90 text-indigo-700';
+          const valColor = isEmerald ? 'text-emerald-700' : isRose ? 'text-rose-600' : 'text-indigo-950';
+          const hoverBorder = isEmerald ? 'hover:border-emerald-300/80' : isRose ? 'hover:border-rose-300/80' : isAmber ? 'hover:border-amber-300/80' : 'hover:border-indigo-300/80';
+          return (
+            <div key={card.label} className={`${adminPanel} p-3 transition ${hoverBorder} hover:shadow-md`}>
+              <span className={`inline-flex rounded-md p-1.5 mb-2 ${iconBg}`}>{card.icon}</span>
+              <p className={`text-lg font-semibold tabular-nums tracking-tight ${valColor}`}>{card.value}</p>
+              <p className="mt-0.5 text-xs text-indigo-950/55">{card.label}</p>
+              {card.sub && <p className="mt-0.5 text-[10px] leading-snug text-indigo-950/35">{card.sub}</p>}
             </div>
-            <p className="mt-4 text-2xl font-semibold tabular-nums tracking-tight text-indigo-950 sm:text-3xl">{card.value}</p>
-            <p className="mt-1 text-sm text-indigo-950/55">{card.label}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

@@ -43,14 +43,34 @@ const featureCards = [
   { icon: '◉',  title: 'Gift Cards',       subtitle: 'Give the gift of glow',  href: '/gift-cards',  accent: 'bg-amber-500',  card: 'from-amber-50 to-yellow-50',  border: 'border-amber-100'  },
 ];
 
-const trustItems = [
-  { stat: '500+',  label: 'Products'         },
-  { stat: '50K+',  label: 'Happy Customers'  },
-  { stat: '4.8',   label: 'Average Rating'   },
-  { stat: '100%',  label: 'Authentic'        },
-];
+async function fetchProductStats(): Promise<{ totalProducts: number; averageRating: number }> {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/stats`, {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) throw new Error('stats fetch failed');
+    const data = await res.json();
+    return { totalProducts: data.totalProducts ?? 0, averageRating: data.averageRating ?? 0 };
+  } catch {
+    return { totalProducts: 0, averageRating: 0 };
+  }
+}
 
-export default function HomePage() {
+export default async function HomePage() {
+  const { totalProducts, averageRating } = await fetchProductStats();
+
+  const productStat = totalProducts > 0 ? `${totalProducts}+` : '500+';
+  const ratingStat = averageRating > 0
+    ? averageRating.toFixed(1)
+    : '4.8';
+
+  const trustItems = [
+    { stat: productStat, label: 'Products'        },
+    { stat: '50K+',      label: 'Happy Customers' },
+    { stat: ratingStat,  label: 'Average Rating'  },
+    { stat: '100%',      label: 'Authentic'       },
+  ];
+
   return (
     <div className="bg-[#fdfbf9]">
 
