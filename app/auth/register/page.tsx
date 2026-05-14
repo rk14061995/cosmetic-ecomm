@@ -23,7 +23,8 @@ function RegisterForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.password.length < 6) { toast.error('Password must be at least 6 characters'); return; }
-    const result = await dispatch(registerUser(form));
+    const payload = { ...form, referralCode: form.referralCode.trim() || undefined };
+    const result = await dispatch(registerUser(payload));
     if (registerUser.fulfilled.match(result)) {
       dispatch(fetchCart());
       toast.success(`Welcome to ${siteName}, ${result.payload.user.name}!`);
@@ -58,7 +59,7 @@ function RegisterForm() {
               className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone (optional)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone </label>
             <input type="tel" value={form.phone} onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
               placeholder="9876543210"
               className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300" />

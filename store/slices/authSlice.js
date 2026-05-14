@@ -47,6 +47,9 @@ const authSlice = createSlice({
   reducers: {
     clearError: (state) => { state.error = null; },
     setInitialized: (state) => { state.initialized = true; },
+    updateUser: (state, action) => {
+      if (state.user) Object.assign(state.user, action.payload);
+    },
   },
   extraReducers: (builder) => {
     const pending = (state) => { state.loading = true; state.error = null; };
@@ -93,5 +96,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError, setInitialized } = authSlice.actions;
+export const { clearError, setInitialized, updateUser } = authSlice.actions;
 export default authSlice.reducer;

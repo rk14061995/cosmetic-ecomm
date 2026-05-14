@@ -9,3 +9,4 @@ export declare const registerUser: AsyncThunk<AuthResponse, { name: string; emai
 export declare const fetchProfile: AsyncThunk<User, void, RejectValue>;
 export declare const logoutUser: AsyncThunk<void, void, Record<string, never>>;
 export declare const setInitialized: () => { type: string };
+export declare const updateUser: (payload: Partial<User>) => { type: string; payload: Partial<User> };

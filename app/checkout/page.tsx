@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { fetchCart } from '@/store/slices/cartSlice';
+import { updateUser } from '@/store/slices/authSlice';
 import api from '@/lib/api';
 import { formatPrice, loadRazorpayScript } from '@/lib/utils';
 import type { UserAddress, ApiError } from '@/types/api';
@@ -137,6 +138,7 @@ export default function CheckoutPage() {
     try {
       const { data } = await api.post('/auth/addresses', payload);
       const saved = data?.addresses?.[data.addresses.length - 1];
+      dispatch(updateUser({ addresses: data.addresses }));
       setSelectedAddress(saved);
       setShowForm(false);
       setNewAddress({ ...initialAddress });
