@@ -208,7 +208,7 @@ export default function GiftCardsPage() {
                   step: '3',
                   icon: '🛍️',
                   title: 'Redeem at Checkout',
-                  desc: 'They apply the code at checkout on Glowzy — balance deducted automatically. No expiry hassle for a full year.',
+                  desc: 'They apply the code at checkout on kosmeticX — balance deducted automatically. No expiry hassle for a full year.',
                 },
               ].map((step) => (
                 <div key={step.step} className="flex gap-5 bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-pink-200 transition-all">

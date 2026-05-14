@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 const TESTIMONIALS = [
   { name: 'Aisha R.', city: 'Mumbai', quote: 'My skin texture changed in 3 weeks. Lightweight formulas, zero irritation.', rating: 5 },
   { name: 'Sana K.', city: 'Delhi', quote: 'The mystery box was actually worth it. Every product was usable and premium.', rating: 5 },
-  { name: 'Priya M.', city: 'Bengaluru', quote: 'Glowzy recommendations are spot on. The quiz gave me a perfect routine.', rating: 5 },
+  { name: 'Priya M.', city: 'Bengaluru', quote: 'kosmeticX recommendations are spot on. The quiz gave me a perfect routine.', rating: 5 },
   { name: 'Ritika J.', city: 'Pune', quote: 'Packaging, delivery, product quality — all 10/10. My go-to beauty store now.', rating: 5 },
 ];
 
@@ -23,7 +23,7 @@ export default function TestimonialsCarousel() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <p className="text-xs uppercase tracking-[0.2em] font-semibold text-indigo-500 mb-2">Community Love</p>
-          <h2 className="text-3xl font-black text-neutral-900">What Glowzy Customers Say</h2>
+          <h2 className="text-3xl font-black text-neutral-900">What kosmeticX Customers Say</h2>
         </div>
 
         <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-4">

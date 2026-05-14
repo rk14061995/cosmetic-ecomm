@@ -64,7 +64,7 @@ export default function MysteryBoxPreview() {
               <span className="font-thin italic text-indigo-500">Boxes</span>
             </h2>
             <p className="text-slate-600 mt-4 font-light text-sm md:text-base max-w-xl">
-              The most-loved Glowzy feature: each Mystery Box is hand-curated by our team with premium K-beauty + global icons.
+              The most-loved kosmeticX feature: each Mystery Box is hand-curated by our team with premium K-beauty + global icons.
               Unbox discovery, value, and delight in every order.
             </p>
             <div className="flex flex-wrap gap-3 mt-6">

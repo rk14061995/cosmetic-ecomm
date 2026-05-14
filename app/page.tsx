@@ -171,7 +171,7 @@ export default function HomePage() {
           <div className="flex items-end justify-between mb-10">
             <div>
               <p className="text-xs font-bold tracking-[0.2em] text-indigo-400 uppercase mb-2">Discover More</p>
-              <h2 className="text-3xl md:text-4xl font-black text-neutral-900">Everything Glowzy</h2>
+              <h2 className="text-3xl md:text-4xl font-black text-neutral-900">Everything kosmeticX</h2>
               <p className="text-sm text-neutral-500 mt-2 max-w-xl">
                 Elevated experiences beyond shopping - personalized routines, curated bundles, gifting, and more.
               </p>
@@ -192,7 +192,7 @@ export default function HomePage() {
                       {f.icon}
                     </div>
                     <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-neutral-400">
-                      Glowzy Pick
+                      kosmeticX Pick
                     </span>
                   </div>
                   <p className="relative font-black text-neutral-900 text-lg mb-1.5 tracking-tight">{f.title}</p>

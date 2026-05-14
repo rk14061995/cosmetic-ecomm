@@ -51,7 +51,7 @@ export default function BlogTeaser() {
             Beauty Journal
           </span>
           <h2 className="text-3xl font-bold text-gray-900">From Our Beauty Journal</h2>
-          <p className="text-gray-500 mt-2">Tips, tutorials & trends from the Glowzy team</p>
+          <p className="text-gray-500 mt-2">Tips, tutorials & trends from the kosmeticX team</p>
         </div>
 
         {/* Cards */}

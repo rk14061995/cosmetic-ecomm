@@ -1,7 +1,7 @@
-# Project Summary: Glowzy (Cosmetic E-Commerce)
+# Project Summary: kosmeticX (Cosmetic E-Commerce)
 
 ## Project Overview
-Glowzy is a full-stack beauty e-commerce platform with:
+kosmeticX is a full-stack beauty e-commerce platform with:
 - Customer storefront (Next.js)
 - Admin panel (within same Next.js app)
 - Backend API (Node.js + Express + MongoDB)
@@ -85,11 +85,11 @@ Frontend points to deployed backend via:
 - Homepage mystery section reads reels dynamically
 
 ### UI/Branding
-- Brand renamed Glowzy across app
+- Brand renamed kosmeticX across app
 - Header logo visibility fixes
 - Reduced pink-heavy UI; moved to indigo/cyan premium palette
 - Mobile header styled to app-like look
-- “Everything Glowzy” section made premium + mobile horizontal shelf
+- “Everything kosmeticX” section made premium + mobile horizontal shelf
 - Quiz UI revamped with Gen-Z styling
 
 ---
@@ -160,7 +160,7 @@ After backend code changes, redeploy backend so frontend sees latest API behavio
 
 ## Prompt Usage Instruction
 When working on this project:
-- Preserve Glowzy branding and premium aesthetic
+- Preserve kosmeticX branding and premium aesthetic
 - Keep Mystery Box as high-priority section
 - Prefer admin-configurable data over hardcoded UI lists
 - Ensure new UI changes are mobile-first and production-ready

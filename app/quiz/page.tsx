@@ -394,7 +394,7 @@ export default function QuizPage() {
 
       {/* Footer note */}
       <div className="text-center pb-8 text-xs text-indigo-400 font-medium">
-        Your answers help us personalise your Glowzy experience 🌸
+        Your answers help us personalise your kosmeticX experience 🌸
       </div>
     </div>
   );

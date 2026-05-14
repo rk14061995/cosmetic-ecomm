@@ -151,7 +151,7 @@ export default function BlogPostPage() {
               )}
             </div>
             <div className="text-left">
-              <p className="font-semibold text-sm">{post.author?.name ?? 'Glowzy Team'}</p>
+              <p className="font-semibold text-sm">{post.author?.name ?? 'kosmeticX Team'}</p>
               <div className="flex items-center gap-3 text-white/70 text-xs mt-0.5">
                 <span>{formatDate(post.createdAt)}</span>
                 <span>·</span>

@@ -10,7 +10,7 @@ const PAYOUT_METHODS = ['wallet', 'upi', 'bank'] as const;
 type PayoutMethod = typeof PAYOUT_METHODS[number];
 
 const PAYOUT_PLACEHOLDERS: Record<PayoutMethod, string> = {
-  wallet: 'Your Glowzy wallet will be credited automatically',
+  wallet: 'Your kosmeticX wallet will be credited automatically',
   upi:    'Enter your UPI ID (e.g. name@upi)',
   bank:   'Enter IFSC code and account number separated by a comma',
 };
@@ -97,7 +97,7 @@ export default function AffiliatePage() {
       {/* Hero */}
       <div className="bg-gradient-to-r from-purple-900 to-pink-900 text-white py-20 px-4 text-center">
         <div className="text-5xl mb-4">💄</div>
-        <h1 className="text-4xl md:text-5xl font-bold mb-3">Become a Glowzy Affiliate</h1>
+        <h1 className="text-4xl md:text-5xl font-bold mb-3">Become a kosmeticX Affiliate</h1>
         <p className="text-purple-200 text-xl mb-10">Earn 10% commission on every sale you refer</p>
 
         <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto">
@@ -347,7 +347,7 @@ export default function AffiliatePage() {
 
             {/* Perks sidebar */}
             <div className="lg:col-span-2">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Why Join Glowzy Affiliates?</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Why Join kosmeticX Affiliates?</h3>
               <div className="space-y-4">
                 {[
                   { icon: '💰', title: '10% Commission', desc: 'Earn on every sale referred through your unique link.' },
