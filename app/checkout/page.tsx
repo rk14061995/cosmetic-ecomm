@@ -9,6 +9,7 @@ import api from '@/lib/api';
 import { formatPrice, loadRazorpayScript } from '@/lib/utils';
 import type { UserAddress, ApiError } from '@/types/api';
 import { formatOrderLabelForDisplay } from '@/lib/orderDisplay';
+import RAZORPAY_LOGO from '@/lib/razorpayLogo';
 import toast from 'react-hot-toast';
 import { useRequireUser } from '@/hooks/useRequireUser';
 import { INDIAN_STATES_AND_UTS } from '@/data/indianStates';
@@ -90,7 +91,7 @@ export default function CheckoutPage() {
   const router   = useRouter();
   const dispatch = useAppDispatch();
   const { user, authReady, isAuthed } = useRequireUser();
-  const { items, summary } = useAppSelector((state) => state.cart);
+  const { items, summary, couponCode } = useAppSelector((state) => state.cart);
 
   const [selectedAddress, setSelectedAddress] = useState<UserAddress | null>(null);
   const [placing,         setPlacing]         = useState(false);
@@ -173,6 +174,7 @@ export default function CheckoutPage() {
         },
         paymentMethod: 'razorpay',
         walletAmountUsed: 0,
+        ...(couponCode ? { couponCode } : {}),
       });
 
       const order = orderRes.order;
@@ -190,7 +192,7 @@ export default function CheckoutPage() {
 
         // Brand identity shown in the Razorpay modal
         name:        process.env.NEXT_PUBLIC_SITE_NAME || 'KosmeticX',
-        image:       `${process.env.NEXT_PUBLIC_SITE_URL || ''}/logo.png`,
+        image:       RAZORPAY_LOGO,
         description: `${orderLabel} · ${items.length} item${items.length > 1 ? 's' : ''}`,
 
         order_id: rpData.razorpayOrderId,
