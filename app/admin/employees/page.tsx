@@ -14,7 +14,7 @@ const MONTHS = ['January','February','March','April','May','June','July','August
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const now = new Date();
 
-const EMPTY_FORM = { name: '', role: '', phone: '', email: '', joiningDate: '', monthlySalary: '', status: 'active' as const };
+const EMPTY_FORM = { name: '', role: '', phone: '', email: '', joiningDate: '', monthlySalary: '', status: 'active' as 'active' | 'inactive' };
 const EMPTY_PAY  = { month: String(now.getMonth() + 1), year: String(now.getFullYear()), amount: '', paymentMode: 'Bank Transfer', totalDays: '30', presentDays: '30', note: '' };
 const PAYMENT_MODES = ['Bank Transfer', 'Cash', 'UPI', 'Cheque', 'NEFT', 'RTGS', 'IMPS'];
 
