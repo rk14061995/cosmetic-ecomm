@@ -268,10 +268,20 @@ export interface AdminStats {
   totalUsers: number;
   recentOrders: Order[];
   monthlyRevenue: MonthlyRevenue[];
+  stockInvestment: number;
+  totalExpenses: number;
   totalInvestment: number;
   totalCogs: number;
   totalProfit: number;
   profitMargin: number;
+}
+
+export interface Expense {
+  _id: string;
+  name: string;
+  amount: number;
+  note?: string;
+  createdAt: string;
 }
 
 export interface ApiError {
@@ -360,4 +370,50 @@ export interface Affiliate {
   totalOrders?: number;
   payouts?: AffiliatePayout[];
   referrals?: AffiliateReferral[];
+}
+
+export interface SalaryRecord {
+  _id: string;
+  month: number;
+  year: number;
+  amount: number;
+  paymentMode?: string;
+  totalDays?: number;
+  presentDays?: number;
+  paidAt: string;
+  note?: string;
+}
+
+export interface SalaryComponent {
+  name: string;
+  amount: number;
+}
+
+export interface Employee {
+  _id: string;
+  name: string;
+  role: string;
+  phone?: string;
+  email?: string;
+  joiningDate?: string;
+  monthlySalary: number;
+  allowances: SalaryComponent[];
+  deductions: SalaryComponent[];
+  status: 'active' | 'inactive';
+  salaryRecords: SalaryRecord[];
+  createdAt: string;
+}
+
+export interface Refund {
+  _id: string;
+  order?: { _id: string; orderNumber?: string; totalPrice: number; orderStatus: string };
+  user?: { _id: string; name?: string; email?: string };
+  orderNumber?: string;
+  amount: number;
+  reason: string;
+  method: 'wallet' | 'bank' | 'razorpay' | 'other';
+  status: 'pending' | 'approved' | 'rejected' | 'processed';
+  adminNote?: string;
+  processedAt?: string;
+  createdAt: string;
 }

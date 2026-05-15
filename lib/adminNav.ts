@@ -9,6 +9,9 @@ export const ADMIN_NAV_LINKS = [
   { href: '/admin/mystery-boxes', label: 'Mystery boxes', icon: 'gift' as const },
   { href: '/admin/payments', label: 'Payments', icon: 'payments' as const },
   { href: '/admin/reels', label: 'Reels', icon: 'reels' as const },
+  { href: '/admin/expenses', label: 'Expenses', icon: 'expenses' as const },
+  { href: '/admin/employees', label: 'Employees', icon: 'employees' as const },
+  { href: '/admin/refunds', label: 'Refunds', icon: 'refunds' as const },
 ] as const;
 
 export type AdminNavIconId = (typeof ADMIN_NAV_LINKS)[number]['icon'];

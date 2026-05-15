@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { formatPrice, formatDate, getOrderStatusColor } from '@/lib/utils';
@@ -8,9 +8,52 @@ import toast from 'react-hot-toast';
 import { AdminPageHeader, adminPanel, adminStack, adminTableHead, btnSecondary } from '@/components/admin/ui';
 import type { AdminStats, MonthlyRevenue, Order, ApiError } from '@/types/api';
 
-const statCards = (stats: AdminStats | null) => [
+type FilterKey = 'all' | 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+
+const FILTERS: { key: FilterKey; label: string }[] = [
+  { key: 'all', label: 'All time' },
+  { key: 'daily', label: 'Today' },
+  { key: 'weekly', label: 'This week' },
+  { key: 'monthly', label: 'This month' },
+  { key: 'quarterly', label: 'This quarter' },
+  { key: 'yearly', label: 'This year' },
+];
+
+function getDateRange(filter: FilterKey): { from?: string; to?: string } {
+  const now = new Date();
+  const start = new Date(now);
+  switch (filter) {
+    case 'daily':
+      start.setHours(0, 0, 0, 0);
+      return { from: start.toISOString() };
+    case 'weekly': {
+      const day = start.getDay();
+      start.setDate(start.getDate() - (day === 0 ? 6 : day - 1));
+      start.setHours(0, 0, 0, 0);
+      return { from: start.toISOString() };
+    }
+    case 'monthly':
+      start.setDate(1);
+      start.setHours(0, 0, 0, 0);
+      return { from: start.toISOString() };
+    case 'quarterly': {
+      const q = Math.floor(now.getMonth() / 3);
+      start.setMonth(q * 3, 1);
+      start.setHours(0, 0, 0, 0);
+      return { from: start.toISOString() };
+    }
+    case 'yearly':
+      start.setMonth(0, 1);
+      start.setHours(0, 0, 0, 0);
+      return { from: start.toISOString() };
+    default:
+      return {};
+  }
+}
+
+const statCards = (stats: AdminStats | null, filter: FilterKey) => [
   {
-    label: 'Total orders',
+    label: filter === 'all' ? 'Total orders' : 'Orders',
     value: stats?.totalOrders ?? 0,
     sub: null,
     color: 'indigo',
@@ -32,7 +75,7 @@ const statCards = (stats: AdminStats | null) => [
     ),
   },
   {
-    label: 'Customers',
+    label: filter === 'all' ? 'Customers' : 'New customers',
     value: stats?.totalUsers ?? 0,
     sub: null,
     color: 'indigo',
@@ -54,9 +97,9 @@ const statCards = (stats: AdminStats | null) => [
     ),
   },
   {
-    label: 'Inventory investment',
+    label: 'Total investment',
     value: formatPrice(stats?.totalInvestment ?? 0),
-    sub: 'Cost price × units in stock',
+    sub: stats ? `Stock ${formatPrice(stats.stockInvestment ?? 0)} · Expenses ${formatPrice(stats.totalExpenses ?? 0)}` : 'Stock + overhead expenses',
     color: 'amber',
     icon: (
       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -67,7 +110,7 @@ const statCards = (stats: AdminStats | null) => [
   {
     label: 'Net profit',
     value: formatPrice(Math.max(0, stats?.totalProfit ?? 0)),
-    sub: stats ? `${Math.max(0, stats.profitMargin ?? 0).toFixed(1)}% margin · Investment ${formatPrice(stats.totalInvestment ?? 0)}` : null,
+    sub: stats ? `${Math.max(0, stats.profitMargin ?? 0).toFixed(1)}% margin · Revenue − Investment` : null,
     color: (stats?.totalProfit ?? 0) >= 0 ? 'emerald' : 'rose',
     icon: (
       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -87,14 +130,22 @@ const quickActions = [
 export default function AdminDashboard() {
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<FilterKey>('all');
 
-  useEffect(() => {
+  const fetchStats = useCallback((f: FilterKey) => {
+    setLoading(true);
+    const { from, to } = getDateRange(f);
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
     api
-      .get('/orders/admin/stats')
+      .get(`/orders/admin/stats?${params}`)
       .then(({ data }) => setStats(data.stats))
       .catch((err: unknown) => toast.error((err as ApiError).response?.data?.message || 'Failed to load stats'))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => { fetchStats(filter); }, [filter, fetchStats]);
 
   if (loading) {
     return (
@@ -110,13 +161,30 @@ export default function AdminDashboard() {
     );
   }
 
-  const cards = statCards(stats);
+  const cards = statCards(stats, filter);
 
   return (
     <div className={adminStack}>
       <AdminPageHeader
         title="Overview"
         description="High-level performance for your storefront. Figures reflect paid and fulfilled commerce activity."
+        actions={
+          <div className="flex flex-wrap gap-1.5">
+            {FILTERS.map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setFilter(f.key)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                  filter === f.key
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        }
       />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
