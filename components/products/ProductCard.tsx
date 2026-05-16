@@ -7,6 +7,7 @@ import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useAuthStatus } from '@/hooks/useAuthStatus';
+import { trackAddToCart } from '@/lib/gtag';
 import type { Product } from '@/types/api';
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -27,6 +28,7 @@ export default function ProductCard({ product }: { product: Product }) {
     const result = await dispatch(addToCart({ itemId: product._id, itemType: 'product', quantity: 1 }));
     if (addToCart.fulfilled.match(result)) {
       toast.success('Added to cart!');
+      trackAddToCart({ itemId: product._id, itemName: product.name, price: product.discountPrice ?? product.price, brand: product.brand });
     } else {
       toast.error(result.payload as string || 'Failed to add to cart');
     }

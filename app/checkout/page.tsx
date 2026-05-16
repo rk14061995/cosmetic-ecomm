@@ -13,6 +13,7 @@ import { formatOrderLabelForDisplay } from '@/lib/orderDisplay';
 import RAZORPAY_LOGO from '@/lib/razorpayLogo';
 import toast from 'react-hot-toast';
 import { useRequireUser } from '@/hooks/useRequireUser';
+import { trackPurchase } from '@/lib/gtag';
 import { INDIAN_STATES_AND_UTS } from '@/data/indianStates';
 
 /** Razorpay checkout: max 15 note key-value pairs; each value max 256 chars. */
@@ -243,6 +244,18 @@ export default function CheckoutPage() {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature:  response.razorpay_signature,
               orderId:             order._id,
+            });
+            trackPurchase({
+              transactionId: order._id,
+              value: effectiveTotal,
+              shipping: summary.shipping,
+              discount: summary.discount,
+              items: items.map((i) => ({
+                item_id: i.product?._id || i.mysteryBox?._id || i._id,
+                item_name: i.product?.name || i.mysteryBox?.name || i.name || '',
+                price: i.price,
+                quantity: i.quantity,
+              })),
             });
             toast.success('Payment successful! Order confirmed 🎉');
             dispatch(fetchCart());

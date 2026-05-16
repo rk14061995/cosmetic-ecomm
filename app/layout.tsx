@@ -3,6 +3,8 @@ import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import Providers from '@/components/Providers';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
+import { GA_MEASUREMENT_ID } from '@/lib/gtag';
 import Navbar from '@/components/layout/Navbar';
 import ConditionalFooter from '@/components/layout/ConditionalFooter';
 import OrganizationJsonLd from '@/components/seo/OrganizationJsonLd';
@@ -57,15 +59,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-IN">
       <head>
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-G8Q7117KR9" strategy="afterInteractive" />
+        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} strategy="afterInteractive" />
         <Script id="google-analytics" strategy="afterInteractive">{`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', 'G-G8Q7117KR9');
+          gtag('config', '${GA_MEASUREMENT_ID}');
         `}</Script>
       </head>
       <body className={`${inter.className} bg-white text-gray-900 antialiased`}>
+        <GoogleAnalytics />
         <OrganizationJsonLd />
         <Providers>
           <Navbar />

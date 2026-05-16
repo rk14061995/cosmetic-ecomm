@@ -8,6 +8,7 @@ import { formatPrice } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStatus } from '@/hooks/useAuthStatus';
+import { trackRemoveFromCart, trackBeginCheckout } from '@/lib/gtag';
 
 const FREE_SHIPPING_THRESHOLD = 500;
 
@@ -28,8 +29,13 @@ export default function CartPage() {
 
   const handleRemove = async (itemId: string) => {
     setRemovingId(itemId);
+    const item = items.find((i) => i._id === itemId);
     await dispatch(removeFromCart(itemId));
     toast.success('Removed from cart');
+    if (item) {
+      const name = item.product?.name || item.mysteryBox?.name || item.name || '';
+      trackRemoveFromCart({ itemId, itemName: name, price: item.price, quantity: item.quantity });
+    }
     setRemovingId(null);
   };
 
@@ -288,6 +294,15 @@ export default function CartPage() {
 
               {/* CTA */}
               <Link href="/checkout"
+                onClick={() => trackBeginCheckout({
+                  value: summary.total,
+                  items: items.map((i) => ({
+                    item_id: i.product?._id || i.mysteryBox?._id || i._id,
+                    item_name: i.product?.name || i.mysteryBox?.name || i.name || '',
+                    price: i.price,
+                    quantity: i.quantity,
+                  })),
+                })}
                 className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-bold py-3.5 rounded-2xl hover:shadow-lg hover:scale-[1.01] transition-all text-sm">
                 Checkout
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
