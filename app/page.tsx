@@ -76,10 +76,9 @@ export default async function HomePage() {
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-[#fdfbf9]">
-        {/* Subtle background texture */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full bg-rose-100/40 blur-3xl" />
-          <div className="absolute bottom-0 -left-20 w-[400px] h-[400px] rounded-full bg-pink-100/30 blur-3xl" />
+          <div className="absolute -top-40 -right-40 w-[700px] h-[700px] rounded-full bg-indigo-100/50 blur-3xl" />
+          <div className="absolute bottom-0 -left-24 w-[500px] h-[500px] rounded-full bg-cyan-100/40 blur-3xl" />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 relative">
@@ -87,33 +86,32 @@ export default async function HomePage() {
 
             {/* Left copy */}
             <div>
-              <div className="inline-flex items-center gap-2 bg-white border border-rose-100 rounded-full px-4 py-1.5 mb-8 shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
-                <span className="text-xs font-semibold tracking-[0.15em] text-rose-500 uppercase">New Collection · Spring 2025</span>
+              <div className="inline-flex items-center gap-2 bg-white border border-indigo-100 rounded-full px-4 py-1.5 mb-8 shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                <span className="text-xs font-semibold tracking-[0.15em] text-indigo-500 uppercase">New Collection · Spring 2025</span>
               </div>
 
               <h1 className="text-6xl lg:text-7xl font-black text-neutral-900 leading-[1.05] tracking-tight mb-6">
-                Reveal Your
+                K-Beauty
                 <br />
-                <span className="font-thin italic text-rose-400"> Inner</span>
-                <span className="block font-black">Radiance</span>
+                <span className="font-thin italic bg-gradient-to-r from-indigo-500 to-cyan-400 bg-clip-text text-transparent">Crafted</span>
+                <span className="block font-black">For Your Skin</span>
               </h1>
 
               <p className="text-base text-neutral-500 leading-relaxed max-w-md mb-10 font-light">
-                K-beauty rituals meet premium formulations. Curated skincare, makeup and
-                mystery boxes — crafted for every skin type, delivered to your door.
+                Authentic Korean skincare, makeup and mystery boxes — curated for every skin type and delivered fast across India.
               </p>
 
               <div className="flex flex-wrap items-center gap-4 mb-14">
                 <Link
                   href="/products"
-                  className="bg-neutral-900 text-white font-semibold text-sm tracking-wide px-8 py-3.5 rounded-full hover:bg-neutral-700 transition-all hover:shadow-lg hover:shadow-neutral-200"
+                  className="bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-semibold text-sm tracking-wide px-8 py-3.5 rounded-full hover:shadow-lg hover:shadow-indigo-200/60 hover:scale-[1.02] transition-all"
                 >
                   Shop Collection
                 </Link>
                 <Link
                   href="/quiz"
-                  className="flex items-center gap-2 bg-white border border-rose-200 text-rose-500 font-semibold text-sm px-6 py-3.5 rounded-full hover:border-rose-400 hover:shadow-sm transition-all"
+                  className="flex items-center gap-2 bg-white border border-indigo-200 text-indigo-500 font-semibold text-sm px-6 py-3.5 rounded-full hover:border-indigo-400 hover:shadow-sm transition-all"
                 >
                   <span className="text-xs">◇</span> Take Skin Quiz
                 </Link>
@@ -133,14 +131,13 @@ export default async function HomePage() {
             {/* Right visual */}
             <div className="hidden lg:flex items-center justify-center">
               <div className="relative w-[480px] h-[480px]">
-                {/* Outer ring */}
-                <div className="absolute inset-0 rounded-full border border-rose-100" />
-                <div className="absolute inset-6 rounded-full border border-pink-100/60" />
+                <div className="absolute inset-0 rounded-full border border-indigo-100" />
+                <div className="absolute inset-6 rounded-full border border-cyan-100/60" />
                 {/* Center card */}
-                <div className="absolute inset-12 rounded-3xl bg-gradient-to-br from-rose-100/60 via-pink-50 to-white backdrop-blur-sm border border-white/80 shadow-2xl shadow-rose-100/50 flex flex-col items-center justify-center gap-4">
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-rose-200 to-pink-200 flex items-center justify-center text-4xl shadow-lg">🌸</div>
+                <div className="absolute inset-12 rounded-3xl bg-gradient-to-br from-indigo-50 via-white to-cyan-50 backdrop-blur-sm border border-white/80 shadow-2xl shadow-indigo-100/60 flex flex-col items-center justify-center gap-4">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-400 to-cyan-400 flex items-center justify-center text-4xl shadow-lg shadow-indigo-200/50">✨</div>
                   <div className="text-center px-6">
-                    <p className="text-xs font-bold tracking-[0.2em] text-rose-400 uppercase mb-1">Bestseller</p>
+                    <p className="text-xs font-bold tracking-[0.2em] text-indigo-400 uppercase mb-1">Bestseller</p>
                     <p className="text-sm font-semibold text-neutral-800">Hydra-Glow Moisturizer</p>
                     <p className="text-xs text-neutral-400 mt-0.5">SPF 50 · Hyaluronic Acid</p>
                   </div>
@@ -152,11 +149,11 @@ export default async function HomePage() {
                   </div>
                 </div>
                 {/* Floating badges */}
-                <div className="absolute top-8 -right-4 bg-white rounded-2xl shadow-lg border border-rose-50 px-4 py-2.5 text-center">
+                <div className="absolute top-8 -right-4 bg-white rounded-2xl shadow-lg border border-indigo-50 px-4 py-2.5 text-center">
                   <p className="text-xs font-bold text-neutral-900">K-Beauty</p>
-                  <p className="text-[10px] text-rose-400 font-medium">Certified</p>
+                  <p className="text-[10px] text-indigo-400 font-medium">Certified</p>
                 </div>
-                <div className="absolute bottom-12 -left-6 bg-white rounded-2xl shadow-lg border border-rose-50 px-4 py-2.5">
+                <div className="absolute bottom-12 -left-6 bg-white rounded-2xl shadow-lg border border-indigo-50 px-4 py-2.5">
                   <p className="text-[10px] text-neutral-400">Free shipping</p>
                   <p className="text-xs font-bold text-neutral-900">above ₹500</p>
                 </div>
@@ -167,8 +164,47 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── TRUST STRIP ──────────────────────────────────────────────── */}
+      <section className="py-14 bg-white border-y border-neutral-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { icon: '◎', title: 'Free Shipping',   desc: 'On orders above ₹500'  },
+              { icon: '◇', title: 'Easy Returns',    desc: '7-day return policy'    },
+              { icon: '◈', title: 'Secure Payment',  desc: 'Razorpay encrypted'     },
+              { icon: '◉', title: '100% Authentic',  desc: 'Genuine products only'  },
+            ].map((f) => (
+              <div key={f.title} className="flex items-start gap-4 p-5 rounded-2xl bg-[#fdfbf9] border border-neutral-100">
+                <span className="text-xl text-rose-300 flex-shrink-0">{f.icon}</span>
+                <div>
+                  <h3 className="font-bold text-neutral-900 text-sm">{f.title}</h3>
+                  <p className="text-xs text-neutral-400 mt-0.5">{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURED PRODUCTS ────────────────────────────────────────── */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <p className="text-xs font-bold tracking-[0.2em] text-rose-400 uppercase mb-2">Curated For You</p>
+              <h2 className="text-3xl font-black text-neutral-900">Featured Products</h2>
+              <p className="text-neutral-400 mt-1 font-light text-sm">Handpicked by our K-beauty experts</p>
+            </div>
+            <Link href="/products?featured=true" className="text-sm text-neutral-400 hover:text-neutral-700 transition-colors font-medium">
+              View all →
+            </Link>
+          </div>
+          <FeaturedProducts />
+        </div>
+      </section>
+
       {/* ── CATEGORY STRIP ───────────────────────────────────────────── */}
-      <section className="py-16 bg-white border-y border-neutral-100">
+      <section className="py-16 bg-[#fdfbf9] border-y border-neutral-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-10">
             <div>
@@ -183,10 +219,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <ShopByBrand />
-
       {/* ── FEATURE STRIP ────────────────────────────────────────────── */}
-      <section className="py-20 bg-gradient-to-b from-[#fdfbf9] to-white">
+      <section className="py-20 bg-gradient-to-b from-white to-[#fdfbf9]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between mb-10">
             <div>
@@ -228,31 +262,19 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── TESTIMONIALS ─────────────────────────────────────────────── */}
+      <TestimonialsCarousel />
+
       {/* ── MYSTERY BOXES ────────────────────────────────────────────── */}
       <MysteryBoxPreview />
-
-      {/* ── FEATURED PRODUCTS ────────────────────────────────────────── */}
-      <section className="py-20 bg-white border-t border-neutral-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <p className="text-xs font-bold tracking-[0.2em] text-rose-400 uppercase mb-2">Curated For You</p>
-              <h2 className="text-3xl font-black text-neutral-900">Featured Products</h2>
-              <p className="text-neutral-400 mt-1 font-light text-sm">Handpicked by our K-beauty experts</p>
-            </div>
-            <Link href="/products?featured=true" className="text-sm text-neutral-400 hover:text-neutral-700 transition-colors font-medium">
-              View all →
-            </Link>
-          </div>
-          <FeaturedProducts />
-        </div>
-      </section>
 
       {/* ── BESTSELLERS + NEW ARRIVALS ──────────────────────────────── */}
       <ProductSplit />
 
-      {/* ── TESTIMONIALS ─────────────────────────────────────────────── */}
-      <TestimonialsCarousel />
+      <ShopByBrand />
+
+      {/* ── BLOG TEASER ──────────────────────────────────────────────── */}
+      <BlogTeaser />
 
       {/* ── REFERRAL BANNER ──────────────────────────────────────────── */}
       <section className="py-16 bg-neutral-900">
@@ -268,31 +290,6 @@ export default async function HomePage() {
           >
             Get Your Referral Code →
           </Link>
-        </div>
-      </section>
-
-      {/* ── BLOG TEASER ──────────────────────────────────────────────── */}
-      <BlogTeaser />
-
-      {/* ── TRUST STRIP ──────────────────────────────────────────────── */}
-      <section className="py-14 bg-white border-t border-neutral-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { icon: '◎', title: 'Free Shipping',   desc: 'On orders above ₹500'  },
-              { icon: '◇', title: 'Easy Returns',    desc: '7-day return policy'    },
-              { icon: '◈', title: 'Secure Payment',  desc: 'Razorpay encrypted'     },
-              { icon: '◉', title: '100% Authentic',  desc: 'Genuine products only'  },
-            ].map((f) => (
-              <div key={f.title} className="flex items-start gap-4 p-5 rounded-2xl bg-[#fdfbf9] border border-neutral-100">
-                <span className="text-xl text-rose-300 flex-shrink-0">{f.icon}</span>
-                <div>
-                  <h3 className="font-bold text-neutral-900 text-sm">{f.title}</h3>
-                  <p className="text-xs text-neutral-400 mt-0.5">{f.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
